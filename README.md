@@ -1,1 +1,4 @@
-# tuneshare
+# TuneShare
+
+## Team Members
+* Angel Alvarez
