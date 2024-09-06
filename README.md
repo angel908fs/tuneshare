@@ -6,3 +6,4 @@
 * Rodrigo Esteves
 * Bryan Camarillo
 * Ryan Moua
+* Pineapple Wang
