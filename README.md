@@ -2,7 +2,7 @@
 
 ## Team Members
 * Angel Alvarez
-* Malachi Peel
+* Malachi Peel.
 * Rodrigo Esteves
 * Bryan Camarillo
 * Ryan Moua
