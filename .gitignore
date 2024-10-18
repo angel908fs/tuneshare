@@ -1,8 +1,25 @@
-# macOS
-.DS_Store
-
-# Node.js
+# Node.js related
 node_modules/
+npm-debug.log
+yarn-error.log
 
-# Environment variables
+# Logs
+logs/
+*.log
+pids/
+*.pid
+*.seed
+
+# Ignore dotenv files (backend)
 .env
+
+# Ignore build output (frontend)
+frontend/build/
+
+# Ignore coverage and test results
+coverage/
+*.test.js.snap
+
+# Ignore system-specific files
+.DS_Store
+Thumbs.db

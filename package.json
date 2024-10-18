@@ -1,0 +1,12 @@
+{
+  "name": "tuneshare",
+  "version": "1.0.0",
+  "description": "## Team Members * Angel Alvarez * Malachi Peel * Rodrigo Esteves * Bryan Camarillo * Ryan Moua * Pineapple Wang",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
