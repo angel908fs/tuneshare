@@ -14,10 +14,13 @@ app.use("/", router);
 describe("POST /user/authenticate", () => {
     
     it("should return 404 if user does not exist", async () => {
+        // this is what the mock userExists function returns -> false
         userExists.mockReturnValue(false);
 
+        // simulate a request to API endpoint
         const res = await request(app).post("/user/authenticate").query({ email: "test@test.com", password: "password123" }).send();
 
+        // assert response from request
         expect(res.statusCode).toBe(404);
         expect(res.body).toEqual({ error: "user does not exist" });
     });
