@@ -28,5 +28,9 @@ To start the frontend simply `cd` into the folder with `cd frontend` and then ru
 > Always start the backend first, otherwise you might run into issues since the frontend depends on the backend
 
 
-# Guidelines
+## Guidelines
 - Confidential information such as API keys, passwords, etc should **NEVER** be hardcoded, instead they should be put in the `.env` files
+
+## Running Unit Tests
+To run the unit tests for the backend, you can `cd` into `backend` and then run 
+`npm test`

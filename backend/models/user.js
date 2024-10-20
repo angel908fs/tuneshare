@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';        
-import { v4 as uuidv4 } from 'uuid';    // For generating UUIDs (User IDs)
+const mongoose = require('mongoose');
+const { v4: uuidv4 } = require('uuid');    // For generating UUIDs (User IDs)
 
 
 // User Schema
@@ -29,4 +29,4 @@ const userSchema = new mongoose.Schema(
 
 // Create and export the User model
 const User = mongoose.model('User', userSchema);
-export default User;
+module.exports = User;
