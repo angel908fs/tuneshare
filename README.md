@@ -15,7 +15,7 @@ These are the requirements needed to run TuneShare
 2. NPM is also needed but you don't need to install it since it gets installed automatically when you install NodeJS
 
 ## Generating node_modules
-Node modules are essential libraries for both the backend and the frontend of TuneShare, you might find yourself not having them on your local repository or missing some of them, if that's the case, you can just `cd` into the respective folder, either `cd backend` or `cd frontend` and then run `npm install` which will generate and/or update all the node modules needed for the project
+Node modules are essential libraries for both the backend and the frontend of TuneShare, you might find yourself not having them on your local repository or missing some of them, if that's the case, you can just `cd` into the respective folders with `cd backend` and `cd frontend` and then run `npm i` for both folders which will generate and/or update all the node modules needed for those two folders
 
 
 ## Running TuneShare
@@ -28,5 +28,9 @@ To start the frontend simply `cd` into the folder with `cd frontend` and then ru
 > Always start the backend first, otherwise you might run into issues since the frontend depends on the backend
 
 
-# Guidelines
+## Guidelines
 - Confidential information such as API keys, passwords, etc should **NEVER** be hardcoded, instead they should be put in the `.env` files
+
+## Running Unit Tests
+To run the unit tests for the backend, you can `cd` into `backend` and then run 
+`npm test`
