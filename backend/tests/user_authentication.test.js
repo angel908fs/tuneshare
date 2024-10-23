@@ -5,7 +5,7 @@ const userExists = require("../utils/user.js");
 const User = require("../models/user.js");
 
 jest.mock("../utils/user.js");
-jest.mock("../models/User");
+jest.mock("../models/user.js");
 
 const app = express();
 app.use(express.json());
