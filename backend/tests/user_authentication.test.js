@@ -67,4 +67,17 @@ describe("POST /user/authenticate", () => {
         expect(res.statusCode).toBe(200);
         expect(res.body).toEqual({ success: "user has been authenticated" });
     });
+
+    it("should return 500 for an internal server error", async () => {
+        // Mock userExists will return true to move past the existence check
+        userExists.mockReturnValue(true);
+        // Mock User.findOne will throw an error, simulating a server error
+        User.findOne.mockRejectedValue(new Error("Database error"));
+    
+        const res = await request(app).post("/user/authenticate").send({ email: "test@test.com", password: "password123", userID: 'userID' });
+    
+        expect(res.statusCode).toBe(500);
+        expect(res.body).toEqual({ error: "Server error" });
+    });
+    
 });
