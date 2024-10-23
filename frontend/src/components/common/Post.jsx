@@ -146,7 +146,7 @@ const Post = ({ post }) => {
 							</div>
 						</div>
 						<div className='flex w-1/3 justify-end gap-2 items-center'>
-							<FaRegBookmark className='w-4 h-4 cursor-pointer text-slate-500  group-hover:text-yellow-500 ' />
+							<FaRegBookmark className='w-4 h-4 cursor-pointer text-slate-500  hover:text-yellow-500 ' />
 						</div>
 					</div>
 				</div>

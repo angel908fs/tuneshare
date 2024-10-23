@@ -3,9 +3,11 @@ import {Route,Routes} from 'react-router-dom';
 import HomePage from './pages/home/HomePage';
 import LoginPage from './pages/auth/Login/LoginPage';
 import SignUpPage from './pages/auth/signup/SignUpPage';
+import NotificationPage from './pages/notfications/NotificationPage';
+import ProfilePage from './pages/Profile/ProfilePage';
+
 import Sidebar from './components/common/Sidebar';
 import RightPanel from './components/common/Rightbar';
-
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
         <Route path='/' element = {<HomePage />} />
         <Route path='/login' element = {<LoginPage />} />
         <Route path='/signup' element = {<SignUpPage />} />
+        <Route path='/notifications' element = {<NotificationPage />} />
+        <Route path ='/profile/:username' element={<ProfilePage />} />
       </Routes>
       <RightPanel />
     </div>

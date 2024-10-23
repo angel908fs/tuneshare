@@ -26,6 +26,8 @@ module.exports = {
   daisyui: {
     themes: [
       "light",
+      "cyberpunk",
+      "luxury",
       {
         black:{
           ...daisyUIThemes["black"],
@@ -35,7 +37,7 @@ module.exports = {
         },
         dark:{
           ...daisyUIThemes["dark"],
-          primary: "rgb(29,155,240)",
+          primary: "rgb(226, 21, 18)",
           secondary: "rgb(46,46,46)",
         }
       },
