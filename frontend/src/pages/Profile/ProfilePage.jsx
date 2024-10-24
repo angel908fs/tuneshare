@@ -27,8 +27,8 @@ const ProfilePage = () => {
 		fullName: "John Doe",
 		username: "johndoe",
 		profileImg: "/avatars/boy2.png",
-		coverImg: "/cover.png",
-		bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+		coverImg: "/cover.png", // is empty rn
+		bio: "This is a bio",
 		following: ["1", "2", "3"],
 		followers: ["1", "2", "3"],
 	};

@@ -9,11 +9,12 @@ import ProfilePage from './pages/Profile/ProfilePage';
 import Sidebar from './components/common/Sidebar';
 import RightPanel from './components/common/Rightbar';
 
+// can't get rid of sidebar and right panel without having authoried user
 function App() {
   return (
     <div className='flex max-w-6xl mx-auto'>
       {/*common component, bc its not wrapped with routes */}
-      <Sidebar />
+      <Sidebar /> 
       <Routes> // different pages 
         <Route path='/' element = {<HomePage />} />
         <Route path='/login' element = {<LoginPage />} />
@@ -25,5 +26,4 @@ function App() {
     </div>
   );
 }
-
 export default App;

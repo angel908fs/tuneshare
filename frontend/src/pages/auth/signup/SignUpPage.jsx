@@ -17,7 +17,7 @@ const SignUpPage = () => {
 	});
 
 	const handleSubmit = (e) => {
-		e.preventDefault();
+		e.preventDefault(); // page won't reload
 		console.log(formData);
 	};
 
