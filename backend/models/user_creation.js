@@ -1,32 +1,30 @@
-const User = require("./models/User"); // Import the User model
+const User = require("../models/user.js"); // Import the User model
 const bcrypt = require("bcrypt"); // For password hashing
 
-async function createAccount(username, email, password, bio = "", profile_picture = "")
+async function createAccount(username, email, password)
 {
     try
     {
-        // Check if username or email already exists
-        const existingUser = await User.findOne(
-        {
-            $or: [{ username }, { email }],
-        });
+        // Check for conflicting usernames and emails separately
+        const userExists = await User.findOne({ username });
+        const emailExists = await User.findOne({ email });
 
-        if (existingUser)
+        if (userExists)
         {
-            return {
-                success: false,
-                message: "The username with the associated email already exists. Please use another one.",
-            };
+            return { success: false, message: "This username is already taken by another account. Please user another one." };
         }
-        
+
+        if (emailExists)
+        {
+            return { success: false, message: "This email is already ascociated with an account. Please use another one." };
+        }
+                
         // Create the new user object
         const newUser = new User(
         {
             username,
             email,
-            password: await bcrypt.hash(password, 10),
-            bio,
-            profile_picture,
+            password: await bcrypt.hash(password, 10)
         });
 
         // Save the new user to the database
