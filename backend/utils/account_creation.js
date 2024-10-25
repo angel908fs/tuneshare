@@ -5,20 +5,6 @@ async function createAccount(username, email, password)
 {
     try
     {
-        // Check for conflicting usernames and emails separately
-        const userExists = await User.findOne({ username });
-        const emailExists = await User.findOne({ email });
-
-        if (userExists)
-        {
-            return { success: false, message: "This username is already taken by another account. Please user another one." };
-        }
-
-        if (emailExists)
-        {
-            return { success: false, message: "This email is already ascociated with an account. Please use another one." };
-        }
-                
         // Create the new user object
         const newUser = new User(
         {

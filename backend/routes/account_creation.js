@@ -1,7 +1,8 @@
 const express = require("express");
 let router = express.Router();
-const userExists = require("../utils/user.js");
+const {userNameExists} = require("../utils/user.js");
 const User = require('../models/user.js');
+const createAccount = require("../utils/account_creation.js");
 
 // create user
 router.post("/user/create", async (req, res, next) => {
@@ -11,19 +12,22 @@ router.post("/user/create", async (req, res, next) => {
             return res.status(400).send({ error: "Missing required parameters" });
         }
 
-        // check if user exists 
-        if (userExists(req.body.userID)) {
-            const user = await User.findOne({ userid: req.body.username });
-            
-            // check if email and password match
-            if (req.body.email === user.email && req.body.password === user.password) {
-                return res.status(200).send({ success: "user has been authenticated" });
-            } else {
-                return res.status(401).send({ error: "Invalid email or password" });
-            }
-        } else {
-            return res.status(404).send({ error: "User does not exist" });
-        }
+         // Check for conflicting usernames and emails separately
+         const userExists = await userNameExists(req.body.username);
+         const emailExists = await emailExists(req.body.email);
+ 
+         if (userExists)
+         {
+             return { success: false, message: "This username is already taken by another account. Please user another one." };
+         }
+ 
+         if (emailExists)
+         {
+             return { success: false, message: "This email is already ascociated with an account. Please use another one." };
+         }
+                 
+
+        return await createAccount(req.body.username,  req.body.email, req.body.password);
     } catch (err) {
         return res.status(500).send({ error: "Server error" });
     }
