@@ -1,4 +1,4 @@
-const createAccount = require("../models/user_creation.js");
+const createAccount = require("../utils/account_creation.js");
 const User = require("../models/user.js");
 jest.mock("../models/user.js");
 
@@ -52,16 +52,22 @@ describe("createAccount", () =>
         });
     });
 
-    it("should handle errors gracefully", async () =>
-    {
-        User.findOne.mockRejectedValue(new Error("Database error")); // Simulate database failure
-
+    it("should handle errors gracefully", async () => {
+        // Mock the database failure
+        User.findOne.mockRejectedValue(new Error("Database error"));
+    
+        // Mock console.error to suppress the error message in the test output
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    
         const result = await createAccount("C", "c@example.com", "password123");
-        
-        expect(result).toEqual(
-        {
+    
+        // Expect the result to match the error handling response
+        expect(result).toEqual({
             success: false,
             message: "Could not create an account for C. Please try again later.",
         });
+    
+        // Restore the original console.error after the test
+        consoleSpy.mockRestore();
     });
 });
