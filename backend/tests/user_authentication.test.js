@@ -11,10 +11,10 @@ const app = express();
 app.use(express.json());
 app.use("/", router);
 
-describe("POST /user/authenticate", () => {
+describe("POST /login", () => {
 
     it("should return 400 if email is missing", async () => {
-        const res = await request(app).post("/user/authenticate").send({ password: "password123", userID: 'userID' });
+        const res = await request(app).post("/login").send({ password: "password123", userID: 'userID' });
         expect(res.statusCode).toBe(400);
         expect(res.body).toEqual({ error: "Missing required parameters" });
     });
@@ -22,7 +22,7 @@ describe("POST /user/authenticate", () => {
     it("should return 404 if user does not exist", async () => {
         userEmailExists.mockResolvedValue(false); // Mock the async function to return false
 
-        const res = await request(app).post("/user/authenticate").send({ email: "test@test.com", password: "password123", userID: 'userID' });
+        const res = await request(app).post("/login").send({ email: "test@test.com", password: "password123", userID: 'userID' });
 
         expect(res.statusCode).toBe(404);
         expect(res.body).toEqual({ error: "User does not exist" });
@@ -32,7 +32,7 @@ describe("POST /user/authenticate", () => {
         userEmailExists.mockResolvedValue(true); // User exists
         User.findOne.mockResolvedValue({ email: "test@test.com", password: "password123" });
 
-        const res = await request(app).post("/user/authenticate").send({ email: "wrong@test.com", password: "wrongPassword", userID: 'userID' });
+        const res = await request(app).post("/login").send({ email: "wrong@test.com", password: "wrongPassword", userID: 'userID' });
 
         expect(res.statusCode).toBe(401);
         expect(res.body).toEqual({ error: "Invalid email or password" });
@@ -42,7 +42,7 @@ describe("POST /user/authenticate", () => {
         userEmailExists.mockResolvedValue(true);
         User.findOne.mockResolvedValue({ email: "test@test.com", password: "password123" });
 
-        const res = await request(app).post("/user/authenticate").send({ email: "test@test.com", password: "password123", userID: 'userID' });
+        const res = await request(app).post("/login").send({ email: "test@test.com", password: "password123", userID: 'userID' });
 
         expect(res.statusCode).toBe(200);
         expect(res.body).toEqual({ success: "user has been authenticated" });
@@ -52,7 +52,7 @@ describe("POST /user/authenticate", () => {
         userEmailExists.mockResolvedValue(true);
         User.findOne.mockRejectedValue(new Error("Database error")); // Simulate server error
 
-        const res = await request(app).post("/user/authenticate").send({ email: "test@test.com", password: "password123", userID: 'userID' });
+        const res = await request(app).post("/login").send({ email: "test@test.com", password: "password123", userID: 'userID' });
 
         expect(res.statusCode).toBe(500);
         expect(res.body).toEqual({ error: "Server error" });

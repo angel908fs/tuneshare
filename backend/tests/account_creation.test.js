@@ -11,14 +11,14 @@ const app = express();
 app.use(express.json()); // Middleware to parse JSON request bodies
 app.use(router); // Use the router
 
-describe("POST /user/create", () => {
+describe("POST /signup", () => {
     beforeEach(() => {
         jest.clearAllMocks(); // Clear mocks between tests
     });
 
     it("should return 400 if any required parameters are missing", async () => {
         const response = await request(app)
-            .post("/user/create")
+            .post("/signup")
             .send({ username: "testuser", email: "test@example.com" }); // Missing password
 
         expect(response.status).toBe(400);
@@ -31,7 +31,7 @@ describe("POST /user/create", () => {
         userEmailExists.mockResolvedValue(false); // Email is not taken
 
         const response = await request(app)
-            .post("/user/create")
+            .post("/signup")
             .send({ username: "existinguser", email: "test@example.com", password: "password123" });
 
         expect(response.status).toBe(409); // Conflict status for existing username
@@ -48,7 +48,7 @@ describe("POST /user/create", () => {
         userEmailExists.mockResolvedValue(true); // Email is taken
 
         const response = await request(app)
-            .post("/user/create")
+            .post("/signup")
             .send({ username: "testuser", email: "existing@example.com", password: "password123" });
 
         expect(response.status).toBe(409); // Conflict status for existing email
@@ -70,7 +70,7 @@ describe("POST /user/create", () => {
         });
 
         const response = await request(app)
-            .post("/user/create")
+            .post("/signup")
             .send({ username: "testuser", email: "test@example.com", password: "password123" });
 
         expect(response.status).toBe(200); // Success
@@ -89,7 +89,7 @@ describe("POST /user/create", () => {
         userNameExists.mockRejectedValue(new Error("Server error"));
 
         const response = await request(app)
-            .post("/user/create")
+            .post("/signup")
             .send({ username: "testuser", email: "test@example.com", password: "password123" });
 
         expect(response.status).toBe(500);

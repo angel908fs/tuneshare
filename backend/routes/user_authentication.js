@@ -4,7 +4,7 @@ const { userEmailExists } = require("../utils/user.js");
 const User = require('../models/user.js');
 
 // authenticate user
-router.post("/user/authenticate", async (req, res, next) => {
+router.post("/login", async (req, res, next) => {
     try {
         // Check if required request parameters are present
         if (!req.body.email || !req.body.password) {
