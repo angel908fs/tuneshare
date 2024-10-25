@@ -8,6 +8,7 @@ import ProfilePage from './pages/Profile/ProfilePage';
 
 import Sidebar from './components/common/Sidebar';
 import RightPanel from './components/common/Rightbar';
+import {Toaster} from 'react-hot-toast' // adds flare aka notifications on doing something
 
 // can't get rid of sidebar and right panel without having authoried user
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Route path ='/profile/:username' element={<ProfilePage />} />
       </Routes>
       <RightPanel />
+      <Toaster />
     </div>
   );
 }
