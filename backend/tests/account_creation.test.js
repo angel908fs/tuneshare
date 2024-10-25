@@ -4,7 +4,6 @@ const router = require("../routes/account_creation.js");
 const { userNameExists, userEmailExists } = require("../utils/user.js");
 const createAccount = require("../utils/account_creation.js");
 
-
 jest.mock("../utils/user.js"); // Mock the user utility functions
 jest.mock("../utils/account_creation.js"); // Mock the account creation function
 
@@ -26,7 +25,7 @@ describe("POST /user/create", () => {
         expect(response.body).toEqual({ error: "Missing required parameters" });
     });
 
-    it("should return a conflict message if the username already exists", async () => {
+    it("should return 409 if the username already exists", async () => {
         // Mock userNameExists to return true, indicating the username is taken
         userNameExists.mockResolvedValue(true);
         userEmailExists.mockResolvedValue(false); // Email is not taken
@@ -35,15 +34,15 @@ describe("POST /user/create", () => {
             .post("/user/create")
             .send({ username: "existinguser", email: "test@example.com", password: "password123" });
 
-        expect(response.status).toBe(200); // Assuming the route returns success with a conflict message in JSON
+        expect(response.status).toBe(409); // Conflict status for existing username
         expect(response.body).toEqual({
             success: false,
-            message: "This username is already taken by another account. Please user another one."
+            message: "This username is already taken by another account. Please use another one."
         });
         expect(userNameExists).toHaveBeenCalledWith("existinguser");
     });
 
-    it("should return a conflict message if the email already exists", async () => {
+    it("should return 409 if the email already exists", async () => {
         // Mock userEmailExists to return true, indicating the email is taken
         userNameExists.mockResolvedValue(false);
         userEmailExists.mockResolvedValue(true); // Email is taken
@@ -52,10 +51,10 @@ describe("POST /user/create", () => {
             .post("/user/create")
             .send({ username: "testuser", email: "existing@example.com", password: "password123" });
 
-        expect(response.status).toBe(200); // Assuming the route returns success with a conflict message in JSON
+        expect(response.status).toBe(409); // Conflict status for existing email
         expect(response.body).toEqual({
             success: false,
-            message: "This email is already ascociated with an account. Please use another one."
+            message: "This email is already associated with an account. Please use another one."
         });
         expect(userEmailExists).toHaveBeenCalledWith("existing@example.com");
     });
@@ -74,7 +73,7 @@ describe("POST /user/create", () => {
             .post("/user/create")
             .send({ username: "testuser", email: "test@example.com", password: "password123" });
 
-        expect(response.status).toBe(200);
+        expect(response.status).toBe(200); // Success
         expect(response.body).toEqual({
             success: true,
             message: "Account created successfully.",
