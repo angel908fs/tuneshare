@@ -4,6 +4,7 @@
   "description": "## Team Members * Angel Alvarez * Malachi Peel * Rodrigo Esteves * Bryan Camarillo * Ryan Moua * Pineapple Wang",
   "main": "index.js",
   "scripts": {
+    "start": "vite",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
