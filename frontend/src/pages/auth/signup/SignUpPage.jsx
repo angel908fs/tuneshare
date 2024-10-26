@@ -20,7 +20,7 @@ const SignUpPage = () => {
 	const{ mutate, isError, isPending, error} = useMutation({
 		mutationFn: async({email,username,password}) => {
 			try	{
-				const res = await fetch("/api/auth/signup",{ // going to vite server
+				const res = await fetch("/api/auth/signup",{
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json"
@@ -28,14 +28,13 @@ const SignUpPage = () => {
 					body: JSON.stringify({email, username, password}),
 				} );
 
-				if(!res.ok) throw new Error("Something went wrong");
 				const data = await res.json();
-				if(data.error) throw new Error(data.error || "Failed to create account");
+				if(!res.ok) throw new Error(data.error || "Failed to create account");
 				console.log(data);
 				return data;
 			} catch (error) {
-				console.log(error);
-				toast.error(error.message);
+				console.error(error);
+				throw error;
 			}
 		},
 	});

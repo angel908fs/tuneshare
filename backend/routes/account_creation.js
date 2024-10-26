@@ -4,7 +4,7 @@ const { userNameExists, userEmailExists } = require("../utils/user.js");
 const createAccount = require("../utils/account_creation.js");
 
 // create user
-router.post("/signup", async (req, res, next) => {
+router.post("/signup", async (req, res) => {
     try {
         // check if required request parameters are present
         if (!req.body.username || !req.body.email || !req.body.password) {
@@ -34,7 +34,7 @@ router.post("/signup", async (req, res, next) => {
         return res.status(200).send(accountCreationResult);
 
     } catch (err) {
-        return res.status(500).send({ error: "Server error" });
+        return res.status(500).send({ error: "Server error" }); // route goes here
     }
 });
 
