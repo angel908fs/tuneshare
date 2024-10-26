@@ -8,7 +8,7 @@ export default defineConfig({
     port: 3000,
     proxy:{
       "/api": {
-        target: "https://localhost:5000", // connects to vite to intercept
+        target: "http://localhost:5000", // connects to vite to intercept
         changeOrigin:true,
       }
     }

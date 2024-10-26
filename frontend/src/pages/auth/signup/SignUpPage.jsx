@@ -14,28 +14,27 @@ const SignUpPage = () => {
 	const [formData, setFormData] = useState({
 		email: "",
 		username: "",
-		fullName: "",
 		password: "",
 	});
 
 	const{ mutate, isError, isPending, error} = useMutation({
-		mutationFn: async({email,username,fullname,password}) => {
+		mutationFn: async({email,username,password}) => {
 			try	{
-				const res = await fetch("/api/auth/signup",{ // causing error
+				const res = await fetch("/api/auth/signup",{ // going to vite server
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json"
 					},
-					body: JSON.stringify({email, username, fullname, password}),
+					body: JSON.stringify({email, username, password}),
 				} );
 
-				//if(!res.ok) throw new Error("Something went wrong");
+				if(!res.ok) throw new Error("Something went wrong");
 				const data = await res.json();
 				if(data.error) throw new Error(data.error || "Failed to create account");
 				console.log(data);
 				return data;
 			} catch (error) {
-				console.error(error);
+				console.log(error);
 				toast.error(error.message);
 			}
 		},
@@ -83,17 +82,7 @@ const SignUpPage = () => {
 								value={formData.username}
 							/>
 						</label>
-						<label className='input input-bordered rounded flex items-center gap-2 flex-1'>
-							<MdDriveFileRenameOutline />
-							<input
-								type='text'
-								className='grow'
-								placeholder='Full Name'
-								name='fullName'
-								onChange={handleInputChange}
-								value={formData.fullName}
-							/>
-						</label>
+						
 					</div>
 					<label className='input input-bordered rounded flex items-center gap-2'>
 						<MdPassword />
