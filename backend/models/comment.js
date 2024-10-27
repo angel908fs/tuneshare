@@ -1,9 +1,10 @@
-// Comment Schema (for reference, you might have a separate schema for comments)
+const mongoose = require('mongoose');
+
 const commentSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     content: { type: String, required: true },
-    createdAt: { type: Date, default: Date.now }
+    created_at: { type: Date, default: Date.now }
 });
 
-// Create and export the Comment model
-const Comment = mongoose.model('Comment', commentSchema);
+const Comment = mongoose.model('Post', commentSchema);
+module.exports = Comment;
