@@ -1,31 +1,41 @@
 const express = require("express");
 let router = express.Router();
-const { userNameExists, userEmailExists } = require("../utils/user.js");
-const createAccount = require("../utils/account_creation.js");
 const User = require("../models/user.js");
 const { generateTokenAndSetCookie } = require("../utils/generateToken.js");
 const bcrypt = require("bcryptjs");
 
-
 // create user
 router.post("/signup", async (req, res) => {
     try {
-        const {email, username, password } = req.body;
+        const { email, username, password } = req.body;
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if(!emailRegex.test(email)){
-            return res.status(400).json({error: "invalid email format"});
+
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ error: "invalid email format" });
         }
 
-        const existingUser = await User.findOne({ username});
-        if(existingUser){
-            return res.status(400).json({error: "email is already taken"});
+        const existingUsername = await User.findOne({ username });
+        if (existingUsername) {
+            return res.status(409).json({
+                success: false,
+                message: "This username is already taken by another account. Please use another one."
+            });
         }
-        if (password.length < 6){
-            return res.status(400).json({error: "Password must be at least 6 characters logn"});
+
+        const existingEmail = await User.findOne({ email });
+        if (existingEmail) {
+            return res.status(409).json({
+                success: false,
+                message: "This email is already associated with an account. Please use another one."
+            });
+        }
+
+        if (password.length < 6) {
+            return res.status(400).json({ error: "Password must be at least 6 characters long" });
         }
 
         const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password,salt);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
         const newUser = new User({
             email,
@@ -33,58 +43,16 @@ router.post("/signup", async (req, res) => {
             password: hashedPassword,
         });
 
-        if(newUser){
-            generateTokenAndSetCookie(newUser.user_id,res);
-            await newUser.save();
+        await newUser.save();
+        generateTokenAndSetCookie(newUser.user_id, res);
 
-            res.status(201).json({
-                username: newUser.username,
-                email: newUser.email,
-                user_id: newUser.user_id,
-            });
-        }else{
-            res.status(400).json({error: "Invalid User data:"});
-        }
-
+        return res.status(201).json({
+            username: newUser.username,
+            email: newUser.email,
+            user_id: newUser.user_id,
+        });
     } catch (error) {
-        console.log("Error in account_creation",error.message);
-        return res.status(500).send({ error: "Server error" }); // route goes here
-/*
-Before Changes
-// create user
-router.post("/signup", async (req, res, next) => {
-    try {
-        // check if required request parameters are present
-        if (!req.body.username || !req.body.email || !req.body.password) {
-            return res.status(400).send({ error: "Missing required parameters" });
-        }
-
-        // Check for conflicting usernames and emails separately
-        const userExists = await userNameExists(req.body.username);
-        const emailExists = await userEmailExists(req.body.email);
-
-        if (userExists) {
-            return res.status(409).send({
-                success: false,
-                message: "This username is already taken by another account. Please use another one."
-            });
-        }
-
-        if (emailExists) {
-            return res.status(409).send({
-                success: false,
-                message: "This email is already associated with an account. Please use another one."
-            });
-        }
-
-        // If no conflicts, proceed to create the account
-        const accountCreationResult = await createAccount(req.body.username, req.body.email, req.body.password);
-        return res.status(200).send(accountCreationResult);
-
-    } catch (err) {
-        return res.status(500).send({ error: "Server error" });
-    
-*/
+        return res.status(500).json({ error: "Server error" });
     }
 });
 
