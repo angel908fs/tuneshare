@@ -6,7 +6,8 @@ const cors = require('cors');
 const connectToDB = require('./config/db.js');
 const userAuthenticationRoutes = require('./routes/user_authentication.js');
 const defaultRoute = require('./routes/default_route.js');
-const invalidRoutes = require('./routes/invalid_routes.js')
+const invalidRoutes = require('./routes/invalid_routes.js');
+const spotifyRoutes = require('./routes/spotify_routes.js'); // import spotify routes
 
 dotenv.config();
 const PORT = 8080;
@@ -22,7 +23,8 @@ app.use(cors({
 
 // routes
 app.use(defaultRoute);
-app.use(invalidRoutes)
+app.use(spotifyRoutes); // change order of routes, so spotifyRoutes is not considered invalid
+app.use(invalidRoutes);
 app.use(userAuthenticationRoutes);
 
 // database connection
