@@ -8,8 +8,8 @@ async function createAccount(username, email, password)
         // Create the new user object
         const newUser = new User(
         {
-            username,
             email,
+            username, // switched email and user
             password: await bcrypt.hash(password, 10)
         });
 
