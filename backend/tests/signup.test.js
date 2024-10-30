@@ -1,6 +1,6 @@
 const request = require("supertest");
 const express = require("express");
-const router = require("../routes/account_creation.js");
+const router = require("../routes/signup.js");
 const User = require("../models/user.js");
 const { generateTokenAndSetCookie } = require("../utils/generateToken.js");
 
