@@ -5,10 +5,35 @@ import { IoNotifications } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { RiLogoutCircleLine } from "react-icons/ri";
+import { useMutation } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const Sidebar = () => {
+
+	const {mutate:LogOut} = useMutation({
+		mutationFn: async() =>{
+			try{
+				const res = axios.fetch("/api/auth/logout");
+				const data = res.data;
+
+				if(!res.ok){
+					throw new Error(data.error || "Something went wrong");
+				}
+				return data;
+			}catch(error){
+				throw new Error(error);
+			}
+		},
+
+		onSuccess: () => {
+			toast.success("Logged out");
+		},
+		onError: () =>{
+			toast.error("Logout failed");
+		}
+	});
+
 	const data = { // this is hardcoded, will remove later
-		fullName: "John Doe",
 		username: "johndoe",
 		profileImg: "/avatars/boy1.png",
 	};
@@ -61,10 +86,15 @@ const Sidebar = () => {
 						</div>
 						<div className='flex justify-between flex-1'>
 							<div className='hidden md:block'>
-								<p className='text-white font-bold text-sm w-20 truncate'>{data?.fullName}</p>
+			
 								<p className='text-slate-500 text-sm'>@{data?.username}</p>
 							</div>
-							<RiLogoutCircleLine className='w-5 h-5 cursor-pointer' />
+							<RiLogoutCircleLine className='w-5 h-5 cursor-pointer' // clicking icon should log out
+								onClick={(e) =>{
+									e.preventDefault();
+									LogOut();
+								}}
+								/>
 						</div>
 					</Link>
 				)}
