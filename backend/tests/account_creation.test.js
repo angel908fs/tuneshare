@@ -16,6 +16,42 @@ describe("POST /signup", () => {
         jest.clearAllMocks(); // Clear mocks between tests to prevent shared state issues
     });
 
+    it("should return 400 if email is missing", async () => {
+        const response = await request(app)
+            .post("/signup")
+            .send({ username: "testuser", password: "password123" }); // Missing email
+
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual({ error: "Missing required parameters" });
+    });
+
+    it("should return 400 if password is missing", async () => {
+        const response = await request(app)
+            .post("/signup")
+            .send({ username: "testuser", email: "test@example.com" }); // Missing password
+
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual({ error: "Missing required parameters" });
+    });
+
+    it("should return 400 if username is missing", async () => {
+        const response = await request(app)
+            .post("/signup")
+            .send({ email: "test@example.com", password: "password123" }); // Missing username
+
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual({ error: "Missing required parameters" });
+    });
+
+    it("should return 400 if all required parameters are missing", async () => {
+        const response = await request(app)
+            .post("/signup")
+            .send({}); // All parameters missing
+
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual({ error: "Missing required parameters" });
+    });
+
     it("should return 400 if password is less than 6 characters", async () => {
         const response = await request(app)
             .post("/signup")
@@ -55,8 +91,7 @@ describe("POST /signup", () => {
     });
 
     it("should create an account if username and email are available and password is valid", async () => {
-        User.findOne.mockResolvedValueOnce(null); // Username available
-        User.findOne.mockResolvedValueOnce(null); // Email available
+        User.findOne.mockResolvedValueOnce(null).mockResolvedValue(null); // Username available
 
         // Mock the new User instance and its save method
         const mockUser = {

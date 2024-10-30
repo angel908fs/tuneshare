@@ -7,7 +7,13 @@ const bcrypt = require("bcryptjs");
 // create user
 router.post("/signup", async (req, res) => {
     try {
-        const { email, username, password } = req.body;
+        if (!req.body.email || !req.body.password || !req.body.username) {
+            return res.status(400).send({ error: "Missing required parameters" });
+        }
+        const email = req.body.email;
+        const password = req.body.password;
+        const username =req.body.username;
+
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         if (!emailRegex.test(email)) {
@@ -34,8 +40,7 @@ router.post("/signup", async (req, res) => {
             return res.status(400).json({ error: "Password must be at least 6 characters long" });
         }
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        const hashedPassword = await bcrypt.hash(password, 0);
 
         const newUser = new User({
             email,
@@ -52,7 +57,7 @@ router.post("/signup", async (req, res) => {
             user_id: newUser.user_id,
         });
     } catch (error) {
-        return res.status(500).json({ error: "Server error" });
+        return res.status(500).json({ error: "Server error"});
     }
 });
 
