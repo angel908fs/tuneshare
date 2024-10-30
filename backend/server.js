@@ -7,6 +7,9 @@ const connectToDB = require('./config/db.js');
 const userAuthenticationRoutes = require('./routes/user_authentication.js');
 const defaultRoute = require('./routes/default_route.js');
 const invalidRoutes = require('./routes/invalid_routes.js')
+const accountCreation = require('./routes/account_creation.js')
+const follow = require('./routes/follow_route.js')
+
 
 dotenv.config();
 const PORT = 8080;
@@ -21,9 +24,12 @@ app.use(cors({
 }));
 
 // routes
+app.use('/api/auth',accountCreation); // signup
+app.use(userAuthenticationRoutes); // login
 app.use(defaultRoute);
-app.use(invalidRoutes)
-app.use(userAuthenticationRoutes);
+app.use(follow);
+app.use(invalidRoutes); // THIS HAS TO STAY LAST
+
 
 // database connection
 connectToDB();
