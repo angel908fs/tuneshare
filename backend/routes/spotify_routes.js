@@ -76,8 +76,6 @@ router.get("/callback", async function(req, res){
     //Access & Refresh token are not stored in env 
     process.env.ACCESSTOKEN = access_token;
     process.env.REFRESHTOKEN = refresh_token;
-    console.log( process.env.ACCESSTOKEN);
-    console.log( process.env.REFRESHTOKEN);
 
     // Respond to the user
     res.send("Tokens have been received and stored.");
@@ -88,7 +86,28 @@ router.get("/callback", async function(req, res){
   }
 });
 
+async function search(trackName) {
+  try {
+    const response = await axios.get('https://api.spotify.com/v1/search', {
+      headers: {
+        'Authorization': `Bearer ${process.env.ACCESSTOKEN}`
+      },
+      params: { // Define URL parameters here
+        q: trackName,
+        type: 'track',
+        limit: 15
+      }
+    });
 
+    // Log and return data if response is successful
+    console.log(response.data);
+    return response.data.tracks.items;
+  } catch (error) {
+    console.error('Error:', error.response ? error.response.data : error.message);
+  }
+}
+
+search('sons & critics freestyle').then(retList => console.log(retList));
 
 module.exports = router;
 
