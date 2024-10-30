@@ -37,7 +37,8 @@ describe("Post Utility Functions", () =>
         expect(result.message).toBe("Could not create the post. Please try again later.");
     });
 
-    it("should retrieve user posts successfully", async () => {
+    it("should retrieve user posts successfully", async () =>
+    {
         const mockUser = { username: "user123", user_id: "foobar" };
         const mockPost =
         [
@@ -56,7 +57,8 @@ describe("Post Utility Functions", () =>
         expect(result.post).toEqual(mockPost);
     });
 
-    it("should handle errors when retrieving posts", async () => {
+    it("should handle errors when retrieving posts", async () =>
+    {
         Post.find = jest.fn().mockReturnValue({ populate: jest.fn().mockReturnValue({ exec: jest.fn().mockRejectedValue(new Error("Server Error")) }) });
 
         const result = await getUserPosts("user123");
