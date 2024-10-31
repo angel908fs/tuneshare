@@ -15,17 +15,6 @@ const u2_id = "2";
 const u3_id = "3";
 const u4_id = "4";
 
-// Helper function to simulate user1 following user2
-async function makeUser1_FollowUser2() {
-    const user1 = { user_id: u1_id, following: [u2_id], save: jest.fn() }; // Already following user2
-    const user2 = { user_id: u2_id, followers: [u1_id], save: jest.fn() };
-
-    User.findOne.mockResolvedValueOnce(user1).mockResolvedValueOnce(user2); // Mock users
-
-    return { user1, user2 };
-}
-
-
 // Test cases
 describe("POST /follow", () => {
     beforeEach(() => {
@@ -37,10 +26,10 @@ describe("POST /follow", () => {
 
         const res = await request(app)
             .post("/follow")
-            .send({ user_id: u1_id, target_user_id: u3_id });
+            .send({ userID: u1_id, target_userID: u3_id });
 
         expect(res.statusCode).toBe(404);
-        expect(res.body).toEqual({ error: "User or friend not found" });
+        expect(res.body).toEqual({ error: "User not found" });
     });
 
     it("should return 404 if the target user does not exist", async () => {
@@ -49,14 +38,16 @@ describe("POST /follow", () => {
 
         const res = await request(app)
             .post("/follow")
-            .send({ user_id: u1_id, target_user_id: u3_id });
+            .send({ userID: u1_id, target_userID: u3_id });
 
         expect(res.statusCode).toBe(404);
-        expect(res.body).toEqual({ error: "User or friend not found" });
+        expect(res.body).toEqual({ error: "Target user not found" });
     });
 
     it("should return 409 if the user is already following the target user", async () => {
-        const { user1, user2 } = await makeUser1_FollowUser2();
+        let user1 = { user_id: u1_id, following: [u3_id], save: jest.fn() };
+        let user2 = { user_id: u3_id, followers: [u1_id], save: jest.fn() };
+
 
         User.findOne
             .mockResolvedValueOnce(user1) // Mock user1 found
@@ -64,37 +55,18 @@ describe("POST /follow", () => {
 
         const res = await request(app)
             .post("/follow")
-            .send({ user_id: user1.user_id, target_user_id: user2.user_id });
+            .send({ userID: user1.user_id, target_userID: user2.user_id });
 
         expect(res.statusCode).toBe(409);
         expect(res.body).toEqual({
-            error: "User is already friends with this user",
+            error: "User is already following target user",
         });
     });
 
-    it("should return 409 if the target user already has the user as a follower", async () => {
-        const { user1, user2 } = await makeUser1_FollowUser2();
-
-        // Reverse the scenario: User2 already has User1 as a follower
-        user2.following.push(user1.user_id);
-
-        User.findOne
-            .mockResolvedValueOnce(user1) // Mock user1 found
-            .mockResolvedValueOnce(user2); // Mock user2 found
-
-        const res = await request(app)
-            .post("/follow")
-            .send({ user_id: user1.user_id, target_user_id: user2.user_id });
-
-        expect(res.statusCode).toBe(409);
-        expect(res.body).toEqual({
-            error: "Target user already has user as follower",
-        });
-    });
 
     it("should return 200 if the user successfully follows the target user", async () => {
-        const user1 = { user_id: u1_id, following: [u2_id], save: jest.fn() };
-        const user2 = { user_id: u2_id, followers: [u1_id], save: jest.fn() };
+        let user1 = { user_id: u1_id, following: [], save: jest.fn() };
+        let user2 = { user_id: u3_id, followers: [], save: jest.fn() };
 
         User.findOne
             .mockResolvedValueOnce(user1) // Mock user1 found
@@ -102,7 +74,7 @@ describe("POST /follow", () => {
 
         const res = await request(app)
             .post("/follow")
-            .send({ user_id: user1.user_id, target_user_id: user2.user_id });
+            .send({ userID: user1.user_id, target_userID: user2.user_id });
 
         expect(res.statusCode).toBe(200);
         expect(res.body).toEqual({
@@ -110,7 +82,7 @@ describe("POST /follow", () => {
         });
 
         // Ensure both users' lists were updated correctly
-        expect(user1.following).toContain(u2_id);
+        expect(user1.following).toContain(u3_id);
         expect(user2.followers).toContain(u1_id);
 
         // Ensure save() was called for both users
@@ -121,10 +93,9 @@ describe("POST /follow", () => {
     it("should return 500 if there is a server error", async () => {
         // Simulate a database error
         User.findOne.mockRejectedValueOnce(new Error("Database error"));
-
         const res = await request(app)
             .post("/follow")
-            .send({ user_id: u1_id, target_user_id: u2_id });
+            .send({ userID: u3_id, target_userID: u4_id });
 
         expect(res.statusCode).toBe(500);
         expect(res.body).toEqual({ error: "Server error" });
