@@ -18,7 +18,7 @@ const LoginPage = () => {
 	const { mutate:login, isError,isPending,error} = useMutation({
 		mutationFn: async ({ email, password}) => {
 			try{
-				const res = await axios.post("/api/login", {
+				const res = await axios.post("/api/login", { // needs api for vite config
 					email,
 					password,
 				});
@@ -80,7 +80,9 @@ const LoginPage = () => {
 							value={formData.password}
 						/>
 					</label>
-					<button className='btn rounded-full btn-primary text-white'>Login</button>
+					<button className='btn rounded-full btn-primary text-white'>
+							{isPending ? "Loading..." : "Login"}
+						</button>
 					{isError && <p className='text-red-500'>Something went wrong</p>}
 				</form>
 				<div className='flex flex-col gap-2 mt-4'>
