@@ -5,23 +5,48 @@ import XSvg from "../../../components/svgs/Logo";
 
 import { MdOutlineMail } from "react-icons/md";
 import { MdPassword } from "react-icons/md";
+import { useMutation } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import axios from "axios";
 
 const LoginPage = () => {
 	const [formData, setFormData] = useState({
 		username: "",
 		password: "",
 	});
+	
+	const { mutate:login, isError,isPending,error} = useMutation({
+		mutationFn: async ({ email, password}) => {
+			try{
+				const res = await axios.post("/api/login", {
+					email,
+					password,
+				});
+				console.log("Response data:",res.data);
+				return res.data;
+			}catch (error) {
+				console.error("Login error:",error);
+				throw new Error(error.response?.data?.error || "Server error");
+			}
+		},
+		onSuccess: (data) =>{
+			toast.success("Logged In!");
+		},
+		onError: (error) => {
+			toast.error(error.message);
+		},
+	});
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		console.log(formData);
+		login(formData);
 	};
 
 	const handleInputChange = (e) => {
 		setFormData({ ...formData, [e.target.name]: e.target.value });
 	};
 
-	const isError = false;
+	
 
 	return (
 		<div className='max-w-screen-xl mx-auto flex h-screen'>
@@ -37,10 +62,10 @@ const LoginPage = () => {
 						<input
 							type='text'
 							className='grow'
-							placeholder='username'
-							name='username'
+							placeholder='email'
+							name='email'
 							onChange={handleInputChange}
-							value={formData.username}
+							value={formData.email}
 						/>
 					</label>
 
