@@ -4,9 +4,11 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 const connectToDB = require('./config/db.js');
-const userAuthenticationRoutes = require('./routes/user_authentication.js');
+const userAuthenticationRoutes = require('./routes/login.js');
 const defaultRoute = require('./routes/default_route.js');
-const invalidRoutes = require('./routes/invalid_routes.js')
+const invalidRoutes = require('./routes/invalid_routes.js');
+const accountCreation = require('./routes/signup.js')
+const spotifyRoutes = require('./routes/spotify_routes.js'); // import spotify routes
 
 dotenv.config();
 const PORT = 8080;
@@ -21,9 +23,13 @@ app.use(cors({
 }));
 
 // routes
-app.use(defaultRoute);
-app.use(invalidRoutes)
+app.use('/api/auth',accountCreation); // signup
+app.use(userAuthenticationRoutes); // login
+app.use(spotifyRoutes);
 app.use(userAuthenticationRoutes);
+app.use(defaultRoute);
+
+app.use(invalidRoutes); // THIS HAS TO STAY LAST
 
 // database connection
 connectToDB();
