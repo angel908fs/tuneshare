@@ -23,7 +23,7 @@ app.use(cors({
 }));
 
 // routes
-app.use('/api/auth',accountCreation); // signup
+app.use('/api',accountCreation); // signup, '/api' connects to the vite config
 app.use(userAuthenticationRoutes); // login
 app.use(spotifyRoutes);
 app.use(userAuthenticationRoutes);
