@@ -2,8 +2,16 @@ const express = require('express');
 require('dotenv').config();
 const axios = require("axios"); // Use axios instead of request
 const querystring = require('querystring'); // Import querystring for redirect URL
+const SpotifyWebApi = require('spotify-web-api-js');
 
 let router = express.Router(); //route to express app
+
+const spotifyApi = new SpotifyWebApi({ // initialize Spotify with credentials
+  clientId: process.env.CLIENTID,
+  clientSecret: process.env.CLIENTSECRET,
+  redirectUri: process.env.REDIRECTURI
+});
+
 
 // paths are taken only when using backend server (localhost:8080)
 // Route to authenticate user via Spotify
@@ -86,5 +94,47 @@ router.get("/callback", async function(req, res){
   }
 });
 
-module.exports = router;
+router.get('/search', async (req, res) => {
+  const query = req.query.q;
+  const accessToken = process.env.ACCESSTOKEN;
 
+  if (!query) {
+    return res.status(400).send('Query parameter "q" is required.');
+  }
+  
+  if (!accessToken) {
+    return res.status(401).send('Access token not available. Please log in.');
+  }
+
+  try {
+    // Use Axios to search for tracks
+    const response = await axios.get('https://api.spotify.com/v1/search', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      params: {
+        q: query,
+        type: 'track',
+      },
+    });
+
+    // Format the track data
+    const tracks = response.data.tracks.items.map(track => ({
+      id: track.id,
+      name: track.name,
+    }));
+
+    res.json(tracks);
+  } catch (error) {
+    console.error('Error searching tracks:', error);
+    
+    // Handle token expiration
+    if (error.response && error.response.status === 401) {
+      res.status(401).send('Access token expired. Please log in again.');
+    } else {
+      res.status(500).send('Error searching tracks');
+    }
+  }
+});
+
+module.exports = router;
