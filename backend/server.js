@@ -22,9 +22,9 @@ app.use(cors({
     origin: 'http://localhost:3000'  // Frontend URL
 }));
 
-// routes
-app.use('/api/auth',accountCreation); // signup
-app.use(userAuthenticationRoutes); // login
+// routes, /api' connects to the vite config, do not remove
+app.use('/api',accountCreation); // signup, 
+app.use('/api',userAuthenticationRoutes); // login
 app.use(spotifyRoutes);
 app.use(userAuthenticationRoutes);
 app.use(defaultRoute);

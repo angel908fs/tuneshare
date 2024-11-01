@@ -18,7 +18,7 @@ const SignUpPage = () => {
 	const { mutate, isError, isPending, error } = useMutation({
 		mutationFn: async ({ email, username, password }) => {
 			try {
-				const res = await axios.post("/api/auth/signup", {
+				const res = await axios.post("/api/signup", { // needs the /api/
 					email,
 					username,
 					password,
