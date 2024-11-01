@@ -1,9 +1,10 @@
 const express = require("express");
 const request = require("supertest");
 const router = require("../routes/follow_route.js"); // Adjust path if needed
+jest.mock("../models/user.js"); // Mock the User model
+
 const User = require("../models/user.js"); // Mock User model
 
-jest.mock("../models/user.js"); // Mock the User model
 
 const app = express(); // Create an express app
 app.use(express.json()); // Enable JSON parsing
