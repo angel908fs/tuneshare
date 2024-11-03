@@ -22,6 +22,24 @@ describe("POST /follow", () => {
         jest.clearAllMocks(); // Reset mocks between tests
     });
 
+    it("should return 400 if userID is missing", async () => {
+        const res = await request(app)
+            .post("/follow")
+            .send({ target_userID: u3_id });
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toEqual({ error: "Missing required parameter: userID" });
+    });
+
+    it("should return 400 if target_userID is missing", async () => {
+        const res = await request(app)
+            .post("/follow")
+            .send({ userID: u1_id });
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toEqual({ error: "Missing required parameter: target_userID" });
+    });
+
     it("should return 404 if the user does not exist", async () => {
         User.findOne.mockResolvedValueOnce(null); // Mock user not found
 

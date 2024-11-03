@@ -5,7 +5,16 @@ const User = require("../models/user.js");
 
 // User is the one who initiates the follow to target user
 router.post("/follow", async (req, res) => {
-    const {userID, target_userID} = req.body; // get the userID and target user ID from the request body, can be found using username or email
+
+    // Check if the required parameters are present (non NULL or empty)
+        if (!req.body.target_userID) {
+            return res.status(400).send({ error: "Missing required parameter: target_userID" });
+        }
+        if (!req.body.userID) {
+            return res.status(400).send({ error: "Missing required parameter: userID" });
+        }
+    const userID = req.body.userID;
+    const target_userID = req.body.target_userID;
 
     try {    
         const user = await User.findOne({ user_id: userID }); // find the user with the given userID
@@ -29,6 +38,7 @@ router.post("/follow", async (req, res) => {
         console.error("Server error:", error);  // Log error to console
         return res.status(500).json({ error: "Server error" });
     }
+
 });
 
 module.exports = router;
