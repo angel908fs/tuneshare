@@ -12,11 +12,11 @@ const userSchema = new mongoose.Schema(
         password:{type: String, required: true},
 
         // Profile specific data
-        friends:[{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],                // The type is a mongo object (i.e. another user)
+        followers:[{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],                // The type is a mongo object (i.e. another user)
         following:[{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
         bio:{type: String, maxlength: 256},         
 
-        posts:{type: mongoose.Schema.Types.ObjectId, ref: 'Post'},                    // A whole schema needs to be created for this seperately (export as 'Post'), but it's here for referance
+        posts:[{type: mongoose.Schema.Types.ObjectId, ref: 'Post'}],                    // A whole schema needs to be created for this seperately (export as 'Post'), but it's here for referance
         profile_pictire:{type: String},                                               // This wont actually hold a picture, but maybe a URL due to DB size restraints 
     
         // API Keys
@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema(
 
     }, 
 
-    {timestamp: true}                // Generates 'createdAT' and 'updatedAt' timestamps
+    {timestamps: true}                // Generates 'createdAT' and 'updatedAt' timestamps
 ); 
 
 // Create and export the User model
