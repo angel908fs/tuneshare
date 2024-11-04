@@ -10,12 +10,12 @@ const Post = require("../models/post.js");
 // page == 3 will skip the first 20 posts and return the 21th-30th most recent posts
 router.post("/load-feed", async(req, res) => {
     if (!req.body.userid) {
-        return res.status(400).send({sucess: false, message: "missing user id in request body"});
+        return res.status(400).send({success: false, message: "missing user id in request body"});
     }
-    if (!req.body.page) {
+    if (req.body.page === undefined || req.body.page === null) {  // Check if page is undefined explicitly
         return res.status(400).send({success: false, message: "missing page in request body"});
     }
-    if (req.body.page < 1) {
+    if (req.body.page < 1) {  // Now you can safely check for page < 1
         return res.status(400).send({success: false, message: "page parameter must be greater than or equal to 1"});
     }
     try {
@@ -35,12 +35,15 @@ router.post("/load-feed", async(req, res) => {
         // populate the user_id field with the username from the User model, otherwise we would just get the user_id associated with the post
         const posts = await Post.find({user_id: {$in: user.following}}).sort({created_at: -1}).skip(skip).limit(postsPerPage).populate('user_id', 'username');
         
-        if (posts.length == 0) {
+        if (!posts || posts.length === 0) {
             return res.status(404).send({success: true, message: "no posts available at the time"});
         }
 
         return res.status(200).send({success: true, data: posts});
     } catch (error) {
-        return res.status(500).send({ success: false, message: "internal server error", error: error});
+        console.log(error)
+        return res.status(500).send({ success: false, message: "internal server error", error: error.message});
     }
 });
+
+module.exports = router;
