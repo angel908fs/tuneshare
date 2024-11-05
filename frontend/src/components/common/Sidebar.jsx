@@ -9,7 +9,7 @@ import { useMutation } from '@tanstack/react-query';
 
 
 const Sidebar = () => {
-	const { muatate:logout, isPending, isError, error } = useMutation({
+	const { muatate:logout} = useMutation({
 		mutationFn: async() => {
 			try{
 				const res = await axios.post('/logout',{});
@@ -24,8 +24,11 @@ const Sidebar = () => {
 		},
 		onSuccess: () => {
 			toast.success('Logout Successful');
-		}
-	})
+		},
+		onError: () => {
+			toast.error('logout failed');
+		},
+	});
 	const data = { // this is hardcoded, will remove later
 		fullName: "John Doe",
 		username: "johndoe",

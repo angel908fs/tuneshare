@@ -11,7 +11,7 @@ import axios from "axios";
 
 const LoginPage = () => {
 	const [formData, setFormData] = useState({
-		username: "",
+		email: "",
 		password: "",
 	});
 	
@@ -25,7 +25,6 @@ const LoginPage = () => {
 				console.log("Response data:",res.data);
 				return res.data;
 			}catch (error) {
-				console.error("Login error:",error);
 				throw new Error(error.response?.data?.error || "Server error");
 			}
 		},
