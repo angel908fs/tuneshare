@@ -11,45 +11,52 @@ app.use("/", router);
 
 describe("POST /create-post", () =>
 {
-    it("should return 400 if missing required fields", async () =>
+    it("should return 400 if the user_id is missing", async () =>
     {
-        const noUserId = await request(app).post("/create-post").send(
+        const res = await request(app).post("/create-post").send(
         {
-            song_link: "localhost",
-            content: "No user ID"
+            song_link: "https://spotify.com/song",
+            content: "Missing user ID"
         });
 
-        const noSongLink = await request(app).post("/create-post").send(
-        {
-            user_id: "UserID",
-            content: "No song link"
-        });
-
-        const noContent = await request(app).post("/create-post").send(
-        {
-            user_id: "NoContent",
-            song_link: "localhost"
-        });
-
-        expect(noUserId.statusCode).toBe(400);
-        expect(noSongLink.statusCode).toBe(400);
-        expect(noContent.statusCode).toBe(400);
-
-        expect(noUserId.body).toEqual({ error: "Please enter a user ID for the post." });
-        expect(noSongLink.body).toEqual({ error: "Please add a song link for the post." });
-        expect(noContent.body).toEqual({ error: "Please provide content for the post." });
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toEqual({ error: "Please enter a user ID for the post." });
     });
 
-    it("should create a post successfully", async () =>
+    it("should return 400 if the song_link is missing", async () =>
+    {
+        const res = await request(app).post("/create-post").send(
+        {
+            user_id: "UserID123",
+            content: "Missing song link"
+        });
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toEqual({ error: "Please add a song link for the post." });
+    });
+
+    it("should return 400 if the content is missing", async () =>
+    {
+        const res = await request(app).post("/create-post").send(
+        {
+            user_id: "UserID123",
+            song_link: "https://spotify.com/song"
+        });
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toEqual({ error: "Please provide content for the post." });
+    });
+
+    it("should create a post successfully with all parameters provided", async () =>
     {
         const mockPost = 
         {
-            user_id: "UserID", 
-            song_link: "https://www.example.com", 
+            user_id: "UserID123",
+            song_link: "https://spotify.com/song",
             content: "This is a test post."
         };
-        
-        createPost.mockResolvedValue({ success: true, message: "Post created successfully.", post: mockPost });
+
+        createPost.mockResolvedValue({ success: true, post: mockPost });
 
         const res = await request(app).post("/create-post").send(mockPost);
 
@@ -57,14 +64,14 @@ describe("POST /create-post", () =>
         expect(res.body).toEqual(mockPost);
     });
 
-    it("should handle errors during post creation", async () => {
-        //createPost.mockResolvedValue({ success: false, message: "Could not create the post. Please try again later." });
+    it("should handle errors during post creation", async () =>
+    {
         createPost.mockRejectedValue(new Error("Server error"));
-        
+
         const res = await request(app).post("/create-post").send(
-        { 
+        {
             user_id: "ErrorUserId",
-            song_link: "https://www.example.com",
+            song_link: "https://spotify.com/song",
             content: "A post that will fail."
         });
 
@@ -72,3 +79,4 @@ describe("POST /create-post", () =>
         expect(res.body).toEqual({ error: "Internal server error." });
     });
 });
+
