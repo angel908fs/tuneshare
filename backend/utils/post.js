@@ -45,8 +45,6 @@ async function getUserPosts(username)
 
         // Retrieve posts by user ID    
         const posts = await Post.find({ user_id: user.user_id }).populate("user_id").exec();
-        console.warn(user);
-        console.warn(posts);
 
         return {
             success: true, post: posts.map(p => ({
