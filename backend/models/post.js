@@ -3,7 +3,7 @@ const { v4: uuidv4 } = require('uuid');    // For generating UUIDs (User IDs)
 
 const postSchema = new mongoose.Schema(
     {
-        post_id: {type: String, default: uuidv4}, // Automatically generated ObjectId for the post
+        post_id: { type: String, default: uuidv4 }, // For generating Post IDs
         song_link: { type: String, required: true }, // Link to the song
         likes: { type: Number, default: 0 }, // Count of likes
         comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }], // List of comment IDs

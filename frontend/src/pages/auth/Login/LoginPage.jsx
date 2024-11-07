@@ -11,7 +11,7 @@ import axios from "axios";
 
 const LoginPage = () => {
 	const [formData, setFormData] = useState({
-		username: "",
+		email: "",
 		password: "",
 	});
 	
