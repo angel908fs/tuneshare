@@ -21,6 +21,9 @@ const LoginPage = () => {
 				const res = await axios.post("/api/login", { // needs api for vite config
 					email,
 					password,
+				},
+				{
+				withCredentials:true
 				});
 				console.log("Response data:",res.data);
 				return res.data;
