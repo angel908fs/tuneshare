@@ -25,7 +25,7 @@ describe("Post Utility Functions", () =>
 
         const result = await createPost("user123", "https://spotify.com/song1", "Here's a song I just listened to!");
         expect(result.success).toBe(true);
-        expect(result.post).toEqual(mockPost);
+        expect(result.data).toEqual(mockPost);
     });
 
     it("should handle errors when creating a post", async () =>
