@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 import User from '../models/user.js';
+//this is a protectroute
 
 //middleware that performs user authentication
 export const authToken = async (req, res, next) => {

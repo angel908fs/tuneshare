@@ -29,7 +29,7 @@ router.post("/login", async (req, res) => {
         } else {
             return res.status(404).send({ error: "User does not exist" });
         }
-        generateTokenAndSetCookie(user_id,res);
+        
 
     } catch (err) {
         return res.status(500).send({ error: "Server error" });

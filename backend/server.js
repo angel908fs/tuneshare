@@ -27,7 +27,6 @@ app.use(cors({
 app.use('/api',accountCreation); // signup, 
 app.use('/api',userAuthenticationRoutes); // login
 app.use(spotifyRoutes);
-app.use(userAuthenticationRoutes);
 app.use(defaultRoute);
 
 app.use(invalidRoutes); // THIS HAS TO STAY LAST
