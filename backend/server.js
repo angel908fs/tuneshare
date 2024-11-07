@@ -7,8 +7,9 @@ const connectToDB = require('./config/db.js');
 const userAuthenticationRoutes = require('./routes/login.js');
 const defaultRoute = require('./routes/default_route.js');
 const invalidRoutes = require('./routes/invalid_routes.js');
-const accountCreation = require('./routes/signup.js')
+const accountCreation = require('./routes/signup.js');
 const spotifyRoutes = require('./routes/spotify_routes.js'); // import spotify routes
+const LogOutRoute = require('./routes/logout.js');
 
 dotenv.config();
 const PORT = 8080;
@@ -26,6 +27,7 @@ app.use(cors({
 // routes, /api' connects to the vite config, do not remove
 app.use('/api',accountCreation); // signup, 
 app.use('/api',userAuthenticationRoutes); // login
+app.use('/api/logout',LogOutRoute);
 app.use(spotifyRoutes);
 app.use(defaultRoute);
 

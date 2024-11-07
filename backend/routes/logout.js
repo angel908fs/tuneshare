@@ -1,16 +1,13 @@
 const express = require("express");
 const { generateTokenAndSetCookie } = require("../utils/generateToken.js");
 let router = express.Router();
-const User = require('../models/user.js');
 
 router.post('/', async (req,res) => {
     try {
-        res.clearCookie('jwt',{
-            httpOnly: true,
-            secure: process.env.NODE_ENV == 'production',
-            sameSite: 'lax',
-        })
+        res.cookie('jwt',"", {maxAge: 0});
+        res.status(200).send({success: "Logged Out Sucessfully"});
     }catch (error) {
-        res.status(500).send({error: 'Internal Service'});
+        res.status(500).send({error: 'Internal Server Error'});
     }
 });
+module.exports = router;

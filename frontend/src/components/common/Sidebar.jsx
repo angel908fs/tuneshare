@@ -6,20 +6,18 @@ import { FaUser } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { RiLogoutCircleLine } from "react-icons/ri";
 import { useMutation } from '@tanstack/react-query';
-
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const Sidebar = () => {
-	const { muatate:logout} = useMutation({
+	const { mutate:logout} = useMutation({
 		mutationFn: async() => {
 			try{
-				const res = await axios.post('/logout',{});
-				const data = await res.json();
+				const res = await axios.post('/api/logout',{}, { withCredentials: true });
+				return res.data;
 
-				if(!res.ok){
-					throw new Error(data.error || 'Something went wrong');
-				}
 			}catch (error){
-				throw new Error(error);
+				throw new Error(error.response?.data?.error || 'Something went wrong');
 			}
 		},
 		onSuccess: () => {
