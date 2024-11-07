@@ -18,7 +18,7 @@ describe('Spotify API Routes', () => {
   // Test /callback route without an authorization code
   it('should respond with an error if no authCode is provided to /callback', async () => {
     const response = await request(app).get('/callback');
-    expect(response.status).toBe(200);
-    expect(response.text).toBe('Authorization code not received.');
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({ success: false, message: "Authorization code not received." });
   });
 });
