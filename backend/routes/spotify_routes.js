@@ -29,6 +29,10 @@ router.get('/spotifylogin', function(req, res) {
 
 router.get('/refreshtoken', async function(req,res){
   const refresh_token = req.query.refresh_token;
+
+  if (!refresh_token) {
+    return res.status(400).send({ success: false, message: 'Refresh token is required.' });
+  }
   
   try{
   const response = await axios({
