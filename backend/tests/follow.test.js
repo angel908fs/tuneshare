@@ -5,7 +5,6 @@ jest.mock("../models/user.js"); // Mock the User model
 
 const User = require("../models/user.js"); // Mock User model
 
-
 const app = express(); // Create an express app
 app.use(express.json()); // Enable JSON parsing
 app.use("/", router); // Add the router to the app
@@ -28,7 +27,7 @@ describe("POST /follow", () => {
             .send({ target_userID: u3_id });
 
         expect(res.statusCode).toBe(400);
-        expect(res.body).toEqual({ error: "Missing required parameter: userID" });
+        expect(res.body).toEqual({ success: false, message: "Missing required parameter: userID" });
     });
 
     it("should return 400 if target_userID is missing", async () => {
@@ -37,7 +36,7 @@ describe("POST /follow", () => {
             .send({ userID: u1_id });
 
         expect(res.statusCode).toBe(400);
-        expect(res.body).toEqual({ error: "Missing required parameter: target_userID" });
+        expect(res.body).toEqual({ success: false, message: "Missing required parameter: target_userID" });
     });
 
     it("should return 404 if the user does not exist", async () => {
@@ -48,7 +47,7 @@ describe("POST /follow", () => {
             .send({ userID: u1_id, target_userID: u3_id });
 
         expect(res.statusCode).toBe(404);
-        expect(res.body).toEqual({ error: "User not found" });
+        expect(res.body).toEqual({ success: false, message: "User not found" });
     });
 
     it("should return 404 if the target user does not exist", async () => {
@@ -60,13 +59,12 @@ describe("POST /follow", () => {
             .send({ userID: u1_id, target_userID: u3_id });
 
         expect(res.statusCode).toBe(404);
-        expect(res.body).toEqual({ error: "Target user not found" });
+        expect(res.body).toEqual({ success: false, message: "Target user not found" });
     });
 
     it("should return 409 if the user is already following the target user", async () => {
         let user1 = { user_id: u1_id, following: [u3_id], save: jest.fn() };
         let user2 = { user_id: u3_id, followers: [u1_id], save: jest.fn() };
-
 
         User.findOne
             .mockResolvedValueOnce(user1) // Mock user1 found
@@ -78,10 +76,10 @@ describe("POST /follow", () => {
 
         expect(res.statusCode).toBe(409);
         expect(res.body).toEqual({
-            error: "User is already following target user",
+            success: false,
+            message: "User is already following target user",
         });
     });
-
 
     it("should return 200 if the user successfully follows the target user", async () => {
         let user1 = { user_id: u1_id, following: [], save: jest.fn() };
@@ -97,7 +95,8 @@ describe("POST /follow", () => {
 
         expect(res.statusCode).toBe(200);
         expect(res.body).toEqual({
-            success: "User followed successfully",
+            success: true,
+            message: "User followed successfully",
         });
 
         // Ensure both users' lists were updated correctly
@@ -117,6 +116,6 @@ describe("POST /follow", () => {
             .send({ userID: u3_id, target_userID: u4_id });
 
         expect(res.statusCode).toBe(500);
-        expect(res.body).toEqual({ error: "Server error" });
+        expect(res.body).toEqual({ success: false, message: "Server error", error: "Database error" });
     });
 });
