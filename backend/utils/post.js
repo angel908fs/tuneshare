@@ -26,7 +26,7 @@ async function createPost(userID, songLink, postContent)
     }
     catch (error)
     {
-        console.error("Post creation failure: ", error);
+        // console.error("Post creation failure: ", error);
         return { success: false, message: "Could not create the post. Please try again later." };
     }
 }
@@ -58,7 +58,7 @@ async function getUserPosts(username)
     }
     catch (error)
     {
-        console.error("Post retrieval failure: ", error);
+        // console.error("Post retrieval failure: ", error);
         return { success: false, message: "Could not retrieve posts. Please try again later." };
     }
 }

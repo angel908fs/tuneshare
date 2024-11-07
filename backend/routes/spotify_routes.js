@@ -48,7 +48,7 @@ router.get('/refreshtoken', async function(req,res){
     res.send("Refresh token had been updated"); //since there is no new refresh token in the response data there is no need to update env var
   } 
 }catch(error){
-    console.error('Error when refreshing token: ', error); //if theres an error give error in server response
+    // console.error('Error when refreshing token: ', error); //if theres an error give error in server response
     res.status(500).send({error: 'Failed to refresh token' });
   }
 });
@@ -89,7 +89,7 @@ router.get("/callback", async function(req, res){
     res.send("Tokens have been received and stored.");
     
   } catch (error) {
-    console.error("Error exchanging code for tokens: ", error);
+    // console.error("Error exchanging code for tokens: ", error);
     res.send("An error occurred while exchanging tokens.");
   }
 });
@@ -126,7 +126,7 @@ router.get('/search', async (req, res) => {
 
     res.json(tracks);
   } catch (error) {
-    console.error('Error searching tracks:', error);
+    // console.error('Error searching tracks:', error);
     
     // Handle token expiration
     if (error.response && error.response.status === 401) {

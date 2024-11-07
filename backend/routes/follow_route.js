@@ -35,7 +35,7 @@ router.post("/follow", async (req, res) => {
         return res.status(200).json({ success: "User followed successfully" });
     
     } catch (error) {
-        console.error("Server error:", error);  // Log error to console
+        // console.error("Server error:", error);  // Log error to console
         return res.status(500).json({ error: "Server error" });
     }
 

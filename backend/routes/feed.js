@@ -41,7 +41,7 @@ router.post("/load-feed", async(req, res) => {
 
         return res.status(200).send({success: true, data: posts});
     } catch (error) {
-        console.log(error)
+        // console.log(error)
         return res.status(500).send({ success: false, message: "internal server error", error: error.message});
     }
 });
