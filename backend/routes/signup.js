@@ -49,8 +49,8 @@ router.post("/signup", async (req, res) => {
         });
 
         await newUser.save();
+        generateTokenAndSetCookie(newUser.user_id,res);
         
-
         return res.status(201).json({
             username: newUser.username,
             email: newUser.email,
