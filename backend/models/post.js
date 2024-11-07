@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require('uuid');    // For generating UUIDs (User IDs)
 
 const postSchema = new mongoose.Schema(
     {

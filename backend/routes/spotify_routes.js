@@ -16,7 +16,7 @@ const spotifyApi = new SpotifyWebApi({ // initialize Spotify with credentials
 // paths are taken only when using backend server (localhost:8080)
 // Route to authenticate user via Spotify
 router.get('/spotifylogin', function(req, res) { 
-  console.log("Redirecting to Spotify...");
+  // console.log("Redirecting to Spotify...");
   const spotifyAuthURL = 'https://accounts.spotify.com/authorize?' +  
     querystring.stringify({ //get request that authenticates user by logging into spotify account
       response_type: 'code', 
