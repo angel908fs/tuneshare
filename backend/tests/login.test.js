@@ -18,7 +18,7 @@ describe("POST /login", () => {
     it("should return 400 if email is missing", async () => {
         const res = await request(app).post("/login").send({ password: "password123", userID: 'userID' });
         expect(res.statusCode).toBe(400);
-        expect(res.body).toEqual({ success: true, message: "Missing required parameters" });
+        expect(res.body).toEqual({ success: false, message: "Missing required parameters" });
     });
 
     it("should return 404 if user does not exist", async () => {
@@ -27,7 +27,7 @@ describe("POST /login", () => {
         const res = await request(app).post("/login").send({ email: "test@test.com", password: "password123", userID: 'userID' });
 
         expect(res.statusCode).toBe(404);
-        expect(res.body).toEqual({ success: true, message: "User does not exist" });
+        expect(res.body).toEqual({ success: false, message: "User does not exist" });
     });
 
     it("should return 401 for invalid email or password", async () => {
@@ -38,7 +38,7 @@ describe("POST /login", () => {
         const res = await request(app).post("/login").send({ email: "test@test.com", password: "wrongPassword", userID: 'userID' });
 
         expect(res.statusCode).toBe(401);
-        expect(res.body).toEqual({ success: true, message: "Invalid email or password" });
+        expect(res.body).toEqual({ success: false, message: "Invalid email or password" });
     });
 
     it("should return 200 for successful authentication", async () => {
@@ -59,6 +59,6 @@ describe("POST /login", () => {
         const res = await request(app).post("/login").send({ email: "test@test.com", password: "password123", userID: 'userID' });
 
         expect(res.statusCode).toBe(500);
-        expect(res.body).toEqual({ success: true, message: "Server error" });
+        expect(res.body).toEqual({ success: false, message: "Server error" });
     });
 });
