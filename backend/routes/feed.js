@@ -39,7 +39,7 @@ router.post("/load-feed", async(req, res) => {
             return res.status(404).send({success: true, message: "no posts available at the time"});
         }
 
-        return res.status(200).send({success: true, data: posts});
+        return res.status(200).send({success: true, message: "posts have been retrieved successfully",data: posts});
     } catch (error) {
         // console.log(error)
         return res.status(500).send({ success: false, message: "internal server error", error: error.message});

@@ -89,7 +89,7 @@ describe("POST /load-feed", () => {
             .send({ userid: "1", page: 1 });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body).toEqual({ success: true, data: mockPosts });
+        expect(res.body).toEqual({ success: true, message: "posts have been retrieved successfully", data: mockPosts });
     });
 
     it("should return 500 if there is a server error", async () => {
