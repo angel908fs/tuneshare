@@ -25,7 +25,6 @@ const LoginPage = () => {
 				{
 				withCredentials:true
 				});
-				console.log("Response data:",res.data);
 				return res.data;
 			}catch (error) {
 				throw new Error(error.response?.data?.error || "Server error");

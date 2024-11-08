@@ -23,7 +23,6 @@ export const authToken = async (req, res, next) => {
         req.user =user; // attches the user data to the req object
         next();
     }catch(error){
-        console.log("Error in AuthenticateToken",error.message);
-        return res.status(500).send({error: 'Internal Server Error'});
+        return res.status(500).send({error: 'Internal Server Error, In AuthenticateToken'});
     }
 };
