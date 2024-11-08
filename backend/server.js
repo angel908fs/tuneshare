@@ -38,7 +38,7 @@ app.use(loginRoutes);
 app.use(loadFeedRoutes);
 app.use(followUserRoutes);
 app.use(createPostRoutes);
-app.use(profileRoutes)l
+app.use(profileRoutes);
 
 app.use(defaultRoute);
 app.use(invalidRoutes); // THIS HAS TO STAY LAST

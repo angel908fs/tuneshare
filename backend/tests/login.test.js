@@ -4,9 +4,13 @@ const router = require("../routes/login.js");
 const { userEmailExists } = require("../utils/user.js");
 const User = require("../models/user.js");
 const bcrypt = require("bcryptjs");
+const { generateTokenAndSetCookie } = require("../utils/generateToken.js");
 
 jest.mock("../utils/user.js");
 jest.mock("../models/user.js");
+jest.mock('../utils/generateToken.js',()=>({
+    generateTokenAndSetCookie : jest.fn(),
+}));
 jest.mock("bcryptjs"); // Mock bcrypt functions
 
 const app = express();
@@ -43,13 +47,15 @@ describe("POST /login", () => {
 
     it("should return 200 for successful authentication", async () => {
         userEmailExists.mockResolvedValue(true);
-        User.findOne.mockResolvedValue({ email: "test@test.com", password: "hashedPassword123" });
+        User.findOne.mockResolvedValue({_id: "userid", email: "test@test.com", password: "hashedPassword123" });
         bcrypt.compare.mockResolvedValue(true); // Simulate successful password match
 
         const res = await request(app).post("/login").send({ email: "test@test.com", password: "password123", userID: 'userID' });
 
+        expect(generateTokenAndSetCookie).toHaveBeenCalledWith('userid',expect.any(Object));
         expect(res.statusCode).toBe(200);
         expect(res.body).toEqual({ success: true, message: "user has been authenticated" });
+        
     });
 
     it("should return 500 for an internal server error", async () => {
