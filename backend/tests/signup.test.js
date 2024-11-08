@@ -22,7 +22,7 @@ describe("POST /signup", () => {
             .send({ username: "testuser", password: "password123" }); // Missing email
 
         expect(response.status).toBe(400);
-        expect(response.body).toEqual({ error: "Missing required parameters" });
+        expect(response.body).toEqual({ success: false, message: "Missing required parameters" });
     });
 
     it("should return 400 if password is missing", async () => {
@@ -31,7 +31,7 @@ describe("POST /signup", () => {
             .send({ username: "testuser", email: "test@example.com" }); // Missing password
 
         expect(response.status).toBe(400);
-        expect(response.body).toEqual({ error: "Missing required parameters" });
+        expect(response.body).toEqual({ success: false, message: "Missing required parameters" });
     });
 
     it("should return 400 if username is missing", async () => {
@@ -40,7 +40,7 @@ describe("POST /signup", () => {
             .send({ email: "test@example.com", password: "password123" }); // Missing username
 
         expect(response.status).toBe(400);
-        expect(response.body).toEqual({ error: "Missing required parameters" });
+        expect(response.body).toEqual({ success: false, message: "Missing required parameters" });
     });
 
     it("should return 400 if all required parameters are missing", async () => {
@@ -49,7 +49,7 @@ describe("POST /signup", () => {
             .send({}); // All parameters missing
 
         expect(response.status).toBe(400);
-        expect(response.body).toEqual({ error: "Missing required parameters" });
+        expect(response.body).toEqual({ success: false, message: "Missing required parameters" });
     });
 
     it("should return 400 if password is less than 6 characters", async () => {
@@ -58,7 +58,7 @@ describe("POST /signup", () => {
             .send({ username: "testuser", email: "test@example.com", password: "123" }); // Password too short
 
         expect(response.status).toBe(400);
-        expect(response.body).toEqual({ error: "Password must be at least 6 characters long" });
+        expect(response.body).toEqual({ success: false, message: "Password must be at least 6 characters long" });
     });
 
     it("should return 409 if the username already exists", async () => {
@@ -91,7 +91,7 @@ describe("POST /signup", () => {
     });
 
     it("should create an account if username and email are available and password is valid", async () => {
-        User.findOne.mockResolvedValueOnce(null).mockResolvedValue(null); // Username available
+        User.findOne.mockResolvedValueOnce(null).mockResolvedValue(null); // Username and email available
 
         // Mock the new User instance and its save method
         const mockUser = {
@@ -110,9 +110,13 @@ describe("POST /signup", () => {
 
         expect(response.status).toBe(201); // Successful creation
         expect(response.body).toEqual({
-            username: "testuser",
-            email: "test@example.com",
-            user_id: "generated_user_id",
+            success: true,
+            message: "user has been created successfully",
+            data: {
+                username: "testuser",
+                email: "test@example.com",
+                user_id: "generated_user_id",
+            }
         });
         expect(mockUser.save).toHaveBeenCalled(); // Verify save method was called
         expect(generateTokenAndSetCookie).toHaveBeenCalled(); // Verify token generation
@@ -126,6 +130,6 @@ describe("POST /signup", () => {
             .send({ username: "testuser", email: "test@example.com", password: "password123" });
 
         expect(response.status).toBe(500);
-        expect(response.body).toEqual({ error: "Server error" });
+        expect(response.body).toEqual({ success: false, message: "Server error", error: "Server error" });
     });
 });

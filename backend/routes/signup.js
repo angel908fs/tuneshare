@@ -8,7 +8,7 @@ const bcrypt = require("bcryptjs");
 router.post("/signup", async (req, res) => {
     try {
         if (!req.body.email || !req.body.password || !req.body.username) {
-            return res.status(400).send({ error: "Missing required parameters" });
+            return res.status(400).send({success: false, message: "Missing required parameters" });
         }
         const email = req.body.email;
         const password = req.body.password;
@@ -17,12 +17,12 @@ router.post("/signup", async (req, res) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         if (!emailRegex.test(email)) {
-            return res.status(400).json({ error: "invalid email format" });
+            return res.status(400).send({success: false, message: "invalid email format" });
         }
 
         const existingUsername = await User.findOne({ username });
         if (existingUsername) {
-            return res.status(409).json({
+            return res.status(409).send({
                 success: false,
                 message: "This username is already taken by another account. Please use another one."
             });
@@ -30,14 +30,14 @@ router.post("/signup", async (req, res) => {
 
         const existingEmail = await User.findOne({ email });
         if (existingEmail) {
-            return res.status(409).json({
+            return res.status(409).send({
                 success: false,
                 message: "This email is already associated with an account. Please use another one."
             });
         }
 
         if (password.length < 6) {
-            return res.status(400).json({ error: "Password must be at least 6 characters long" });
+            return res.status(400).send({success: false, message: "Password must be at least 6 characters long" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 0);
@@ -49,15 +49,19 @@ router.post("/signup", async (req, res) => {
         });
 
         await newUser.save();
-        generateTokenAndSetCookie(newUser.user_id,res);
-        
-        return res.status(201).json({
-            username: newUser.username,
-            email: newUser.email,
-            user_id: newUser.user_id,
+        generateTokenAndSetCookie(newUser.user_id, res);
+
+        return res.status(201).send({
+            success: true,
+            message: "user has been created successfully",
+            data: {
+                username: newUser.username,
+                email: newUser.email,
+                user_id: newUser.user_id,
+            }
         });
     } catch (error) {
-        return res.status(500).json({ error: "Server error"});
+        return res.status(500).send({success: false, message: "Server error", error: error.message});
     }
 });
 
