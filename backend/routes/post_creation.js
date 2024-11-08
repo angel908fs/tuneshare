@@ -12,31 +12,31 @@ router.post("/create-post", async (req, res) =>
     {
         if (!userID)
         {
-            return res.status(400).json({ error: "Please enter a user ID for the post." });
+            return res.status(400).send({success: false, message: "Please enter a user ID for the post." });
         }
 
         if (!songLink)
         {
-            return res.status(400).json({ error: "Please add a song link for the post." });
+            return res.status(400).send({success: false, message: "Please add a song link for the post." });
         }
 
         if (!content)
         {
-            return res.status(400).json({ error: "Please provide content for the post." });
+            return res.status(400).send({success: false, message: "Please provide content for the post." });
         }
 
         const result = await createPost(userID, songLink, content);
 
         if (result.success)
         {
-            return res.status(201).json(result.post);
+            return res.status(201).send({success: true, message: "Post has been created successfully", data: result.post});
         }
 
-        return res.status(500).json({ error: result.message });
+        return res.status(500).send({success: false, message: result.message });
     }
     catch (err)
     {
-        return res.status(500).json({ error: "Internal server error." });
+        return res.status(500).send({success: false, message: "Internal server error." });
     }
 });
 

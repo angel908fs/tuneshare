@@ -15,7 +15,7 @@ async function createPost(userID, songLink, postContent)
         
         await newPost.save();
         
-        return { success: true, message: "Post created successfully.", post: 
+        return { success: true, message: "Post created successfully.", data: 
             {
                 user_id: userID,
                 song_link: songLink,
@@ -26,8 +26,8 @@ async function createPost(userID, songLink, postContent)
     }
     catch (error)
     {
-        console.error("Post creation failure: ", error);
-        return { success: false, message: "Could not create the post. Please try again later." };
+        // console.error("Post creation failure: ", error);
+        return { success: false, message: "Could not create the post. Please try again later.", error: error.message};
     }
 }
 
@@ -58,8 +58,8 @@ async function getUserPosts(username)
     }
     catch (error)
     {
-        console.error("Post retrieval failure: ", error);
-        return { success: false, message: "Could not retrieve posts. Please try again later." };
+        // console.error("Post retrieval failure: ", error);
+        return { success: false, message: "Could not retrieve posts. Please try again later.", error: error.message};
     }
 }
 

@@ -4,11 +4,16 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 const connectToDB = require('./config/db.js');
-const userAuthenticationRoutes = require('./routes/login.js');
+
+const loginRoutes = require('./routes/login.js');
 const defaultRoute = require('./routes/default_route.js');
 const invalidRoutes = require('./routes/invalid_routes.js');
 const accountCreation = require('./routes/signup.js')
 const spotifyRoutes = require('./routes/spotify_routes.js'); // import spotify routes
+const loadFeedRoutes = require('./routes/feed.js');
+const followUserRoutes = require('./routes/follow_route.js');
+const createPostRoutes = require('./routes/post_creation.js');
+
 
 dotenv.config();
 const PORT = 8080;
@@ -24,11 +29,14 @@ app.use(cors({
 
 // routes, /api' connects to the vite config, do not remove
 app.use('/api',accountCreation); // signup, 
-app.use('/api',userAuthenticationRoutes); // login
+app.use('/api',loginRoutes); // login
 app.use(spotifyRoutes);
-app.use(userAuthenticationRoutes);
-app.use(defaultRoute);
+app.use(loginRoutes);
+app.use(loadFeedRoutes);
+app.use(followUserRoutes);
+app.use(createPostRoutes);
 
+app.use(defaultRoute);
 app.use(invalidRoutes); // THIS HAS TO STAY LAST
 
 // database connection
