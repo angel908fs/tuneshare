@@ -122,6 +122,9 @@ router.get('/search', async (req, res) => {
     const tracks = response.data.tracks.items.map(track => ({
       id: track.id,
       name: track.name,
+      artists: track.artists.name,
+      external_urls: track.external_urls,
+      preview_url: track.preview_url,
     }));
 
     res.json(tracks);
@@ -136,5 +139,88 @@ router.get('/search', async (req, res) => {
     }
   }
 });
+
+// Playback Controls
+router.post('/play', async (req, res) => {
+  const accessToken = process.env.ACCESSTOKEN;
+
+  if (!accessToken) {
+    return res.status(401).send('Access token not available. Please log in.');
+  }
+
+  try {
+    await axios.put('https://api.spotify.com/v1/me/player/play', {}, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    });
+    res.send('Playback started');
+  } catch (error) {
+    console.error('Error starting playback:', error);
+    res.status(500).send('Error starting playback');
+  }
+});
+
+router.post('/pause', async (req, res) => {
+  const accessToken = process.env.ACCESSTOKEN;
+
+  if (!accessToken) {
+    return res.status(401).send('Access token not available. Please log in.');
+  }
+
+  try {
+    await axios.put('https://api.spotify.com/v1/me/player/pause', {}, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    });
+    res.send('Playback paused');
+  } catch (error) {
+    console.error('Error pausing playback:', error);
+    res.status(500).send('Error pausing playback');
+  }
+});
+
+router.post('/next', async (req, res) => {
+  const accessToken = process.env.ACCESSTOKEN;
+
+  if (!accessToken) {
+    return res.status(401).send('Access token not available. Please log in.');
+  }
+
+  try {
+    await axios.post('https://api.spotify.com/v1/me/player/next', {}, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    });
+    res.send('Skipped to next track');
+  } catch (error) {
+    console.error('Error skipping to next track:', error);
+    res.status(500).send('Error skipping to next track');
+  }
+});
+
+router.post('/previous', async (req, res) => {
+  const accessToken = process.env.ACCESSTOKEN;
+
+  if (!accessToken) {
+    return res.status(401).send('Access token not available. Please log in.');
+  }
+
+  try {
+    await axios.post('https://api.spotify.com/v1/me/player/previous', {}, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    });
+    res.send('Skipped to previous track');
+  } catch (error) {
+    console.error('Error skipping to previous track:', error);
+    res.status(500).send('Error skipping to previous track');
+  }
+});
+
+//function that utilizes all of the control 
 
 module.exports = router;
