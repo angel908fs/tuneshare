@@ -13,7 +13,7 @@ const spotifyRoutes = require('./routes/spotify_routes.js'); // import spotify r
 const loadFeedRoutes = require('./routes/feed.js');
 const followUserRoutes = require('./routes/follow_route.js');
 const createPostRoutes = require('./routes/post_creation.js');
-
+const profileRoutes = require('./routes/profile.js');
 
 dotenv.config();
 const PORT = 8080;
@@ -35,6 +35,7 @@ app.use(loginRoutes);
 app.use(loadFeedRoutes);
 app.use(followUserRoutes);
 app.use(createPostRoutes);
+app.use(profileRoutes)l
 
 app.use(defaultRoute);
 app.use(invalidRoutes); // THIS HAS TO STAY LAST
