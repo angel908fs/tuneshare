@@ -16,7 +16,7 @@ const spotifyApi = new SpotifyWebApi({ // initialize Spotify with credentials
 // paths are taken only when using backend server (localhost:8080)
 // Route to authenticate user via Spotify
 router.get('/spotifylogin', function(req, res) { 
-  console.log("Redirecting to Spotify...");
+  // console.log("Redirecting to Spotify...");
   const spotifyAuthURL = 'https://accounts.spotify.com/authorize?' +  
     querystring.stringify({ //get request that authenticates user by logging into spotify account
       response_type: 'code', 
@@ -24,11 +24,15 @@ router.get('/spotifylogin', function(req, res) {
       redirect_uri: process.env.REDIRECTURI
     });
     
-  res.redirect(spotifyAuthURL); // after taking path, redirected to spotify login
+  return res.redirect(spotifyAuthURL); // after taking path, redirected to spotify login
 });
 
 router.get('/refreshtoken', async function(req,res){
   const refresh_token = req.query.refresh_token;
+
+  if (!refresh_token) {
+    return res.status(400).send({ success: false, message: 'Refresh token is required.' });
+  }
   
   try{
   const response = await axios({
@@ -45,11 +49,11 @@ router.get('/refreshtoken', async function(req,res){
   });
 
   if(response.status === 200){
-    res.send("Refresh token had been updated"); //since there is no new refresh token in the response data there is no need to update env var
+    return res.status(200).send({success: true, message: "Token up to date"}); //since there is no new refresh token in the response data there is no need to update env var
   } 
 }catch(error){
-    console.error('Error when refreshing token: ', error); //if theres an error give error in server response
-    res.status(500).send({error: 'Failed to refresh token' });
+    // console.error('Error when refreshing token: ', error); //if theres an error give error in server response
+    return res.status(500).send({success: false, message: 'Failed to refresh token', error: error.message });
   }
 });
 
@@ -58,7 +62,7 @@ router.get("/callback", async function(req, res){
   const authCode = req.query.code;
 
   if (!authCode) {
-    return res.send("Authorization code not received.");// if no response after redirect to spotify, then give error msg
+    return res.status(400).send({success: false, message: "Authorization code not received."});// if no response after redirect to spotify, then give error msg
   }
 
   // Exchange the authorization code for an access token
@@ -86,11 +90,11 @@ router.get("/callback", async function(req, res){
     process.env.REFRESHTOKEN = refresh_token;
 
     // Respond to the user
-    res.send("Tokens have been received and stored.");
+    return res.status(201).send({success: true, message:"Tokens have been received and stored."});
     
   } catch (error) {
-    console.error("Error exchanging code for tokens: ", error);
-    res.send("An error occurred while exchanging tokens.");
+    // console.error("Error exchanging code for tokens: ", error);
+    return res.status(500).send({success: true, message: "An error occurred while exchanging tokens."});
   }
 });
 
@@ -99,11 +103,11 @@ router.get('/search', async (req, res) => {
   const accessToken = process.env.ACCESSTOKEN;
 
   if (!query) {
-    return res.status(400).send('Query parameter "q" is required.');
+    return res.status(400).send({success: false, message: 'Query parameter "q" is required.'});
   }
   
   if (!accessToken) {
-    return res.status(401).send('Access token not available. Please log in.');
+    return res.status(401).send({success: false, message: 'Access token not available. Please log in.'});
   }
 
   try {
@@ -124,15 +128,15 @@ router.get('/search', async (req, res) => {
       name: track.name,
     }));
 
-    res.json(tracks);
+    return res.status(200).send({success: true, message: "found some tracks", data: tracks});
   } catch (error) {
-    console.error('Error searching tracks:', error);
+    // console.error('Error searching tracks:', error);
     
     // Handle token expiration
     if (error.response && error.response.status === 401) {
-      res.status(401).send('Access token expired. Please log in again.');
+      return res.status(401).send({success: false, message: 'Access token expired. Please log in again.'});
     } else {
-      res.status(500).send('Error searching tracks');
+      return res.status(500).send({success: false, message: 'Error searching tracks', error: error.message});
     }
   }
 });

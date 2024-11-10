@@ -25,16 +25,14 @@ const SignUpPage = () => {
 				});
 
 				// Log response details for debugging
-				console.log("Response data:", res.data);
-
-				return res.data;
+				return res.status(200).send({success:true, message: "Signup Successful"})
 			} catch (error) {
 				console.error("Signup error:", error);
 				// Throw a specific error message
 				throw new Error(error.response?.data?.error || "Server error");
 			}
 		},
-		onSuccess: (data) => {
+		onSuccess: () => {
 			toast.success("Account created successfully!");
 		},
 		onError: (error) => {
