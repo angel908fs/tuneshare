@@ -48,8 +48,7 @@ router.get('/refreshtoken', async function(req,res){
     res.send("Refresh token had been updated"); //since there is no new refresh token in the response data there is no need to update env var
   } 
 }catch(error){
-    console.error('Error when refreshing token: ', error); //if theres an error give error in server response
-    res.status(500).send({error: 'Failed to refresh token' });
+    return res.status(500).send({success: false, error: 'Failed to refresh token' });//if theres an error give error in server response
   }
 });
 
@@ -89,8 +88,7 @@ router.get("/callback", async function(req, res){
     res.send("Tokens have been received and stored.");
     
   } catch (error) {
-    console.error("Error exchanging code for tokens: ", error);
-    res.send("An error occurred while exchanging tokens.");
+    return res.send({success: false, message: "An error occurred while exchanging tokens.", error: error.message});
   }
 });
 
@@ -99,11 +97,11 @@ router.get('/search', async (req, res) => {
   const accessToken = process.env.ACCESSTOKEN;
 
   if (!query) {
-    return res.status(400).send('Query parameter "q" is required.');
+    return res.status(400).send({success: false, message: 'Query parameter "q" is required.'});
   }
   
   if (!accessToken) {
-    return res.status(401).send('Access token not available. Please log in.');
+    return res.status(401).send({success: false, message: 'Access token not available. Please log in.'});
   }
 
   try {
@@ -133,9 +131,9 @@ router.get('/search', async (req, res) => {
     
     // Handle token expiration
     if (error.response && error.response.status === 401) {
-      res.status(401).send('Access token expired. Please log in again.');
+      return res.status(401).send({success: false, message: 'Access token expired. Please log in again.'});
     } else {
-      res.status(500).send('Error searching tracks');
+      return res.status(500).send({success: false, message: 'Error searching tracks'});
     }
   }
 });
@@ -145,7 +143,7 @@ router.post('/play', async (req, res) => {
   const accessToken = process.env.ACCESSTOKEN;
 
   if (!accessToken) {
-    return res.status(401).send('Access token not available. Please log in.');
+    return res.status(401).send({success: false, message:'Access token not available. Please log in.'});
   }
 
   try {
@@ -156,8 +154,7 @@ router.post('/play', async (req, res) => {
     });
     res.send('Playback started');
   } catch (error) {
-    console.error('Error starting playback:', error);
-    res.status(500).send('Error starting playback');
+    return res.status(500).send({success: false, message: 'Error starting playback', error: error.message});
   }
 });
 
@@ -165,7 +162,7 @@ router.post('/pause', async (req, res) => {
   const accessToken = process.env.ACCESSTOKEN;
 
   if (!accessToken) {
-    return res.status(401).send('Access token not available. Please log in.');
+    return res.status(401).send({success: false, message: 'Access token not available. Please log in.'});
   }
 
   try {
@@ -176,8 +173,7 @@ router.post('/pause', async (req, res) => {
     });
     res.send('Playback paused');
   } catch (error) {
-    console.error('Error pausing playback:', error);
-    res.status(500).send('Error pausing playback');
+      return res.status(500).send({success: false, message: 'Error pausing playback', error: error.message});
   }
 });
 
@@ -185,7 +181,7 @@ router.post('/next', async (req, res) => {
   const accessToken = process.env.ACCESSTOKEN;
 
   if (!accessToken) {
-    return res.status(401).send('Access token not available. Please log in.');
+    return res.status(401).send({success: false, message: 'Access token not available. Please log in.', error: error.message});
   }
 
   try {
@@ -196,8 +192,7 @@ router.post('/next', async (req, res) => {
     });
     res.send('Skipped to next track');
   } catch (error) {
-    console.error('Error skipping to next track:', error);
-    res.status(500).send('Error skipping to next track');
+    return res.status(500).send({success: false, message: 'Error skipping to next track', error: error.message});
   }
 });
 
@@ -205,7 +200,7 @@ router.post('/previous', async (req, res) => {
   const accessToken = process.env.ACCESSTOKEN;
 
   if (!accessToken) {
-    return res.status(401).send('Access token not available. Please log in.');
+    return res.status(401).send({success: false, message: 'Access token not available. Please log in.'});
   }
 
   try {
@@ -216,8 +211,7 @@ router.post('/previous', async (req, res) => {
     });
     res.send('Skipped to previous track');
   } catch (error) {
-    console.error('Error skipping to previous track:', error);
-    res.status(500).send('Error skipping to previous track');
+    return res.status(500).send({success: false, message: 'Error skipping to previous track', error: error.message});
   }
 });
 
