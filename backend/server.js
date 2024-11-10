@@ -16,7 +16,7 @@ const followUserRoutes = require('./routes/follow_route.js');
 const createPostRoutes = require('./routes/post_creation.js');
 const profileRoutes = require('./routes/profile.js');
 
-const authRoutes = require('./routes/getMe.js');
+const authRoutes = require('./routes/getMe_route.js');
 
 dotenv.config();
 const PORT = 8080;
