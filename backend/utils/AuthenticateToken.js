@@ -11,18 +11,18 @@ export const authToken = async (req, res, next) => {
         }
         const decoded = jwt.verify(token.process.env.JWT_SECRET);// decodes and verifes the token
         if(!decoded){ 
-            return res.status(401).send({error: 'Unauthorized: Invalid Token'});
+            return res.status(401).send({success: false, message: 'Unauthorized: Invalid Token'});
         }
         const user = await User.findById(decoded.userId).select("-password");
         //retrieves the user data from database
          // excludes showing password
 
         if(!user){ // User check
-            return res.status(404).send({error: 'User not found'});
+            return res.status(404).send({success: false, message: 'User not found'});
         }
         req.user =user; // attches the user data to the req object
         next();
     }catch(error){
-        return res.status(500).send({error: 'Internal Server Error, In AuthenticateToken'});
+        return res.status(500).send({success:false, message: 'Internal Server Error, In AuthenticateToken'});
     }
 };
