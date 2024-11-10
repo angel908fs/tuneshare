@@ -47,12 +47,12 @@ describe("POST /login", () => {
 
     it("should return 200 for successful authentication", async () => {
         userEmailExists.mockResolvedValue(true);
-        User.findOne.mockResolvedValue({_id: "userid", email: "test@test.com", password: "hashedPassword123" });
+        User.findOne.mockResolvedValue({user_id: "userid", email: "test@test.com", password: "hashedPassword123" });
         bcrypt.compare.mockResolvedValue(true); // Simulate successful password match
 
         const res = await request(app).post("/login").send({ email: "test@test.com", password: "password123", userID: 'userID' });
 
-        expect(generateTokenAndSetCookie).toHaveBeenCalledWith('userid',expect.any(Object));
+        expect(generateTokenAndSetCookie).toHaveBeenCalledWith({user_id: "userid", email: "test@test.com"},expect.any(Object));
         expect(res.statusCode).toBe(200);
         expect(res.body).toEqual({ success: true, message: "user has been authenticated" });
         

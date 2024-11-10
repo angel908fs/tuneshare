@@ -30,7 +30,7 @@ const LoginPage = () => {
 				throw new Error(error.response?.data?.error || "Server error");
 			}
 		},
-		onSuccess: (data) =>{
+		onSuccess: () =>{
 			toast.success("Logged In!");
 		},
 		onError: (error) => {

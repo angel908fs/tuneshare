@@ -7,11 +7,10 @@ const router = express.Router();
 // fetch and return the currently authenticated user's information
 router.get('/me', authToken,async (req, res) => {
     try{
-        const user = await User.findById(req.user._id).select("-password");
-        res.status(200).json(user);
+        await User.findById(req.user._id).select("-password");
+        res.status(200).send({success: true, message: "User Authenticated!"});
     }catch(error){
-        console.log("Error in getMe", error.message);
-        res.status(500).send({error: 'Internal Server Error'});
+        res.status(500).send({success:false, message: 'could not authenticate'});
     }
 });
 export default router;

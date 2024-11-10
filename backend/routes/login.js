@@ -21,7 +21,7 @@ router.post("/login", async (req, res) => {
             const passwordMatches = await bcrypt.compare(req.body.password, user.password);
             if (req.body.email === user.email && passwordMatches) {
                 
-                generateTokenAndSetCookie(user._id,res);
+                generateTokenAndSetCookie({user_id: 'userid', email:user.email},res);
 
                 return res.status(200).send({success: true, message: "user has been authenticated" });
             } else {
