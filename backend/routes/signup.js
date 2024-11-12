@@ -5,7 +5,7 @@ const { generateTokenAndSetCookie } = require("../utils/generateToken.js");
 const bcrypt = require("bcryptjs");
 
 // create user
-router.post("/", async (req, res) => {
+router.post("/signup", async (req, res) => {
     try {
         if (!req.body.email || !req.body.password || !req.body.username) {
             return res.status(400).send({success: false, message: "Missing required parameters" });
