@@ -9,11 +9,10 @@ export const authToken = async (req, res, next) => {
         if(!token){ // if no token is found 401
             return res.status(401).send({error: 'Unauthorized: No Token Provided'});
         }
-        const decoded = jwt.verify(token.process.env.JWT_SECRET);// decodes and verifes the token
-        if(!decoded){ 
-            return res.status(401).send({success: false, message: 'Unauthorized: Invalid Token'});
-        }
-        const user = await User.findById(decoded.userId).select("-password");
+        const decoded = jwt.verify(token,process.env.JWT_SECRET);// decodes and verifes the token
+        const user_id = decoded.user_id;
+
+        const user = await User.findOne({user_id}).select('-password');
         //retrieves the user data from database
          // excludes showing password
 

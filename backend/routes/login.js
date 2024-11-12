@@ -5,7 +5,7 @@ const User = require('../models/user.js');
 const bcrypt = require('bcryptjs');
 const { generateTokenAndSetCookie } = require("../utils/generateToken.js");
 
-router.post("/login", async (req, res) => {
+router.post("/", async (req, res) => {
     try {
         if (!req.body.email || !req.body.password) {
             return res.status(400).send({success: false, message: "Missing required parameters" });

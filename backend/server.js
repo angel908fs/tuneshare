@@ -33,8 +33,8 @@ app.use(cors({
 
 // routes, /api' connects to the vite config, do not remove
 app.use('/api',authRoutes); // checking if user is authenticated
-app.use('/api',accountCreation); // signup, 
-app.use('/api',loginRoutes); // login
+app.use('/api/signup',accountCreation); // signup, 
+app.use('/api/login',loginRoutes); // login
 app.use('/api/logout',LogOutRoute);
 
 app.use(spotifyRoutes);
