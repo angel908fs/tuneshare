@@ -5,8 +5,28 @@ import { IoNotifications } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { RiLogoutCircleLine } from "react-icons/ri";
+import { useMutation } from '@tanstack/react-query';
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const Sidebar = () => {
+	const { mutate:logout} = useMutation({
+		mutationFn: async() => {
+			try{
+				const res = await axios.post('/api/logout',{}, { withCredentials: true });
+				return res.data;
+
+			}catch (error){
+				throw new Error(error.response?.data?.error || 'Something went wrong');
+			}
+		},
+		onSuccess: () => {
+			toast.success('Logout Successful');
+		},
+		onError: () => {
+			toast.error('logout failed');
+		},
+	});
 	const data = { // this is hardcoded, will remove later
 		fullName: "John Doe",
 		username: "johndoe",
@@ -64,7 +84,12 @@ const Sidebar = () => {
 								<p className='text-white font-bold text-sm w-20 truncate'>{data?.fullName}</p>
 								<p className='text-slate-500 text-sm'>@{data?.username}</p>
 							</div>
-							<RiLogoutCircleLine className='w-5 h-5 cursor-pointer' />
+							<RiLogoutCircleLine className='w-5 h-5 cursor-pointer' 
+							onClick={(e) => {
+								e.preventDefault();
+								logout();
+							}}
+							/>
 						</div>
 					</Link>
 				)}
