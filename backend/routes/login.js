@@ -3,6 +3,7 @@ let router = express.Router();
 const { userEmailExists } = require("../utils/user.js");
 const User = require('../models/user.js');
 const bcrypt = require('bcryptjs');
+const { generateTokenAndSetCookie } = require("../utils/generateToken.js");
 
 router.post("/login", async (req, res) => {
     try {
@@ -19,6 +20,9 @@ router.post("/login", async (req, res) => {
 
             const passwordMatches = await bcrypt.compare(req.body.password, user.password);
             if (req.body.email === user.email && passwordMatches) {
+                
+                generateTokenAndSetCookie({user_id: 'userid', email:user.email},res);
+
                 return res.status(200).send({success: true, message: "user has been authenticated" });
             } else {
                 return res.status(401).send({success: false, message: "Invalid email or password" });
@@ -26,6 +30,7 @@ router.post("/login", async (req, res) => {
         } else {
             return res.status(404).send({success: false, message: "User does not exist" });
         }
+        
     } catch (err) {
         return res.status(500).send({success: false, message: "Server error" });
     }

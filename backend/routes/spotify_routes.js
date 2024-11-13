@@ -52,7 +52,6 @@ router.get('/refreshtoken', async function(req,res){
     return res.status(200).send({success: true, message: "Token up to date"}); //since there is no new refresh token in the response data there is no need to update env var
   } 
 }catch(error){
-    // console.error('Error when refreshing token: ', error); //if theres an error give error in server response
     return res.status(500).send({success: false, message: 'Failed to refresh token', error: error.message });
   }
 });
@@ -93,8 +92,7 @@ router.get("/callback", async function(req, res){
     return res.status(201).send({success: true, message:"Tokens have been received and stored."});
     
   } catch (error) {
-    // console.error("Error exchanging code for tokens: ", error);
-    return res.status(500).send({success: true, message: "An error occurred while exchanging tokens."});
+    return res.status(500).send({success: false, message: "An error occurred while exchanging tokens.", error: error.message});
   }
 });
 
@@ -126,6 +124,9 @@ router.get('/search', async (req, res) => {
     const tracks = response.data.tracks.items.map(track => ({
       id: track.id,
       name: track.name,
+      artists: track.artists.name,
+      external_urls: track.external_urls,
+      preview_url: track.preview_url,
     }));
 
     return res.status(200).send({success: true, message: "found some tracks", data: tracks});
@@ -137,8 +138,88 @@ router.get('/search', async (req, res) => {
       return res.status(401).send({success: false, message: 'Access token expired. Please log in again.'});
     } else {
       return res.status(500).send({success: false, message: 'Error searching tracks', error: error.message});
+
     }
   }
 });
+
+// Playback Controls
+router.post('/play', async (req, res) => {
+  const accessToken = process.env.ACCESSTOKEN;
+
+  if (!accessToken) {
+    return res.status(401).send({success: false, message:'Access token not available. Please log in.'});
+  }
+
+  try {
+    await axios.put('https://api.spotify.com/v1/me/player/play', {}, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    });
+    res.send('Playback started');
+  } catch (error) {
+    return res.status(500).send({success: false, message: 'Error starting playback', error: error.message});
+  }
+});
+
+router.post('/pause', async (req, res) => {
+  const accessToken = process.env.ACCESSTOKEN;
+
+  if (!accessToken) {
+    return res.status(401).send({success: false, message: 'Access token not available. Please log in.'});
+  }
+
+  try {
+    await axios.put('https://api.spotify.com/v1/me/player/pause', {}, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    });
+    res.send('Playback paused');
+  } catch (error) {
+      return res.status(500).send({success: false, message: 'Error pausing playback', error: error.message});
+  }
+});
+
+router.post('/next', async (req, res) => {
+  const accessToken = process.env.ACCESSTOKEN;
+
+  if (!accessToken) {
+    return res.status(401).send({success: false, message: 'Access token not available. Please log in.', error: error.message});
+  }
+
+  try {
+    await axios.post('https://api.spotify.com/v1/me/player/next', {}, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    });
+    res.send('Skipped to next track');
+  } catch (error) {
+    return res.status(500).send({success: false, message: 'Error skipping to next track', error: error.message});
+  }
+});
+
+router.post('/previous', async (req, res) => {
+  const accessToken = process.env.ACCESSTOKEN;
+
+  if (!accessToken) {
+    return res.status(401).send({success: false, message: 'Access token not available. Please log in.'});
+  }
+
+  try {
+    await axios.post('https://api.spotify.com/v1/me/player/previous', {}, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    });
+    res.send('Skipped to previous track');
+  } catch (error) {
+    return res.status(500).send({success: false, message: 'Error skipping to previous track', error: error.message});
+  }
+});
+
+//function that utilizes all of the control 
 
 module.exports = router;

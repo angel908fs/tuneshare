@@ -8,8 +8,9 @@ const connectToDB = require('./config/db.js');
 const loginRoutes = require('./routes/login.js');
 const defaultRoute = require('./routes/default_route.js');
 const invalidRoutes = require('./routes/invalid_routes.js');
-const accountCreation = require('./routes/signup.js')
+const accountCreation = require('./routes/signup.js');
 const spotifyRoutes = require('./routes/spotify_routes.js'); // import spotify routes
+const LogOutRoute = require('./routes/logout.js');
 const loadFeedRoutes = require('./routes/feed.js');
 const followUserRoutes = require('./routes/follow_route.js');
 const createPostRoutes = require('./routes/post_creation.js');
@@ -24,12 +25,14 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors({
-    origin: 'http://localhost:3000'  // Frontend URL
+    origin: 'http://localhost:3000',  // Frontend URL
+    credentials:true,
 }));
 
 // routes, /api' connects to the vite config, do not remove
 app.use('/api',accountCreation); // signup, 
 app.use('/api',loginRoutes); // login
+app.use('/api/logout',LogOutRoute);
 app.use(spotifyRoutes);
 app.use(loginRoutes);
 app.use(loadFeedRoutes);
