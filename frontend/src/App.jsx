@@ -22,6 +22,7 @@ function App() {
         <Route path='/signup' element = {<SignUpPage />} />
         <Route path='/notifications' element = {<NotificationPage />} />
         <Route path ='/profile/:username' element={<ProfilePage />} />
+        {}
       </Routes>
       <RightPanel />
       <Toaster />
