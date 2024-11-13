@@ -11,7 +11,7 @@ import axios from "axios";
 
 const LoginPage = () => {
 	const [formData, setFormData] = useState({
-		username: "",
+		email: "",
 		password: "",
 	});
 	
@@ -21,15 +21,16 @@ const LoginPage = () => {
 				const res = await axios.post("/api/login", { // needs api for vite config
 					email,
 					password,
+				},
+				{
+				withCredentials:true
 				});
-				console.log("Response data:",res.data);
 				return res.data;
 			}catch (error) {
-				console.error("Login error:",error);
 				throw new Error(error.response?.data?.error || "Server error");
 			}
 		},
-		onSuccess: (data) =>{
+		onSuccess: () =>{
 			toast.success("Logged In!");
 		},
 		onError: (error) => {
