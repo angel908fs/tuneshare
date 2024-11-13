@@ -48,7 +48,7 @@ router.get('/refreshtoken', async function(req,res){
     res.send("Refresh token had been updated"); //since there is no new refresh token in the response data there is no need to update env var
   } 
 }catch(error){
-  return res.status(500).send({success: false, message: 'Failed to refresh token', error: error.message });
+    return res.status(500).send({success: false, message: 'Failed to refresh token', error: error.message });
   }
 });
 
