@@ -14,7 +14,7 @@ import LoadingSpinner from './components/common/LoadingSpinner';
 
 // can't get rid of sidebar and right panel without having authoried user
 function App() {
-  const {data:authUser,isLoading} = useQuery({
+  const {data: authUser,isLoading} = useQuery({
     queryKey: ['authUser'],
     queryFn: async() => {
       try{
@@ -29,7 +29,6 @@ function App() {
         throw new Error(error);
       }
     },
-    retry: false,
   });
 if(isLoading){
   return(

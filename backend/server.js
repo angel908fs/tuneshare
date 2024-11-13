@@ -17,6 +17,7 @@ const createPostRoutes = require('./routes/post_creation.js');
 const profileRoutes = require('./routes/profile.js');
 
 const authRoutes = require('./routes/getMe_route.js');
+const cookieParser = require('cookie-parser');
 
 dotenv.config();
 const PORT = 8080;
@@ -30,6 +31,7 @@ app.use(cors({
     origin: 'http://localhost:3000',  // Frontend URL
     credentials:true,
 }));
+app.use(cookieParser());
 
 // routes, /api' connects to the vite config, do not remove
 app.use('/api',authRoutes); // getme

@@ -13,7 +13,7 @@ router.get('/me', authToken, async (req, res) => {
             return res.status(404).send({success: false, message: "User not found"});
         }
         console.log("User found:",user);
-        res.status(200).send({success: true, message: "User Authenticated!",user: req.user});
+        res.status(200).send({success: true, message: "User Authenticated!",user: req.user.user_id});
     }catch(error){
         
         res.status(500).send({success:false, message: 'could not authenticate'});

@@ -1,10 +1,10 @@
-
-
 const request = require('supertest');
 const express = require('express');
 const { authToken } = require('../utils/AuthenticateToken'); // Mock this
 const User = require('../models/user'); // Mock this
 const getMeRouter = require('../routes/getMe_route'); // Adjust path if needed
+const { ConnectionCheckedInEvent } = require('mongodb');
+const cookieParser = require('cookie-parser');
 
 jest.mock('../utils/AuthenticateToken'); // Mocking the authToken middleware
 jest.mock('../models/user'); // Mocking the User model
@@ -13,6 +13,7 @@ jest.mock('../models/user'); // Mocking the User model
 const app = express();
 app.use(express.json());
 app.use('/me', getMeRouter);
+app.use(cookieParser());
 
 describe('GET /me', () => {
     beforeEach(() => {
