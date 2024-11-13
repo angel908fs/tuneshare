@@ -111,7 +111,7 @@ const LoginPage = () => {
 							value={formData.password}
 						/>
 					</label>
-					<button className='btn rounded-full btn-primary text-white'>
+					<button className='btn rounded-full btn-primary text-gray'>
 							{isPending ? "Loading..." : "Login"}
 						</button>
 					{isError && <p className='text-red-500'>Something went wrong</p>}
