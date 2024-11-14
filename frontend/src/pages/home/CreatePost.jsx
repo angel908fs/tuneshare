@@ -72,7 +72,7 @@ const CreatePost = () => {
           				// accept = 'images' will make it only be able to insert images
           			hidden ref={imgRef} onChange={handleImgChange} />
 					
-					<button className='btn btn-primary rounded-full btn-sm text-white px-4'>
+					<button className='btn btn-primary rounded-full btn-sm text-gray px-4'>
 						{isPending ? "Posting..." : "Post"}
 					</button>
 				</div>

@@ -28,6 +28,8 @@ module.exports = {
       "light",
       "cyberpunk",
       "luxury",
+      "dark",
+      "dim",
       {
         black:{
           ...daisyUIThemes["black"],
@@ -39,6 +41,11 @@ module.exports = {
           ...daisyUIThemes["dark"],
           primary: "rgb(226, 21, 18)",
           secondary: "rgb(46,46,46)",
+        },
+        blueish: {
+            ...daisyUIThemes["dark"],
+            primary: "#79C0FF", // Soft blue shade for primary elements
+            secondary: "#1A73E8", // Slightly deeper blue for secondary elements
         }
       },
     ],
