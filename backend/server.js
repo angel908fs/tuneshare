@@ -33,12 +33,12 @@ app.use(cors({
 app.use('/api',accountCreation); // signup, 
 app.use('/api',loginRoutes); // login
 app.use('/api/logout',LogOutRoute);
-app.use(spotifyRoutes);
-app.use(loginRoutes);
-app.use(loadFeedRoutes);
-app.use(followUserRoutes);
-app.use(createPostRoutes);
-app.use(profileRoutes);
+app.use('/api', spotifyRoutes);
+app.use('/api', loginRoutes);
+app.use('/api', loadFeedRoutes);
+app.use('/api', followUserRoutes);
+app.use('/api', createPostRoutes);
+app.use('/api', profileRoutes);
 
 app.use(defaultRoute);
 app.use(invalidRoutes); // THIS HAS TO STAY LAST
