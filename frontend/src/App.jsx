@@ -43,15 +43,15 @@ function App() {
   return (
     <div className='flex max-w-6xl mx-auto'>
       {/*common component, bc its not wrapped with routes */}
-      <Sidebar /> 
+      {authUser && <Sidebar /> }
       <Routes> // different pages 
-        <Route path='/' element = {<HomePage />} />
-        <Route path='/login' element = {<LoginPage />} />
-        <Route path='/signup' element = {<SignUpPage />} />
-        <Route path='/notifications' element = {<NotificationPage />} />
-        <Route path ='/profile/:username' element={<ProfilePage />} />
+        <Route path='/' element = {authUser ? <HomePage /> : <Navigate to='/login'/>} />
+        <Route path='/login' element = {!authUser ? <LoginPage /> : <Navigate to='/'/>}  />
+        <Route path='/signup' element = {!authUser ? <SignUpPage /> : <Navigate to='/' />} />
+        <Route path='/notifications' element = {authUser ? <NotificationPage /> : <Navigate to='/'/>} />
+        <Route path ='/profile/:username' element={authUser ? <ProfilePage />: <Navigate to='/login'/>} />
       </Routes>
-      <RightPanel />
+      {authUser && <RightPanel />}
       <Toaster />
     </div>
   );
