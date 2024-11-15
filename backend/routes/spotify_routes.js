@@ -127,6 +127,7 @@ router.get('/search', async (req, res) => {
       artists: track.artists.name,
       external_urls: track.external_urls,
       preview_url: track.preview_url,
+      image: track.album.images[0]
     }));
 
     return res.status(200).send({success: true, message: "found some tracks", data: tracks});
