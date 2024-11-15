@@ -100,7 +100,7 @@ const SignUpPage = () => {
 					</label>
 					<button
 						type="submit"
-						className="btn rounded-full btn-primary text-white"
+						className="btn rounded-full btn-primary text-gray"
 						disabled={isPending}
 					>
 						{isPending ? "Loading..." : "Sign Up"}
