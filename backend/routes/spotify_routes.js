@@ -124,11 +124,11 @@ router.get('/search', async (req, res) => {
     const tracks = response.data.tracks.items.map(track => ({
       id: track.id,
       name: track.name,
-      artists: track.artists.name,
+      artists: track.artists.map(artist => artist.name), // Map artist objects to their names
       external_urls: track.external_urls,
       preview_url: track.preview_url,
     }));
-
+    
     return res.status(200).send({success: true, message: "found some tracks", data: tracks});
   } catch (error) {
     // console.error('Error searching tracks:', error);
