@@ -43,12 +43,21 @@ describe('Spotify API Routes', () => {
 
   // test /callback route with an error during token exchange
   it('should handle errors during token exchange on /callback', async () => {
+    // Mock Axios to reject with an error
     axios.mockRejectedValueOnce(new Error("Token exchange error"));
-
+  
+    // Make the request to the /callback route
     const response = await request(app).get('/callback?code=mock_auth_code');
+  
+    // Assert status and response
     expect(response.status).toBe(500);
-    expect(response.body).toEqual({ success: true, message: "An error occurred while exchanging tokens." });
+    expect(response.body).toEqual({
+      success: false,
+      message: "An error occurred while exchanging tokens.",
+      error: "Token exchange error"
+    });
   });
+  
 
   // test /refreshtoken route without a refresh token
   it('should return 400 if no refresh token is provided on /refreshtoken', async () => {
@@ -93,28 +102,58 @@ describe('Spotify API Routes', () => {
   // test /search route with a valid query and access token
   it('should return search results on /search', async () => {
     process.env.ACCESSTOKEN = 'mock_access_token';
+  
+    // Mock the Spotify API response
     axios.get.mockResolvedValueOnce({
       data: {
         tracks: {
           items: [
-            { id: '1', name: 'Track 1' },
-            { id: '2', name: 'Track 2' }
-          ]
-        }
-      }
+            {
+              id: '1',
+              name: 'Track 1',
+              artists: [{ name: 'Artist 1' }],
+              external_urls: { spotify: 'https://spotify.com/track1' },
+              preview_url: 'https://preview.com/track1.mp3',
+            },
+            {
+              id: '2',
+              name: 'Track 2',
+              artists: [{ name: 'Artist 2' }],
+              external_urls: { spotify: 'https://spotify.com/track2' },
+              preview_url: 'https://preview.com/track2.mp3',
+            },
+          ],
+        },
+      },
     });
-
+  
+    // Send the request to the /search route
     const response = await request(app).get('/search?q=test');
+  
+    // Assert the response
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
       success: true,
       message: "found some tracks",
       data: [
-        { id: '1', name: 'Track 1' },
-        { id: '2', name: 'Track 2' }
-      ]
+        {
+          id: '1',
+          name: 'Track 1',
+          artists: ['Artist 1'], // Array of artist names
+          external_urls: { spotify: 'https://spotify.com/track1' },
+          preview_url: 'https://preview.com/track1.mp3',
+        },
+        {
+          id: '2',
+          name: 'Track 2',
+          artists: ['Artist 2'], // Array of artist names
+          external_urls: { spotify: 'https://spotify.com/track2' },
+          preview_url: 'https://preview.com/track2.mp3',
+        },
+      ],
     });
   });
+  
 
   // test /search route with an expired access token
   it('should handle expired access token on /search', async () => {
