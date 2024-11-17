@@ -26,7 +26,6 @@ router.post("/create-post", async (req, res) =>
         }
 
         const result = await createPost(userID, songLink, content);
-        await 
 
         if (result.success)
         {
