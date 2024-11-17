@@ -26,7 +26,7 @@ async function createPost(userID, songLink, postContent)
     }
     catch (error)
     {
-        // console.error("Post creation failure: ", error);
+        console.error("Post creation failure: ", error);
         return { success: false, message: "Could not create the post. Please try again later.", error: error.message};
     }
 }
