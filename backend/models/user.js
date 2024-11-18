@@ -12,14 +12,14 @@ const userSchema = new mongoose.Schema(
         password:{type: String, required: true},
 
         // Profile specific data
-        followers:[{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],                // The type is a mongo object (i.e. another user)
-        following:[{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
+        followers:[{type: String, ref: 'User'}],                // The type is a mongo object (i.e. another user)
+        following:[{type: String, ref: 'User'}],
         bio:{type: String, maxlength: 256},    
         
         followers_count: { type: Number, default: 0 },
         following_count: { type: Number, default: 0 },
 
-        posts:[{type: mongoose.Schema.Types.ObjectId, ref: 'Post'}],                    // A whole schema needs to be created for this seperately (export as 'Post'), but it's here for referance
+        posts:[{type: String, ref: 'Post'}],                    // A whole schema needs to be created for this seperately (export as 'Post'), but it's here for referance
         profile_picture:{type: String},                                               // This wont actually hold a picture, but maybe a URL due to DB size restraints 
     
         // API Keys
