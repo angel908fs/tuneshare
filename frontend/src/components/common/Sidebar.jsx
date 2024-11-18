@@ -25,10 +25,10 @@ const Sidebar = () => {
 		},
 		onSuccess: () => {
 			Cookies.remove("tuneshare_cookie");
-    		console.log("Cookie has been deleted");
+			console.log("Cookie has been deleted");
 			toast.success('Logout Successful');
+			console.log("Navigating to /login");
 			navigate("/login");
-
 		},
 		onError: () => {
 			toast.error('logout failed');
