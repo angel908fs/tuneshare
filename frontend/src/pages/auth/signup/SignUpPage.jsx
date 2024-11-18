@@ -27,7 +27,7 @@ const SignUpPage = () => {
 					username,
 					password,
 				});
-				if (res.status === 200) {
+				if (res.status === 201) {
 					setIsAuthenticated(true);
 					// Extract jwt token from response
 					// MUST do res.data.data cuz res.data is an object with {jwt_token: something, user_id: something}

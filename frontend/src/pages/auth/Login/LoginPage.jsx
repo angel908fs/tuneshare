@@ -61,6 +61,7 @@ const LoginPage = () => {
 
 				return res.data;
 			}catch (error) {
+				toast.error("Error during login request:", error.data.message);
 				console.error("Error during login request:", error.response || error.message);
 			}
 		},
