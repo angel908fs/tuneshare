@@ -10,8 +10,6 @@ import LeftPanel from './components/common/Sidebar';
 import RightPanel from './components/common/Rightbar';
 import {Toaster} from 'react-hot-toast' // adds flare aka notifications on doing something
 
-
-
 function App() {
   const location = useLocation();
   const hideSidebars = ['/login','/signup'].includes(location.pathname);
@@ -19,6 +17,7 @@ function App() {
 
   return (
     <div className='flex max-w-6xl mx-auto'>
+
       {!hideSidebars && <LeftPanel />}
       <Routes> // different pages 
         <Route path='/login' element = {<LoginPage />} />
@@ -30,6 +29,7 @@ function App() {
       {!hideSidebars && <RightPanel />}
       <Toaster />
     </div>
+    </QueryClientProvider>
   );
 }
 export default App;
