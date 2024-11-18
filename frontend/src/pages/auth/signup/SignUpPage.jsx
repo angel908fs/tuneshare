@@ -14,6 +14,7 @@ const SignUpPage = () => {
 		username: "",
 		password: "",
 	});
+	const[isAuthenticated,setIsAuthenticated] = useState(false);
 
 	const { mutate, isError, isPending, error } = useMutation({
 		mutationFn: async ({ email, username, password }) => {
@@ -23,9 +24,32 @@ const SignUpPage = () => {
 					username,
 					password,
 				});
+				if (res.status === 200) {
+					setIsAuthenticated(true);
+					// Extract jwt token from response
+					// MUST do res.data.data cuz res.data is an object with {jwt_token: something, user_id: something}
+					const token = res.data.data.jwt_token;
+					console.log("JWT Token:", token);
 
-				// Log response details for debugging
-				return res.status(200).send({success:true, message: "Signup Successful"})
+					// Save the token to a cookie
+					Cookies.set('tuneshare_cookie', token, {
+						expires: 30, // 30 days
+						secure: process.env.NODE_ENV === 'production',
+						sameSite: 'lax',
+					});
+					// let's get the user_id from the cookie!
+					const cookieValue = Cookies.get('tuneshare_cookie');
+					if (cookieValue) {
+						// Decode the token to access the payload
+						const decodedToken = jwtDecode(cookieValue);
+						const userId = decodedToken.user_id;
+						console.log('User ID from cookie:', userId);
+						// Now you can use userId for any react logic in this component
+						setUserID(userId);
+					} else {
+						console.log('No Token found in the cookie.');
+					}
+				}
 			} catch (error) {
 				console.error("Signup error:", error);
 				// Throw a specific error message
@@ -34,6 +58,7 @@ const SignUpPage = () => {
 		},
 		onSuccess: () => {
 			toast.success("Account created successfully!");
+			//reroute user to Login page
 		},
 		onError: (error) => {
 			toast.error(error.message);
@@ -48,7 +73,9 @@ const SignUpPage = () => {
 	const handleInputChange = (e) => {
 		setFormData({ ...formData, [e.target.name]: e.target.value });
 	};
-
+	if(isAuthenticated){
+		<Navigate to= "/" />
+	}
 	return (
 		<div className="max-w-screen-xl mx-auto flex h-screen ">
 			<div className="flex-1 hidden lg:flex items-center justify-center">

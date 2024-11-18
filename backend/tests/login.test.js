@@ -4,12 +4,12 @@ const router = require("../routes/login.js");
 const { userEmailExists } = require("../utils/user.js");
 const User = require("../models/user.js");
 const bcrypt = require("bcryptjs");
-const { generateTokenAndSetCookie } = require("../utils/generateToken.js");
+const { generateToken } = require("../utils/generateToken.js");
 
 jest.mock("../utils/user.js");
 jest.mock("../models/user.js");
 jest.mock('../utils/generateToken.js',()=>({
-    generateTokenAndSetCookie : jest.fn(),
+    generateToken : jest.fn(),
 }));
 jest.mock("bcryptjs"); // Mock bcrypt functions
 
@@ -52,7 +52,7 @@ describe("POST /login", () => {
 
         const res = await request(app).post("/login").send({ email: "test@test.com", password: "password123", userID: 'userID' });
 
-        expect(generateTokenAndSetCookie).toHaveBeenCalledWith({user_id: "userid", email: "test@test.com"},expect.any(Object));
+        expect(generateToken).toHaveBeenCalledWith(user_id,expect.any(Object));
         expect(res.statusCode).toBe(200);
         expect(res.body).toEqual({ success: true, message: "user has been authenticated" });
         
