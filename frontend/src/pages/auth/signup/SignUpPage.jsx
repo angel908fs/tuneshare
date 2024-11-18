@@ -29,12 +29,12 @@ const SignUpPage = () => {
 				});
 				if (res.status === 201) {
 					setIsAuthenticated(true);
-					// Extract jwt token from response
+					// extract jwt token from response
 					// MUST do res.data.data cuz res.data is an object with {jwt_token: something, user_id: something}
 					const token = res.data.data.jwt_token;
 					console.log("JWT Token:", token);
 
-					// Save the token to a cookie
+					// save the token to a cookie
 					Cookies.set('tuneshare_cookie', token, {
 						expires: 30, // 30 days
 						secure: process.env.NODE_ENV === 'production',
@@ -43,22 +43,21 @@ const SignUpPage = () => {
 					// let's get the user_id from the cookie!
 					const cookieValue = Cookies.get('tuneshare_cookie');
 					if (cookieValue) {
-						// Decode the token to access the payload
+						// decode the token to access the payload
 						const decodedToken = jwtDecode(cookieValue);
 						const userId = decodedToken.user_id;
 						console.log('User ID from cookie:', userId);
-						// Now you can use userId for any react logic in this component
+						// now you can use userID in this component
 						setUserID(userId);
 					} else {
 						console.log('No token found in the cookie.');
 					}
 				}
-				//Log response details for debugging
 				return res.data;
 			} catch (error) {
+				toast.error("Error signing up:\n" + error.response.data.message);
 				console.error("Signup error:", error);
-				// Throw a specific error message
-				throw new Error(error.response?.data?.error || "Server error");
+				throw new Error(error.response.data.message);
 			}
 		},
 		onSuccess: () => {
@@ -135,7 +134,7 @@ const SignUpPage = () => {
 					>
 						{isPending ? "Loading..." : "Sign Up"}
 					</button>
-					{isError && <p className="text-red-500">{error.message}</p>}
+					{/*isError && <p className="text-red-500">{error.message}</p>*/}
 				</form>
 				<div className="flex flex-col lg:w-2/3 gap-2 mt-4">
 					<p className="text-primary text-lg">Already have an account?</p>
