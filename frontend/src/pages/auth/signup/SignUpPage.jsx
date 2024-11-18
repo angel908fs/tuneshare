@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import XSvg from "../../../components/svgs/Logo";
 import { MdOutlineMail } from "react-icons/md";
@@ -14,7 +14,7 @@ const SignUpPage = () => {
 		username: "",
 		password: "",
 	});
-
+	const navigate = useNavigate();
 	const { mutate, isError, isPending, error } = useMutation({
 		mutationFn: async ({ email, username, password }) => {
 			try {
@@ -24,8 +24,8 @@ const SignUpPage = () => {
 					password,
 				});
 
-				// Log response details for debugging
-				return res.status(200).send({success:true, message: "Signup Successful"})
+				//Log response details for debugging
+				return res.data;
 			} catch (error) {
 				console.error("Signup error:", error);
 				// Throw a specific error message
@@ -33,9 +33,10 @@ const SignUpPage = () => {
 			}
 		},
 		onSuccess: () => {
-			toast.success("Account created successfully!");
+			toast.success("Account Created Successfully!");
+			navigate("/login");
 		},
-		onError: (error) => {
+		onError: () => {
 			toast.error(error.message);
 		},
 	});
@@ -43,12 +44,12 @@ const SignUpPage = () => {
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		mutate(formData);
+		
 	};
 
 	const handleInputChange = (e) => {
 		setFormData({ ...formData, [e.target.name]: e.target.value });
 	};
-
 	return (
 		<div className="max-w-screen-xl mx-auto flex h-screen ">
 			<div className="flex-1 hidden lg:flex items-center justify-center">

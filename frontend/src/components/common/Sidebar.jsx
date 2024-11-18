@@ -3,13 +3,14 @@ import XSvg from "../svgs/Logo";
 import { MdHomeFilled } from "react-icons/md";
 import { IoNotifications } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { RiLogoutCircleLine } from "react-icons/ri";
 import { useMutation } from '@tanstack/react-query';
 import axios from "axios";
 import toast from "react-hot-toast";
 
 const Sidebar = () => {
+	const navigate = useNavigate();
 	const { mutate:logout} = useMutation({
 		mutationFn: async() => {
 			try{
@@ -22,6 +23,8 @@ const Sidebar = () => {
 		},
 		onSuccess: () => {
 			toast.success('Logout Successful');
+			navigate("/login");
+
 		},
 		onError: () => {
 			toast.error('logout failed');

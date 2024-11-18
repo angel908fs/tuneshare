@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-
+import { Navigate } from "react-router-dom";
 import XSvg from "../../../components/svgs/Logo";
 
 import { MdOutlineMail } from "react-icons/md";
@@ -18,6 +18,8 @@ const LoginPage = () => {
 	});
 
 	const [userID, setUserID] = useState("");
+	const[isAuthenticated, setIsAuthenticated] = useState(false);
+	
 	
 	const { mutate:login, isError,isPending,error} = useMutation({
 		mutationFn: async ({ email, password}) => {
@@ -29,8 +31,9 @@ const LoginPage = () => {
 				{
 				withCredentials:true
 				});
-
+				
 				if (res.status === 200) {
+					setIsAuthenticated(true);
 					// Extract jwt token from response
 					// MUST do res.data.data cuz res.data is an object with {jwt_token: something, user_id: something}
 					const token = res.data.data.jwt_token;
@@ -54,17 +57,12 @@ const LoginPage = () => {
 					} else {
 						console.log('No token found in the cookie.');
 					}
-				}				
+				}
+
 				return res.data;
 			}catch (error) {
 				console.error("Error during login request:", error.response || error.message);
 			}
-		},
-		onSuccess: () =>{
-			toast.success("Logged In!");
-		},
-		onError: (error) => {
-			toast.error(error.message);
 		},
 	});
 
@@ -76,7 +74,9 @@ const LoginPage = () => {
 	const handleInputChange = (e) => {
 		setFormData({ ...formData, [e.target.name]: e.target.value });
 	};
-
+	if(isAuthenticated){
+		return <Navigate to="/"/>;
+	}
 	
 
 	return (
@@ -114,7 +114,7 @@ const LoginPage = () => {
 					<button className='btn rounded-full btn-primary text-gray'>
 							{isPending ? "Loading..." : "Login"}
 						</button>
-					{isError && <p className='text-red-500'>Something went wrong</p>}
+					{isError && <p className='text-red-500'>Account Does Not Exist</p>}
 				</form>
 				<div className='flex flex-col gap-2 mt-4'>
 					<p className='text-primary text-lg'>{"Don't"} have an account?</p>

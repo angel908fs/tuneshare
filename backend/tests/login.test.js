@@ -8,8 +8,8 @@ const { generateToken } = require("../utils/generateToken.js");
 
 jest.mock("../utils/user.js");
 jest.mock("../models/user.js");
-jest.mock("../utils/generateToken.js", () => ({
-  generateToken: jest.fn(() => "mockedToken"),
+jest.mock('../utils/generateToken.js',()=>({
+    generateToken : jest.fn(),
 }));
 jest.mock("bcryptjs"); // Mock bcrypt functions
 
@@ -80,7 +80,21 @@ describe("POST /login", () => {
       .post("/login")
       .send({ email: "test@test.com", password: "password123", userID: "userID" });
 
-    expect(res.statusCode).toBe(500);
-    expect(res.body).toEqual({ success: false, message: "Server error" });
-  });
+        const res = await request(app).post("/login").send({ email: "test@test.com", password: "password123", userID: 'userID' });
+
+        expect(generateToken).toHaveBeenCalledWith(user_id,expect.any(Object));
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toEqual({ success: true, message: "user has been authenticated" });
+        
+    });
+
+    it("should return 500 for an internal server error", async () => {
+        userEmailExists.mockResolvedValue(true);
+        User.findOne.mockRejectedValue(new Error("Database error")); // Simulate server error
+
+        const res = await request(app).post("/login").send({ email: "test@test.com", password: "password123", userID: 'userID' });
+
+        expect(res.statusCode).toBe(500);
+        expect(res.body).toEqual({ success: false, message: "Server error" });
+    });
 });
