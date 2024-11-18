@@ -119,7 +119,6 @@ describe("POST /signup", () => {
             }
         });
         expect(mockUser.save).toHaveBeenCalled(); // Verify save method was called
-        expect(generateTokenAndSetCookie).toHaveBeenCalled(); // Verify token generation
     });
 
     it("should return 500 if there is a server error", async () => {

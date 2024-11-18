@@ -8,10 +8,10 @@ const { generateToken } = require("../utils/generateToken.js");
 
 jest.mock("../utils/user.js");
 jest.mock("../models/user.js");
-jest.mock('../utils/generateToken.js',()=>({
-    generateToken : jest.fn(),
+jest.mock('../utils/generateToken.js', () => ({
+    generateToken: jest.fn(() => 'mockedToken'), 
 }));
-jest.mock("bcryptjs"); // Mock bcrypt functions
+jest.mock("bcryptjs"); 
 
 const app = express();
 app.use(express.json());
@@ -21,7 +21,7 @@ describe("POST /login", () => {
   it("should return 400 if email is missing", async () => {
     const res = await request(app)
       .post("/login")
-      .send({ password: "password123", userID: "userID" });
+      .send({ password: "password123" });
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({ success: false, message: "Missing required parameters" });
   });
@@ -31,7 +31,7 @@ describe("POST /login", () => {
 
     const res = await request(app)
       .post("/login")
-      .send({ email: "test@test.com", password: "password123", userID: "userID" });
+      .send({ email: "test@test.com", password: "password123" });
 
     expect(res.statusCode).toBe(404);
     expect(res.body).toEqual({ success: false, message: "User does not exist" });
@@ -40,11 +40,11 @@ describe("POST /login", () => {
   it("should return 401 for invalid email or password", async () => {
     userEmailExists.mockResolvedValue(true);
     User.findOne.mockResolvedValue({ email: "test@test.com", password: "hashedPassword123" });
-    bcrypt.compare.mockResolvedValue(false); // Simulate password mismatch
+    bcrypt.compare.mockResolvedValue(false); // simulate password mismatch
 
     const res = await request(app)
       .post("/login")
-      .send({ email: "test@test.com", password: "wrongPassword", userID: "userID" });
+      .send({ email: "test@test.com", password: "wrongPassword" });
 
     expect(res.statusCode).toBe(401);
     expect(res.body).toEqual({ success: false, message: "Invalid email or password" });
@@ -57,11 +57,11 @@ describe("POST /login", () => {
       email: "test@test.com",
       password: "hashedPassword123",
     });
-    bcrypt.compare.mockResolvedValue(true); // Simulate successful password match
+    bcrypt.compare.mockResolvedValue(true); // simulate successful password match
 
     const res = await request(app)
       .post("/login")
-      .send({ email: "test@test.com", password: "password123", userID: "userID" });
+      .send({ email: "test@test.com", password: "password123" });
 
     expect(generateToken).toHaveBeenCalledWith("userid");
     expect(res.statusCode).toBe(200);
@@ -74,27 +74,13 @@ describe("POST /login", () => {
 
   it("should return 500 for an internal server error", async () => {
     userEmailExists.mockResolvedValue(true);
-    User.findOne.mockRejectedValue(new Error("Database error")); // Simulate server error
+    User.findOne.mockRejectedValue(new Error("Database error")); // simulate server error
 
     const res = await request(app)
       .post("/login")
-      .send({ email: "test@test.com", password: "password123", userID: "userID" });
+      .send({ email: "test@test.com", password: "password123" });
 
-        const res = await request(app).post("/login").send({ email: "test@test.com", password: "password123", userID: 'userID' });
-
-        expect(generateToken).toHaveBeenCalledWith(user_id,expect.any(Object));
-        expect(res.statusCode).toBe(200);
-        expect(res.body).toEqual({ success: true, message: "user has been authenticated" });
-        
-    });
-
-    it("should return 500 for an internal server error", async () => {
-        userEmailExists.mockResolvedValue(true);
-        User.findOne.mockRejectedValue(new Error("Database error")); // Simulate server error
-
-        const res = await request(app).post("/login").send({ email: "test@test.com", password: "password123", userID: 'userID' });
-
-        expect(res.statusCode).toBe(500);
-        expect(res.body).toEqual({ success: false, message: "Server error" });
-    });
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual({ success: false, message: "Server error", error: expect.any(Object) });
+  });
 });
