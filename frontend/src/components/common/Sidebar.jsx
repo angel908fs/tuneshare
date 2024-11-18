@@ -8,6 +8,8 @@ import { RiLogoutCircleLine } from "react-icons/ri";
 import { useMutation } from '@tanstack/react-query';
 import axios from "axios";
 import toast from "react-hot-toast";
+import Cookies from 'js-cookie';
+
 
 const Sidebar = () => {
 	const navigate = useNavigate();
@@ -22,9 +24,11 @@ const Sidebar = () => {
 			}
 		},
 		onSuccess: () => {
+			Cookies.remove("tuneshare_cookie");
+			console.log("Cookie has been deleted");
 			toast.success('Logout Successful');
+			console.log("Navigating to /login");
 			navigate("/login");
-
 		},
 		onError: () => {
 			toast.error('logout failed');

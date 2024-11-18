@@ -7,6 +7,8 @@ import { MdPassword } from "react-icons/md";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import axios from "axios";
+import Cookies from 'js-cookie';
+import { jwtDecode }  from 'jwt-decode';
 
 const SignUpPage = () => {
 	const [formData, setFormData] = useState({
@@ -14,6 +16,8 @@ const SignUpPage = () => {
 		username: "",
 		password: "",
 	});
+	const [userID, setUserID] = useState("");
+	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const navigate = useNavigate();
 	const { mutate, isError, isPending, error } = useMutation({
 		mutationFn: async ({ email, username, password }) => {
@@ -23,18 +27,42 @@ const SignUpPage = () => {
 					username,
 					password,
 				});
+				if (res.status === 201) {
+					setIsAuthenticated(true);
+					// extract jwt token from response
+					// MUST do res.data.data cuz res.data is an object with {jwt_token: something, user_id: something}
+					const token = res.data.data.jwt_token;
+					console.log("JWT Token:", token);
 
-				//Log response details for debugging
+					// save the token to a cookie
+					Cookies.set('tuneshare_cookie', token, {
+						expires: 30, // 30 days
+						secure: process.env.NODE_ENV === 'production',
+						sameSite: 'lax',
+					});
+					// let's get the user_id from the cookie!
+					const cookieValue = Cookies.get('tuneshare_cookie');
+					if (cookieValue) {
+						// decode the token to access the payload
+						const decodedToken = jwtDecode(cookieValue);
+						const userId = decodedToken.user_id;
+						console.log('User ID from cookie:', userId);
+						// now you can use userID in this component
+						setUserID(userId);
+					} else {
+						console.log('No token found in the cookie.');
+					}
+				}
 				return res.data;
 			} catch (error) {
+				toast.error("Error signing up:\n" + error.response.data.message);
 				console.error("Signup error:", error);
-				// Throw a specific error message
-				throw new Error(error.response?.data?.error || "Server error");
+				throw new Error(error.response.data.message);
 			}
 		},
 		onSuccess: () => {
 			toast.success("Account Created Successfully!");
-			navigate("/login");
+			navigate("/");
 		},
 		onError: () => {
 			toast.error(error.message);
@@ -106,7 +134,7 @@ const SignUpPage = () => {
 					>
 						{isPending ? "Loading..." : "Sign Up"}
 					</button>
-					{isError && <p className="text-red-500">{error.message}</p>}
+					{/*isError && <p className="text-red-500">{error.message}</p>*/}
 				</form>
 				<div className="flex flex-col lg:w-2/3 gap-2 mt-4">
 					<p className="text-primary text-lg">Already have an account?</p>

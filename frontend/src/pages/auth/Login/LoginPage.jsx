@@ -34,12 +34,12 @@ const LoginPage = () => {
 				
 				if (res.status === 200) {
 					setIsAuthenticated(true);
-					// Extract jwt token from response
+					// extract jwt token from response
 					// MUST do res.data.data cuz res.data is an object with {jwt_token: something, user_id: something}
 					const token = res.data.data.jwt_token;
 					console.log("JWT Token:", token);
 
-					// Save the token to a cookie
+					// save the token to a cookie
 					Cookies.set('tuneshare_cookie', token, {
 						expires: 30, // 30 days
 						secure: process.env.NODE_ENV === 'production',
@@ -48,19 +48,20 @@ const LoginPage = () => {
 					// let's get the user_id from the cookie!
 					const cookieValue = Cookies.get('tuneshare_cookie');
 					if (cookieValue) {
-						// Decode the token to access the payload
+						// decode the token to access the payload
 						const decodedToken = jwtDecode(cookieValue);
 						const userId = decodedToken.user_id;
 						console.log('User ID from cookie:', userId);
-						// Now you can use userId for any react logic in this component
+						// now you can use userID for any react logic in this component
 						setUserID(userId);
 					} else {
 						console.log('No token found in the cookie.');
 					}
 				}
-
+				toast.success("logged in!");
 				return res.data;
 			}catch (error) {
+				toast.error("Error during login request:\n" + error.response.data.message);
 				console.error("Error during login request:", error.response || error.message);
 			}
 		},
