@@ -64,12 +64,6 @@ const LoginPage = () => {
 				console.error("Error during login request:", error.response || error.message);
 			}
 		},
-		onSuccess: () =>{
-			toast.success("Logged In!");
-		},
-		onError: (error) => {
-			toast.error(error.message);
-		},
 	});
 
 	const handleSubmit = (e) => {
@@ -120,7 +114,7 @@ const LoginPage = () => {
 					<button className='btn rounded-full btn-primary text-gray'>
 							{isPending ? "Loading..." : "Login"}
 						</button>
-					{isError && <p className='text-red-500'>Something went wrong</p>}
+					{isError && <p className='text-red-500'>Account Does Not Exist</p>}
 				</form>
 				<div className='flex flex-col gap-2 mt-4'>
 					<p className='text-primary text-lg'>{"Don't"} have an account?</p>
