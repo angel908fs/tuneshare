@@ -36,7 +36,7 @@ function App() {
           <Route path='/signup' element={<SignUpPage />} />
           <Route path='/' element={<HomePage />} />
           <Route path='/notifications' element={<NotificationPage />} />
-          <Route path='/profile/:username' element={<ProfilePage />} />
+          <Route path='/profile/:userId' element={<ProfilePage />} />
         </Routes>
         {!hideSidebars && <RightPanel />}
         <Toaster />
