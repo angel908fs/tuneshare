@@ -33,13 +33,19 @@ router.post("/load-feed", async(req, res) => {
         // skip the first 10*page posts (if page is greater than 1)
         // limit the search to 10 post
         // populate the user_id field with the username from the User model, otherwise we would just get the user_id associated with the post
-        const posts = await Post.find({user_id: {$in: user.following}}).sort({created_at: -1}).skip(skip).limit(postsPerPage).populate('user_id', 'username');
+        const posts = await Post.find({user_id: {$in: user.following}}).sort({created_at: -1}).skip(skip).limit(postsPerPage);
         
-        if (!posts || posts.length === 0) {
-            return res.status(404).send({success: true, message: "no posts available at the time"});
-        }
+        const postsWithUserName = await Promise.all(
+            posts.map(async (post) => {
+                const user = await User.findOne({ user_id: post.user_id }, 'username');
+                return {
+                    ...post.toObject(),
+                    username: user ? user.username : 'Unknown User'
+                };
+            })
+        );
 
-        return res.status(200).send({success: true, message: "posts have been retrieved successfully",data: posts});
+        return res.status(200).send({success: true, message: "posts have been retrieved successfully", data: postsWithUserName});
     } catch (error) {
         // console.log(error)
         return res.status(500).send({ success: false, message: "internal server error", error: error.message});
