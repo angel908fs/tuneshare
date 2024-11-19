@@ -6,13 +6,69 @@ import { FaUser } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { RiLogoutCircleLine } from "react-icons/ri";
 import { useMutation } from '@tanstack/react-query';
+import { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Cookies from 'js-cookie';
-
+import { jwtDecode } from "jwt-decode";
 
 const Sidebar = () => {
 	const navigate = useNavigate();
+	const [userData, setUserData] = useState(null);
+	const [posts, setPosts] = useState([]);
+	const [isMyProfile, setIsMyProfile] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState(null);
+	const [userIdFromCookie, setUserIdFromCookie] = useState("");
+	const [userId, setUserId] = useState(null);
+
+	useEffect(() => {
+		// get user ID from JWT token in cookie
+		const cookieValue = Cookies.get("tuneshare_cookie");
+		if (cookieValue) {
+			const decodedToken = jwtDecode(cookieValue);
+			setUserId(decodedToken.user_id);
+			setUserIdFromCookie(decodedToken.user_id); 
+			console.log("User ID from cookie:", decodedToken.user_id);
+		} else {
+			console.log("No token found in the cookie.");
+		}
+	}, []);
+	
+	useEffect(() => {
+		const fetchProfileData = async () => {
+			if (!userId) return;
+			try {
+				setIsLoading(true);
+				const response = await axios.post("/api/profile", {
+					user_id: userId,
+					page: 1,
+				});
+				console.log(response.data);
+	
+				if (response.data.success) {
+					console.log(response.data.data);
+					setUserData(response.data.data.user);
+					setPosts(response.data.data.posts);
+					setError(null);
+					setIsMyProfile(userId === response.data.data.user.user_id);
+				} else {
+					setError(response.data.message);
+				}
+			} catch (err) {
+				console.error(err);
+				setError("An error occurred while fetching profile data.");
+			} finally {
+				setIsLoading(false);
+			}
+		};
+	
+		fetchProfileData();
+
+		console.log(userData);
+	}, [userId]); 
+	
+
 	const { mutate:logout} = useMutation({
 		mutationFn: async() => {
 			try{
@@ -68,7 +124,7 @@ const Sidebar = () => {
 
 					<li className='flex justify-center md:justify-start'>
 						<Link
-							to={`/profile/${data?.username}`}
+							to={`/profile/${userId}`}
 							className='flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
 						>
 							<FaUser className='w-6 h-6' />
@@ -76,9 +132,9 @@ const Sidebar = () => {
 						</Link>
 					</li>
 				</ul>
-				{data && (
+				{data && userData && (
 					<Link
-						to={`/profile/${data.username}`}
+						to={`/profile/${userId}`}
 						className='mt-auto mb-10 flex gap-2 items-start transition-all duration-300 hover:bg-[#181818] py-2 px-4 rounded-full'
 					>
 						<div className='avatar hidden md:inline-flex'>
@@ -88,8 +144,8 @@ const Sidebar = () => {
 						</div>
 						<div className='flex justify-between flex-1'>
 							<div className='hidden md:block'>
-								<p className='text-white font-bold text-sm w-20 truncate'>{data?.fullName}</p>
-								<p className='text-slate-500 text-sm'>@{data?.username}</p>
+								{/* <p className='text-white font-bold text-sm w-20 truncate'>{data?.fullName}</p> */}
+								<p className='text-slate-500 text-sm'>@{userData.username}</p>
 							</div>
 							<RiLogoutCircleLine className='w-5 h-5 cursor-pointer' 
 							onClick={(e) => {
