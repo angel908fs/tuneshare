@@ -14,6 +14,17 @@ async function createPost(userID, songLink, postContent)
         });
         
         await newPost.save();
+
+        // Update user's post array
+        const userPost = await User.findOne({user_id: userID});
+
+        if (!userPost)
+        {
+            return { success: false, message: "User not found." };
+        }
+
+        userPost.posts.push(newPost.post_id);
+        await userPost.save();
         
         return { success: true, message: "Post created successfully.", data: 
             {
