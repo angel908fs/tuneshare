@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 
 const Post = ({ post }) => {
 	const [comment, setComment] = useState("");
-	const postOwner = post.user;
+	const postOwner = post;
 	const isLiked = false;
 
 	const isMyPost = true;
@@ -26,6 +26,8 @@ const Post = ({ post }) => {
 	};
 
 	const handleLikePost = () => {};
+
+	console.warn(post);
 
 	return (
 		<>

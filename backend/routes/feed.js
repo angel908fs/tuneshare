@@ -8,47 +8,55 @@ const Post = require("../models/post.js");
 // page == 1 will return the 10 most recent posts
 // page == 2 will skip the first 10 posts and return the 11th-20th most recent posts
 // page == 3 will skip the first 20 posts and return the 21th-30th most recent posts
-router.post("/load-feed", async(req, res) => {
-    if (!req.body.userid) {
-        return res.status(400).send({success: false, message: "missing user id in request body"});
-    }
-    if (req.body.page === undefined || req.body.page === null) {  // Check if page is undefined explicitly
-        return res.status(400).send({success: false, message: "missing page in request body"});
-    }
-    if (req.body.page < 1) {  // Now you can safely check for page < 1
-        return res.status(400).send({success: false, message: "page parameter must be greater than or equal to 1"});
-    }
+router.post("/load-feed", async (req, res) => {
     try {
         const userId = req.body.userid;
-        const pageNumber = req.body.page; // page is used to load posts in batches of 10, page must start at 1
+        const pageNumber = req.body.page;
 
-        const user = await User.findOne({user_id: userId});
+        if (!userId) {
+            console.error("User ID is missing in the request body.");
+            return res.status(400).send({ success: false, message: "Missing user ID in request body" });
+        }
+
+        if (!pageNumber) {
+            console.error("Page parameter is missing.");
+            return res.status(400).send({ success: false, message: "Missing page parameter in request body" });
+        }
+
+        const user = await User.findOne({ user_id: userId });
+        
         if (!user) {
-            return res.status(404).send({success:false, message: "user not found"});
+            console.error(`User not found with ID: ${userId}`);
+            return res.status(404).send({ success: false, message: "User not found" });
         }
 
         const postsPerPage = 10;
         const skip = (pageNumber - 1) * postsPerPage;
-        // sort to get latests posts first
-        // skip the first 10*page posts (if page is greater than 1)
-        // limit the search to 10 post
-        // populate the user_id field with the username from the User model, otherwise we would just get the user_id associated with the post
-        const posts = await Post.find({ $in: [...user.following, userId] }).sort({created_at: -1}).skip(skip).limit(postsPerPage);
-        
+
+        const posts = await Post.find({ user_id: { $in: [...user.following, userId] } })
+            .sort({ created_at: -1 })
+            .skip(skip)
+            .limit(postsPerPage);
+
+        if (!posts) {
+            console.error("No posts found.");
+            return res.status(404).send({ success: false, message: "No posts found" });
+        }
+
         const postsWithUserName = await Promise.all(
             posts.map(async (post) => {
-                const user = await User.findOne({ user_id: post.user_id }, 'username');
+                const postUser = await User.findOne({ user_id: post.user_id }, "username");
                 return {
                     ...post.toObject(),
-                    username: user ? user.username : 'Unknown User'
+                    username: postUser ? postUser.username : "Unknown User",
                 };
             })
         );
 
-        return res.status(200).send({success: true, message: "posts have been retrieved successfully", data: postsWithUserName});
+        res.status(200).send({ success: true, data: postsWithUserName });
     } catch (error) {
-        // console.log(error)
-        return res.status(500).send({ success: false, message: "internal server error", error: error.message});
+        console.error("Internal server error:", error);
+        res.status(500).send({ success: false, message: "Internal server error", error: error.message });
     }
 });
 
