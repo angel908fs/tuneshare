@@ -15,13 +15,14 @@
             
             await newPost.save();
 
-            const userPost = await User.findOneAndUpdate(
+            // Insert backslashes before double-quotes for JSON
+            postContent = postContent.replace(/"/g, '\\"');
+
+            await User.findOneAndUpdate(
                 { user_id: userID },
-                { $push: { posts: newPost.post_id } }
+                { $push: { posts: `{"post_id": "${newPost.post_id}", "content": "${postContent}"}` } }
             );
 
-            await userPost.save();
-            
             return { success: true, message: "Post created successfully.", data: 
                 {
                     user_id: userID,

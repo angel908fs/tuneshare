@@ -33,7 +33,7 @@ router.post("/load-feed", async(req, res) => {
         // skip the first 10*page posts (if page is greater than 1)
         // limit the search to 10 post
         // populate the user_id field with the username from the User model, otherwise we would just get the user_id associated with the post
-        const posts = await Post.find({user_id: {$in: user.following}}).sort({created_at: -1}).skip(skip).limit(postsPerPage);
+        const posts = await Post.find({ $in: [...user.following, userId] }).sort({created_at: -1}).skip(skip).limit(postsPerPage);
         
         const postsWithUserName = await Promise.all(
             posts.map(async (post) => {
