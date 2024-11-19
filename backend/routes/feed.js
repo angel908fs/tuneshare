@@ -45,10 +45,17 @@ router.post("/load-feed", async (req, res) => {
 
         const postsWithUserName = await Promise.all(
             posts.map(async (post) => {
-                const postUser = await User.findOne({ user_id: post.user_id }, "username");
+                const postOwner = await User.findOne({ user_id: post.user_id }, "username posts");
+                
+                const postData = user.posts.find(userPost => {
+                    const parsedPost = JSON.parse(userPost);
+                    return parsedPost.post_id === post.post_id;
+                });
+
                 return {
                     ...post.toObject(),
-                    username: postUser ? postUser.username : "Unknown User",
+                    username: postOwner ? postOwner.username : "Unknown User",
+                    content: postData ? JSON.parse(postData).content : null
                 };
             })
         );
