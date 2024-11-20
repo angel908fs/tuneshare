@@ -32,14 +32,11 @@ router.post("/profile", async(req, res) => {
         const postsPerPage = 10;
         const skip = (pageNumber - 1) * postsPerPage;
 
-        const userData = await User.findOne({ user_id: userID }).select("username bio profile_picture followers_count following_count");
+        const userData = await User.findOne({ user_id: userID }).select("-password");
         // sort to get latests posts first
         // skip the first 10*page posts (if page is greater than 1)
         // limit the search to 10 post
         const posts = await Post.find({user_id: userID}).sort({created_at: -1}).skip(skip).limit(postsPerPage);
-        if (!posts || posts.length === 0) {
-            return res.status(404).send({success: true, message: "no posts available at the time"});
-        }
         return res.status(200).send({success: true, message: "user data has been retrieved successfully", data: {user: userData, posts: posts}});
     } catch (error) {
         return res.status(500).send({ success: false, message: "internal server error", error: error.message});

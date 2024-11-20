@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-
+import { Navigate } from "react-router-dom";
 import XSvg from "../../../components/svgs/Logo";
 
 import { MdOutlineMail } from "react-icons/md";
@@ -18,6 +18,8 @@ const LoginPage = () => {
 	});
 
 	const [userID, setUserID] = useState("");
+	const[isAuthenticated, setIsAuthenticated] = useState(false);
+	
 	
 	const { mutate:login, isError,isPending,error} = useMutation({
 		mutationFn: async ({ email, password}) => {
@@ -29,14 +31,15 @@ const LoginPage = () => {
 				{
 				withCredentials:true
 				});
-
+				
 				if (res.status === 200) {
-					// Extract jwt token from response
+					setIsAuthenticated(true);
+					// extract jwt token from response
 					// MUST do res.data.data cuz res.data is an object with {jwt_token: something, user_id: something}
 					const token = res.data.data.jwt_token;
 					console.log("JWT Token:", token);
 
-					// Save the token to a cookie
+					// save the token to a cookie
 					Cookies.set('tuneshare_cookie', token, {
 						expires: 30, // 30 days
 						secure: process.env.NODE_ENV === 'production',
@@ -45,26 +48,22 @@ const LoginPage = () => {
 					// let's get the user_id from the cookie!
 					const cookieValue = Cookies.get('tuneshare_cookie');
 					if (cookieValue) {
-						// Decode the token to access the payload
+						// decode the token to access the payload
 						const decodedToken = jwtDecode(cookieValue);
 						const userId = decodedToken.user_id;
 						console.log('User ID from cookie:', userId);
-						// Now you can use userId for any react logic in this component
+						// now you can use userID for any react logic in this component
 						setUserID(userId);
 					} else {
 						console.log('No token found in the cookie.');
 					}
-				}				
+				}
+				toast.success("logged in!");
 				return res.data;
 			}catch (error) {
+				toast.error("Error during login request:\n" + error.response.data.message);
 				console.error("Error during login request:", error.response || error.message);
 			}
-		},
-		onSuccess: () =>{
-			toast.success("Logged In!");
-		},
-		onError: (error) => {
-			toast.error(error.message);
 		},
 	});
 
@@ -76,7 +75,9 @@ const LoginPage = () => {
 	const handleInputChange = (e) => {
 		setFormData({ ...formData, [e.target.name]: e.target.value });
 	};
-
+	if(isAuthenticated){
+		return <Navigate to="/"/>;
+	}
 	
 
 	return (
@@ -114,7 +115,7 @@ const LoginPage = () => {
 					<button className='btn rounded-full btn-primary text-gray'>
 							{isPending ? "Loading..." : "Login"}
 						</button>
-					{isError && <p className='text-red-500'>Something went wrong</p>}
+					{isError && <p className='text-red-500'>Account Does Not Exist</p>}
 				</form>
 				<div className='flex flex-col gap-2 mt-4'>
 					<p className='text-primary text-lg'>{"Don't"} have an account?</p>

@@ -1,4 +1,6 @@
-import {Route,Routes} from 'react-router-dom';
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import Cookies from 'js-cookie'; // assuming you use js-cookie for handling cookies
 
 import HomePage from './pages/home/HomePage';
 import LoginPage from './pages/auth/Login/LoginPage';
@@ -6,32 +8,41 @@ import SignUpPage from './pages/auth/signup/SignUpPage';
 import NotificationPage from './pages/notfications/NotificationPage';
 import ProfilePage from './pages/Profile/ProfilePage';
 
-import Sidebar from './components/common/Sidebar';
+import LeftPanel from './components/common/Sidebar';
 import RightPanel from './components/common/Rightbar';
-import {Toaster} from 'react-hot-toast' // adds flare aka notifications on doing something
-
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'react-hot-toast'; // adds flare aka notifications on doing something
+import { QueryClient, QueryClientProvider } from 'react-query'; // or correct source
 
 const queryClient = new QueryClient();
 
-// can't get rid of sidebar and right panel without having authoried user
 function App() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const hideSidebars = ['/login', '/signup'].includes(location.pathname);
+
+  useEffect(() => {
+    const cookieValue = Cookies.get("tuneshare_cookie");
+    if (!cookieValue && !['/login', '/signup'].includes(location.pathname)) {
+      navigate('/login');
+    }
+  }, [navigate, location.pathname]);
+
   return (
     <QueryClientProvider client={queryClient}>
-    <div className='flex max-w-6xl mx-auto'>
-      {/*common component, bc its not wrapped with routes */}
-      <Sidebar /> 
-      <Routes> 
-        <Route path='/' element = {<HomePage />} />
-        <Route path='/login' element = {<LoginPage />} />
-        <Route path='/signup' element = {<SignUpPage />} />
-        <Route path='/notifications' element = {<NotificationPage />} />
-        <Route path ='/profile/:username' element={<ProfilePage />} />
-      </Routes>
-      <RightPanel />
-      <Toaster />
-    </div>
+      <div className='flex max-w-6xl mx-auto'>
+        {!hideSidebars && <LeftPanel />}
+        <Routes> {/* different pages */}
+          <Route path='/login' element={<LoginPage />} />
+          <Route path='/signup' element={<SignUpPage />} />
+          <Route path='/' element={<HomePage />} />
+          <Route path='/notifications' element={<NotificationPage />} />
+          <Route path='/profile/:userId' element={<ProfilePage />} />
+        </Routes>
+        {!hideSidebars && <RightPanel />}
+        <Toaster />
+      </div>
     </QueryClientProvider>
   );
 }
+
 export default App;

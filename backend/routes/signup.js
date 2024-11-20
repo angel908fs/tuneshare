@@ -1,7 +1,7 @@
 const express = require("express");
 let router = express.Router();
 const User = require("../models/user.js");
-const { generateTokenAndSetCookie } = require("../utils/generateToken.js");
+const { generateToken } = require("../utils/generateToken.js");
 const bcrypt = require("bcryptjs");
 
 // create user
@@ -49,7 +49,7 @@ router.post("/signup", async (req, res) => {
         });
 
         await newUser.save();
-        generateTokenAndSetCookie(newUser.user_id, res);
+        const token = generateToken(newUser.user_id);
 
         return res.status(201).send({
             success: true,
@@ -58,6 +58,7 @@ router.post("/signup", async (req, res) => {
                 username: newUser.username,
                 email: newUser.email,
                 user_id: newUser.user_id,
+                jwt_token: token,
             }
         });
     } catch (error) {
