@@ -22,21 +22,13 @@ const ProfilePage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userIdFromCookie, setUserIdFromCookie] = useState("");
-<<<<<<< HEAD
-  
-=======
   const [showFollowAlert, setShowFollowAlert] = useState(false);
->>>>>>> beef2c4e5cd48df19e1dfacfd7c9416ecabdd593
 
   const coverImgRef = useRef(null);
   const profileImgRef = useRef(null);
 
   const { userId } = useParams(); // get userId from URL parameters
   
-  let currentUserId = "";
-
-
-
      // Handle Follow Action
 	const handleFollow = async (targetUserId) => {
    try {
@@ -72,6 +64,7 @@ const ProfilePage = () => {
 
   useEffect(() => {
     // get user ID from JWT token in cookie
+    let currentUserId = "";
     const cookieValue = Cookies.get("tuneshare_cookie");
     if (cookieValue) {
       const decodedToken = jwtDecode(cookieValue);
