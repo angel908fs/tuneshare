@@ -27,7 +27,7 @@ const Post = ({ post }) => {
 
 	const handleLikePost = () => {};
 
-	console.warn(post);
+	//console.warn(post);
 
 	return (
 		<>
