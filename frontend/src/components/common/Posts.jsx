@@ -14,7 +14,7 @@ const Posts = ({ context, profileUserId }) => {
             try {
                 // Retrieve the JWT from the cookie
                 const token = Cookies.get("tuneshare_cookie");
-				
+                
                 if (!token) {
                     console.error("No token found in cookie");
                     return;
@@ -28,13 +28,13 @@ const Posts = ({ context, profileUserId }) => {
                     console.error("User ID not found in token");
                     return;
                 }
-				
-				// Determine the user ID for the request
+                
+                // Determine the user ID for the request
                 const targetUserId = context === "profile" ? profileUserId : userId;
 
                 // Fetch posts from the feed API
                 const response = await axios.post("/api/load-feed", {
-					context: context,
+                    context: context,
                     userid: targetUserId,
                     page: 1,
                 });
