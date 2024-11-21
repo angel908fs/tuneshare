@@ -22,17 +22,18 @@ const ProfilePage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userIdFromCookie, setUserIdFromCookie] = useState("");
-
+  
 
   const coverImgRef = useRef(null);
   const profileImgRef = useRef(null);
 
   const { userId } = useParams(); // get userId from URL parameters
+  
+  let currentUserId = "";
 
   useEffect(() => {
     // get user ID from JWT token in cookie
     const cookieValue = Cookies.get("tuneshare_cookie");
-    let currentUserId = "";
     if (cookieValue) {
       const decodedToken = jwtDecode(cookieValue);
       currentUserId = decodedToken.user_id;
@@ -240,7 +241,7 @@ const ProfilePage = () => {
             </>
           )}
 
-          <Posts posts={posts} />
+          <Posts context="profile" profileUserId={userId} />
         </div>
       </div>
     </>

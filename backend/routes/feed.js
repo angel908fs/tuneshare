@@ -10,61 +10,62 @@ const Post = require("../models/post.js");
 // page == 3 will skip the first 20 posts and return the 21th-30th most recent posts
 router.post("/load-feed", async (req, res) => {
     try {
+        const context = req.body.context;
         const userId = req.body.userid;
         const pageNumber = req.body.page;
 
-        if (!userId) {
-            console.error("User ID is missing in the request body.");
-            return res.status(400).send({ success: false, message: "Missing user ID in request body" });
-        }
-
-        if (!pageNumber) {
-            console.error("Page parameter is missing.");
-            return res.status(400).send({ success: false, message: "Missing page parameter in request body" });
+        if (!userId || pageNumber < 1) {
+            return res.status(400).send({ success: false, message: "Invalid request parameters." });
         }
 
         const user = await User.findOne({ user_id: userId });
-        
         if (!user) {
-            console.error(`User not found with ID: ${userId}`);
-            return res.status(404).send({ success: false, message: "User not found" });
+            return res.status(404).send({ success: false, message: "User not found." });
         }
 
         const postsPerPage = 10;
         const skip = (pageNumber - 1) * postsPerPage;
 
-        const posts = await Post.find({ user_id: { $in: [...user.following, userId] } })
+        // Find users by user ID (for profile page) or all users (for feed page)
+        const userPosts = await User.find({ user_id: {
+            $in: context === "profile" ? [userId] : [...user.following, userId]
+        }});
+        
+        // Create a mapping of user_id to posts array
+        const userPostsMap = {};
+        userPosts.forEach(u => {
+            userPostsMap[u.user_id] = u.posts.map(post => JSON.parse(post));
+        });
+
+        // Fetch posts from the Post collection
+        const posts = await Post.find({ user_id: { $in: Object.keys(userPostsMap) } })
             .sort({ created_at: -1 })
             .skip(skip)
             .limit(postsPerPage);
 
-        if (!posts) {
-            console.error("No posts found.");
-            return res.status(404).send({ success: false, message: "No posts found" });
-        }
+        // Enrich posts with content
+        const enrichedPosts = posts.map(post => {
+            const userPostData = userPostsMap[post.user_id]?.find(userPost => userPost.post_id === post.post_id);
+            return {
+                ...post.toObject(),
+                username: userPosts.find(u => u.user_id === post.user_id).username,
+                content: userPostData ? userPostData.content : null,
+            };
+        });
 
-        const postsWithUserName = await Promise.all(
-            posts.map(async (post) => {
-                const postOwner = await User.findOne({ user_id: post.user_id }, "username posts");
-                
-                const postData = user.posts.find(userPost => {
-                    const parsedPost = JSON.parse(userPost);
-                    return parsedPost.post_id === post.post_id;
-                });
-
-                return {
-                    ...post.toObject(),
-                    username: postOwner ? postOwner.username : "Unknown User",
-                    content: postData ? JSON.parse(postData).content : null
-                };
-            })
-        );
-
-        res.status(200).send({ success: true, data: postsWithUserName });
+        return res.status(200).send({
+            success: true,
+            message: "Posts retrieved successfully.",
+            data: enrichedPosts,
+        });
     } catch (error) {
-        console.error("Internal server error:", error);
-        res.status(500).send({ success: false, message: "Internal server error", error: error.message });
+        return res.status(500).send({
+            success: false,
+            message: "Internal server error.",
+            error: error.message,
+        });
     }
 });
+
 
 module.exports = router;

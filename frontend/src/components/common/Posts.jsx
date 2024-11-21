@@ -5,7 +5,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 
-const Posts = () => {
+const Posts = ({ context, profileUserId }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [posts, setPosts] = useState([]);
 
@@ -28,10 +28,14 @@ const Posts = () => {
                     console.error("User ID not found in token");
                     return;
                 }
+				
+				// Determine the user ID for the request
+                const targetUserId = context === "profile" ? profileUserId : userId;
 
                 // Fetch posts from the feed API
                 const response = await axios.post("/api/load-feed", {
-                    userid: userId,
+					context: context,
+                    userid: targetUserId,
                     page: 1,
                 });
 
