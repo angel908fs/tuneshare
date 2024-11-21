@@ -6,6 +6,12 @@ import CreatePost from "./CreatePost";
 const HomePage = () => {
 	const [feedType, setFeedType] = useState("Trending");
 
+	const [feedKey, setFeedKey] = useState(0); // Key to force re-render posts
+
+    const handlePostCreated = () => {
+        setFeedKey((prevKey) => prevKey + 1); // Increment key to refresh them
+    };
+
 	return (
 		<>
 			<div className='flex-[4_4_0] mr-auto border-r border-gray-700 min-h-screen'>
@@ -33,10 +39,10 @@ const HomePage = () => {
 				</div>
 
 				{/*  CREATE POST INPUT */}
-				<CreatePost />
+				<CreatePost onPostCreated={handlePostCreated} />
 
 				{/* POSTS */}
-				<Posts context="feed" />
+				<Posts key={feedKey} />
 			</div>
 		</>
 	);
