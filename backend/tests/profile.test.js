@@ -41,7 +41,7 @@ describe("POST /profile", () => {
         expect(response.body).toEqual({ success: false, message: "user not found" });
     });
 
-    it("should return 404 if no posts are available", async () => {
+    it("should return 200 if no posts are available", async () => {
         User.findOne.mockImplementation((query) => {
             if (query.user_id === "123") {
                 return {
@@ -56,17 +56,31 @@ describe("POST /profile", () => {
             }
             return null;
         });
-
+    
         Post.find.mockImplementation(() => ({
             sort: jest.fn().mockReturnThis(),
             skip: jest.fn().mockReturnThis(),
             limit: jest.fn().mockResolvedValue([]) // no posts found
         }));
-
+    
         const response = await request(app).post("/profile").send({ user_id: "123", page: 1 });
-        expect(response.status).toBe(404);
-        expect(response.body).toEqual({ success: true, message: "no posts available at the time" });
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({
+            success: true,
+            message: "user data has been retrieved successfully",
+            data: {
+                user: {
+                    username: "testuser",
+                    bio: "bio",
+                    profile_picture: "url",
+                    followers_count: 10,
+                    following_count: 5
+                },
+                posts: []
+            }
+        });
     });
+    
 
     it("should return 200 and user data with posts if posts are found", async () => {
         const mockUserData = { username: "testuser", bio: "bio", profile_picture: "url", followers_count: 10, following_count: 5 };
