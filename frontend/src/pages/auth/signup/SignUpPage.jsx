@@ -47,7 +47,6 @@ const SignUpPage = () => {
 						const decodedToken = jwtDecode(cookieValue);
 						const userId = decodedToken.user_id;
 						console.log('User ID from cookie:', userId);
-						// now you can use userID in this component
 						setUserID(userId);
 					} else {
 						console.log('No token found in the cookie.');

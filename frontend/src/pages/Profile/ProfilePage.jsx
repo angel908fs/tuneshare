@@ -29,7 +29,7 @@ const ProfilePage = () => {
 
   const { userId } = useParams(); // get userId from URL parameters
   
-     // Handle Follow Action
+     // handle Follow Action
 	const handleFollow = async (targetUserId) => {
    try {
      const res = await axios.post('/api/follow', {
@@ -39,24 +39,24 @@ const ProfilePage = () => {
  
      if (res.data.success) {
      console.log(`Successfully followed user: ${targetUserId}`);
-     setShowFollowAlert(true); // Show alert
-     setTimeout(() => setShowFollowAlert(false), 5000); // Hide after 3 seconds
+     setShowFollowAlert(true); // show alert
+     setTimeout(() => setShowFollowAlert(false), 5000); // hide after 3 seconds
      
      } else if (res.data.error) {
      console.error("Failed to follow user:", res.data.message);
      }
    } catch (error) {
     if (error.response) {
-      // Handle 409 specifically
+      // handle 409 specifically
       if (error.response.status === 409) {
         console.error("User is already following this user.");
         console.error("Error message:", error.response.data.message);
       } else {
-        // Handle other response errors
+        // handle other response errors
         console.error("Error response:", error.response.data.message);
       }
     } else {
-      // Handle network errors or other unexpected issues
+      // handle network errors or other unexpected issues
       console.error("Error while following user:", error.message);
     }
   }
