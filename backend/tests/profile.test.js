@@ -4,8 +4,8 @@ const router = require("../routes/profile.js");
 const User = require("../models/user.js");
 const Post = require("../models/post.js");
 
-jest.mock("../models/user.js"); // Mock User model
-jest.mock("../models/post.js"); // Mock Post model
+jest.mock("../models/user.js");
+jest.mock("../models/post.js"); 
 
 const app = express();
 app.use(express.json());
@@ -35,7 +35,7 @@ describe("POST /profile", () => {
     });
 
     it("should return 404 if user is not found", async () => {
-        User.findOne.mockResolvedValue(null); // Mock user not found
+        User.findOne.mockResolvedValue(null); // mock user not found
         const response = await request(app).post("/profile").send({ user_id: "123", page: 1 });
         expect(response.status).toBe(404);
         expect(response.body).toEqual({ success: false, message: "user not found" });
@@ -60,7 +60,7 @@ describe("POST /profile", () => {
         Post.find.mockImplementation(() => ({
             sort: jest.fn().mockReturnThis(),
             skip: jest.fn().mockReturnThis(),
-            limit: jest.fn().mockResolvedValue([]) // No posts found
+            limit: jest.fn().mockResolvedValue([]) // no posts found
         }));
 
         const response = await request(app).post("/profile").send({ user_id: "123", page: 1 });
@@ -84,7 +84,7 @@ describe("POST /profile", () => {
         Post.find.mockImplementation(() => ({
             sort: jest.fn().mockReturnThis(),
             skip: jest.fn().mockReturnThis(),
-            limit: jest.fn().mockResolvedValue(mockPosts) // Posts found
+            limit: jest.fn().mockResolvedValue(mockPosts) // some posts found
         }));
 
         const response = await request(app).post("/profile").send({ user_id: "123", page: 1 });
@@ -97,7 +97,7 @@ describe("POST /profile", () => {
     });
 
     it("should return 500 if there is a server error", async () => {
-        User.findOne.mockRejectedValue(new Error("Database error")); // Mock server error
+        User.findOne.mockRejectedValue(new Error("Database error")); // mock server error
         const response = await request(app).post("/profile").send({ user_id: "123", page: 1 });
         expect(response.status).toBe(500);
         expect(response.body).toEqual({ success: false, message: "internal server error", error: "Database error" });

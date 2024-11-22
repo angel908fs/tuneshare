@@ -26,24 +26,24 @@ router.post("/load-feed", async (req, res) => {
         const postsPerPage = 10;
         const skip = (pageNumber - 1) * postsPerPage;
 
-        // Find users by user ID (for profile page) or all users (for feed page)
+        // find users by user ID (for profile page) or all users (for feed page)
         const userPosts = await User.find({ user_id: {
             $in: context === "profile" ? [userId] : [...user.following, userId]
         }});
         
-        // Create a mapping of user_id to posts array
+        // create a mapping of user_id to posts array
         const userPostsMap = {};
         userPosts.forEach(u => {
             userPostsMap[u.user_id] = u.posts.map(post => JSON.parse(post));
         });
 
-        // Fetch posts from the Post collection
+        // fetch posts from the Post collection
         const posts = await Post.find({ user_id: { $in: Object.keys(userPostsMap) } })
             .sort({ created_at: -1 })
             .skip(skip)
             .limit(postsPerPage);
 
-        // Enrich posts with content
+        // enrich posts with username
         const enrichedPosts = posts.map(post => {
             const userPostData = userPostsMap[post.user_id]?.find(userPost => userPost.post_id === post.post_id);
             return {
