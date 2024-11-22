@@ -30,6 +30,8 @@ router.post("/follow", async (req, res) => {
         
         user.following.push(target_userID);            // Add the target user to the user's following list
         target_user.followers.push(userID);            // Add the user to the target user's follower list
+        user.following_count++;
+        target_user.followers_count++;
         await user.save();                              // Save the user
         await target_user.save();                       // Save the target user
         return res.status(200).json({success: true, message: "User followed successfully" });
