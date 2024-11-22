@@ -17,7 +17,7 @@ router.post("/profile", async(req, res) => {
     if (req.body.page === undefined || req.body.page === null) {  // Check if page is undefined explicitly
         return res.status(400).send({success: false, message: "missing page in request body"});
     }
-    if (req.body.page < 1) {  // Now you can safely check for page < 1
+    if (req.body.page < 1) {  // now you can safely check for page < 1
         return res.status(400).send({success: false, message: "page parameter must be greater than or equal to 1"});
     }
     try {

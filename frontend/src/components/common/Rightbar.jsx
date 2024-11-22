@@ -10,7 +10,7 @@ const RightPanel = () => {
 	const isLoading = false;
 
 	const [userIdFromCookie, setUserIdFromCookie] = useState("");
-	const [followedUsers, setFollowedUsers] = useState([]); // Track followed users
+	const [followedUsers, setFollowedUsers] = useState([]); // track followed users
 
   
 	useEffect(() => {
@@ -27,7 +27,7 @@ const RightPanel = () => {
   }, []);
 
 
-    // Handle Follow Action
+    // handle Follow Action
 	const handleFollow = async (targetUserId) => {
 		 //console.log(`Following user: ${targetUserId}`);
 		try {
@@ -38,7 +38,7 @@ const RightPanel = () => {
 	
 		  if (response.data.success) {
 			console.log(`Successfully followed user: ${targetUserId}`);
-			setFollowedUsers((prev) => [...prev, targetUserId]); // Update the list of followed users
+			setFollowedUsers((prev) => [...prev, targetUserId]); // update the list of followed users
 		  } else {
 			console.error("Failed to follow user:", response.data.message);
 		  }

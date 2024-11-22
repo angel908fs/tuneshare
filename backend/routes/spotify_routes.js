@@ -1,7 +1,7 @@
 const express = require('express');
 require('dotenv').config();
-const axios = require("axios"); // Use axios instead of request
-const querystring = require('querystring'); // Import querystring for redirect URL
+const axios = require("axios"); 
+const querystring = require('querystring'); 
 const SpotifyWebApi = require('spotify-web-api-js');
 
 let router = express.Router(); //route to express app
@@ -14,7 +14,7 @@ const spotifyApi = new SpotifyWebApi({ // initialize Spotify with credentials
 
 
 // paths are taken only when using backend server (localhost:8080)
-// Route to authenticate user via Spotify
+// route to authenticate user via Spotify
 router.get('/spotifylogin', function(req, res) { 
   // console.log("Redirecting to Spotify...");
   const spotifyAuthURL = 'https://accounts.spotify.com/authorize?' +  
@@ -83,12 +83,12 @@ router.get("/callback", async function(req, res){
 
     const { access_token, refresh_token } = response.data;
 
-    // Set environment variables for testing (avoid in production)
-    //Access & Refresh token are not stored in env 
+    // set environment variables for testing (avoid in production)
+    //access & Refresh token are not stored in env 
     process.env.ACCESSTOKEN = access_token;
     process.env.REFRESHTOKEN = refresh_token;
 
-    // Respond to the user
+    // respond to the user
     return res.status(201).send({success: true, message:"Tokens have been received and stored."});
     
   } catch (error) {
@@ -109,7 +109,7 @@ router.get('/search', async (req, res) => {
   }
 
   try {
-    // Use Axios to search for tracks
+    // use Axios to search for tracks
     const response = await axios.get('https://api.spotify.com/v1/search', {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -120,11 +120,11 @@ router.get('/search', async (req, res) => {
       },
     });
 
-    // Format the track data
+    // format the track data
     const tracks = response.data.tracks.items.map(track => ({
       id: track.id,
       name: track.name,
-      artists: track.artists.map(artist => artist.name), // Map artist objects to their names
+      artists: track.artists.map(artist => artist.name), // map artist objects to their names
       external_urls: track.external_urls,
       preview_url: track.preview_url,
     }));
@@ -133,7 +133,7 @@ router.get('/search', async (req, res) => {
   } catch (error) {
     // console.error('Error searching tracks:', error);
     
-    // Handle token expiration
+    // handle token expiration
     if (error.response && error.response.status === 401) {
       return res.status(401).send({success: false, message: 'Access token expired. Please log in again.'});
     } else {
@@ -143,7 +143,7 @@ router.get('/search', async (req, res) => {
   }
 });
 
-// Playback Controls
+// playback Controls
 router.post('/play', async (req, res) => {
   const accessToken = process.env.ACCESSTOKEN;
 

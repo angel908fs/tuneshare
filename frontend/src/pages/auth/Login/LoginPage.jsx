@@ -52,7 +52,6 @@ const LoginPage = () => {
 						const decodedToken = jwtDecode(cookieValue);
 						const userId = decodedToken.user_id;
 						console.log('User ID from cookie:', userId);
-						// now you can use userID for any react logic in this component
 						setUserID(userId);
 					} else {
 						console.log('No token found in the cookie.');
@@ -87,7 +86,6 @@ const LoginPage = () => {
 			</div>
 			<div className='flex-1 flex flex-col justify-center items-center'>
 				<form className='flex gap-4 flex-col' onSubmit={handleSubmit}>
-					{/* here is how you can use the userID from the cookie across this component */}
 					<h1 className='text-4xl font-extrabold text-primary'> Log In {userID}</h1>
 					<label className='input input-bordered rounded flex items-center gap-2'>
 						<MdOutlineMail />

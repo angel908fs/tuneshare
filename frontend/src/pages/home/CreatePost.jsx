@@ -11,7 +11,7 @@ const CreatePost = ({ onPostCreated }) => {
   const [songLink, setSongLink] = useState("");
   const [userID, setUserID] = useState('');
 
-  // Retrieve user ID from JWT token in cookie
+  // retrieve user ID from JWT token in cookie
   useEffect(() => {
     const cookieValue = Cookies.get('tuneshare_cookie');
     if (cookieValue) {
@@ -23,7 +23,7 @@ const CreatePost = ({ onPostCreated }) => {
     }
   }, []);
 
-  // Mutation to handle post creation
+  // mutation to handle post creation
   const { mutate: createPost, isError, isLoading, error } = useMutation({
     mutationFn: async ({ userID, songLink, content }) => {
       try {
@@ -42,17 +42,17 @@ const CreatePost = ({ onPostCreated }) => {
     },
     onSuccess: () => {
       toast.success('Post created successfully!');
-      // Reset form fields
+      // reset form fields
       setSongLink('');
       setText('');
-      onPostCreated(); // Callback to notify for post updates
+      onPostCreated(); // callback to notify for post updates
     },
     onError: (error) => {
       toast.error('Error creating post: ' + (error.response?.data?.message || error.message));
     },
   });
 
-  // Handle form submission
+  // handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!userID) {

@@ -103,7 +103,7 @@ describe('Spotify API Routes', () => {
   it('should return search results on /search', async () => {
     process.env.ACCESSTOKEN = 'mock_access_token';
   
-    // Mock the Spotify API response
+    // mock the Spotify API response
     axios.get.mockResolvedValueOnce({
       data: {
         tracks: {
@@ -127,10 +127,10 @@ describe('Spotify API Routes', () => {
       },
     });
   
-    // Send the request to the /search route
+    // send the request to the /search route
     const response = await request(app).get('/search?q=test');
   
-    // Assert the response
+    // assert the response
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
       success: true,
@@ -139,14 +139,14 @@ describe('Spotify API Routes', () => {
         {
           id: '1',
           name: 'Track 1',
-          artists: ['Artist 1'], // Array of artist names
+          artists: ['Artist 1'], 
           external_urls: { spotify: 'https://spotify.com/track1' },
           preview_url: 'https://preview.com/track1.mp3',
         },
         {
           id: '2',
           name: 'Track 2',
-          artists: ['Artist 2'], // Array of artist names
+          artists: ['Artist 2'], 
           external_urls: { spotify: 'https://spotify.com/track2' },
           preview_url: 'https://preview.com/track2.mp3',
         },
