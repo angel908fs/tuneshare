@@ -14,7 +14,15 @@ async function createPost(userID, songLink, postContent)
         });
         
         await newPost.save();
-        
+
+        // Insert backslashes before double-quotes for JSON
+        postContent = postContent.replace(/"/g, '\\"');
+
+        await User.findOneAndUpdate(
+            { user_id: userID },
+            { $push: { posts: `{"post_id": "${newPost.post_id}", "content": "${postContent}"}` } }
+        );
+
         return { success: true, message: "Post created successfully.", data: 
             {
                 user_id: userID,
@@ -37,15 +45,15 @@ async function getUserPosts(username)
     {
         // Search a username in the User collection
         const user = await User.findOne({ username });
-
+        
         if (!user)
         {
             return { success: false, message: "This username does not exist." };
         }
-
+        
         // Retrieve posts by user ID    
         const posts = await Post.find({ user_id: user.user_id }).populate("user_id").exec();
-
+        
         return {
             success: true, post: posts.map(p => ({
                 user_id: p.user_id,

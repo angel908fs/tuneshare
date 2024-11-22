@@ -8,42 +8,64 @@ const Post = require("../models/post.js");
 // page == 1 will return the 10 most recent posts
 // page == 2 will skip the first 10 posts and return the 11th-20th most recent posts
 // page == 3 will skip the first 20 posts and return the 21th-30th most recent posts
-router.post("/load-feed", async(req, res) => {
-    if (!req.body.userid) {
-        return res.status(400).send({success: false, message: "missing user id in request body"});
-    }
-    if (req.body.page === undefined || req.body.page === null) {  // Check if page is undefined explicitly
-        return res.status(400).send({success: false, message: "missing page in request body"});
-    }
-    if (req.body.page < 1) {  // Now you can safely check for page < 1
-        return res.status(400).send({success: false, message: "page parameter must be greater than or equal to 1"});
-    }
+router.post("/load-feed", async (req, res) => {
     try {
+        const context = req.body.context;
         const userId = req.body.userid;
-        const pageNumber = req.body.page; // page is used to load posts in batches of 10, page must start at 1
+        const pageNumber = req.body.page;
 
-        const user = await User.findOne({user_id: userId});
+        if (!userId || pageNumber < 1) {
+            return res.status(400).send({ success: false, message: "Invalid request parameters." });
+        }
+
+        const user = await User.findOne({ user_id: userId });
         if (!user) {
-            return res.status(404).send({success:false, message: "user not found"});
+            return res.status(404).send({ success: false, message: "User not found." });
         }
 
         const postsPerPage = 10;
         const skip = (pageNumber - 1) * postsPerPage;
-        // sort to get latests posts first
-        // skip the first 10*page posts (if page is greater than 1)
-        // limit the search to 10 post
-        // populate the user_id field with the username from the User model, otherwise we would just get the user_id associated with the post
-        const posts = await Post.find({user_id: {$in: user.following}}).sort({created_at: -1}).skip(skip).limit(postsPerPage).populate('user_id', 'username');
-        
-        if (!posts || posts.length === 0) {
-            return res.status(404).send({success: true, message: "no posts available at the time"});
-        }
 
-        return res.status(200).send({success: true, message: "posts have been retrieved successfully",data: posts});
+        // Find users by user ID (for profile page) or all users (for feed page)
+        const userPosts = await User.find({ user_id: {
+            $in: context === "profile" ? [userId] : [...user.following, userId]
+        }});
+        
+        // Create a mapping of user_id to posts array
+        const userPostsMap = {};
+        userPosts.forEach(u => {
+            userPostsMap[u.user_id] = u.posts.map(post => JSON.parse(post));
+        });
+
+        // Fetch posts from the Post collection
+        const posts = await Post.find({ user_id: { $in: Object.keys(userPostsMap) } })
+            .sort({ created_at: -1 })
+            .skip(skip)
+            .limit(postsPerPage);
+
+        // Enrich posts with content
+        const enrichedPosts = posts.map(post => {
+            const userPostData = userPostsMap[post.user_id]?.find(userPost => userPost.post_id === post.post_id);
+            return {
+                ...post.toObject(),
+                username: userPosts.find(u => u.user_id === post.user_id).username,
+                content: userPostData ? userPostData.content : null,
+            };
+        });
+
+        return res.status(200).send({
+            success: true,
+            message: "Posts retrieved successfully.",
+            data: enrichedPosts,
+        });
     } catch (error) {
-        // console.log(error)
-        return res.status(500).send({ success: false, message: "internal server error", error: error.message});
+        return res.status(500).send({
+            success: false,
+            message: "Internal server error.",
+            error: error.message,
+        });
     }
 });
+
 
 module.exports = router;

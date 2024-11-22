@@ -22,22 +22,54 @@ const ProfilePage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userIdFromCookie, setUserIdFromCookie] = useState("");
-
+  const [showFollowAlert, setShowFollowAlert] = useState(false);
 
   const coverImgRef = useRef(null);
   const profileImgRef = useRef(null);
 
   const { userId } = useParams(); // get userId from URL parameters
+  
+     // Handle Follow Action
+	const handleFollow = async (targetUserId) => {
+   try {
+     const res = await axios.post('/api/follow', {
+     userID: userIdFromCookie,
+     target_userID: targetUserId,
+     });
+ 
+     if (res.data.success) {
+     console.log(`Successfully followed user: ${targetUserId}`);
+     setShowFollowAlert(true); // Show alert
+     setTimeout(() => setShowFollowAlert(false), 5000); // Hide after 3 seconds
+     
+     } else if (res.data.error) {
+     console.error("Failed to follow user:", res.data.message);
+     }
+   } catch (error) {
+    if (error.response) {
+      // Handle 409 specifically
+      if (error.response.status === 409) {
+        console.error("User is already following this user.");
+        console.error("Error message:", error.response.data.message);
+      } else {
+        // Handle other response errors
+        console.error("Error response:", error.response.data.message);
+      }
+    } else {
+      // Handle network errors or other unexpected issues
+      console.error("Error while following user:", error.message);
+    }
+  }
+   };
 
   useEffect(() => {
     // get user ID from JWT token in cookie
-    const cookieValue = Cookies.get("tuneshare_cookie");
     let currentUserId = "";
+    const cookieValue = Cookies.get("tuneshare_cookie");
     if (cookieValue) {
       const decodedToken = jwtDecode(cookieValue);
       currentUserId = decodedToken.user_id;
       setUserIdFromCookie(currentUserId);
-      console.log("User ID from cookie:", userIdFromCookie);
     } else {
       console.log("No token found in the cookie.");
     }
@@ -52,7 +84,7 @@ const ProfilePage = () => {
         });
 
         if (response.data.success) {
-          console.log(response.data.data);
+          //console.log(response.data.data);
           setUserData(response.data.data.user);
           setPosts(response.data.data.posts);
           setError(null);
@@ -95,6 +127,11 @@ const ProfilePage = () => {
         <div className="flex flex-col">
           {!isLoading && userData && (
             <>
+              {showFollowAlert && (
+                <div className="alert alert-success">
+                  Successfully followed user!
+               </div>
+            )}
               <div className="flex gap-10 px-4 py-2 items-center">
                 <Link to="/">
                   <FaArrowLeft className="w-4 h-4" />
@@ -163,7 +200,10 @@ const ProfilePage = () => {
                 {!isMyProfile && (
                   <button
                     className="btn btn-outline rounded-full btn-sm"
-                    onClick={() => alert("Followed successfully")}
+                    onClick={(e) => {
+											e.preventDefault();
+											handleFollow(userId);			
+										  }} 
                   >
                     Follow
                   </button>
@@ -171,8 +211,9 @@ const ProfilePage = () => {
                 {(coverImg || profileImg) && isMyProfile && (
                   <button
                     className="btn btn-primary rounded-full btn-sm text-white px-4 ml-2"
-                    onClick={() => alert("Profile updated successfully")}
-                  >
+										onClick={(e) => {
+											e.preventDefault();	
+										  }}                  >
                     Update
                   </button>
                 )}
@@ -240,7 +281,7 @@ const ProfilePage = () => {
             </>
           )}
 
-          <Posts posts={posts} />
+          <Posts context="profile" profileUserId={userId} />
         </div>
       </div>
     </>
