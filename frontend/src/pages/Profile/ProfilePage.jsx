@@ -28,9 +28,7 @@ const ProfilePage = () => {
   const profileImgRef = useRef(null);
 
   const { userId } = useParams(); // get userId from URL parameters
-
-
-
+  
      // Handle Follow Action
 	const handleFollow = async (targetUserId) => {
    try {
@@ -66,8 +64,8 @@ const ProfilePage = () => {
 
   useEffect(() => {
     // get user ID from JWT token in cookie
-    const cookieValue = Cookies.get("tuneshare_cookie");
     let currentUserId = "";
+    const cookieValue = Cookies.get("tuneshare_cookie");
     if (cookieValue) {
       const decodedToken = jwtDecode(cookieValue);
       currentUserId = decodedToken.user_id;
@@ -283,7 +281,7 @@ const ProfilePage = () => {
             </>
           )}
 
-          <Posts posts={posts} />
+          <Posts context="profile" profileUserId={userId} />
         </div>
       </div>
     </>

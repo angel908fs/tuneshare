@@ -6,7 +6,7 @@ import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 import toast from 'react-hot-toast';
 
-const CreatePost = () => {
+const CreatePost = ({ onPostCreated }) => {
   const [text, setText] = useState("");
   const [songLink, setSongLink] = useState("");
   const [userID, setUserID] = useState('');
@@ -43,8 +43,9 @@ const CreatePost = () => {
     onSuccess: () => {
       toast.success('Post created successfully!');
       // Reset form fields
-      setText('');
       setSongLink('');
+      setText('');
+      onPostCreated(); // Callback to notify for post updates
     },
     onError: (error) => {
       toast.error('Error creating post: ' + (error.response?.data?.message || error.message));
