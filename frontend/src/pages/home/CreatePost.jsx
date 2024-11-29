@@ -6,12 +6,14 @@ import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 import toast from 'react-hot-toast';
 
+
 const CreatePost = ({ onPostCreated }) => {
-  const [text, setText] = useState("");
-  const [songLink, setSongLink] = useState("");
+  const [text, setText] = useState(""); // for content input
+  const [songQuery, setSongQuery] = useState(""); // for song search query
   const [userID, setUserID] = useState('');
 
-  // retrieve user ID from JWT token in cookie
+
+  // Retrieve user ID from JWT token in cookie
   useEffect(() => {
     const cookieValue = Cookies.get('tuneshare_cookie');
     if (cookieValue) {
@@ -23,7 +25,8 @@ const CreatePost = ({ onPostCreated }) => {
     }
   }, []);
 
-  // mutation to handle post creation
+
+  // Mutation to handle post creation
   const { mutate: createPost, isError, isLoading, error } = useMutation({
     mutationFn: async ({ userID, songLink, content }) => {
       try {
@@ -42,33 +45,54 @@ const CreatePost = ({ onPostCreated }) => {
     },
     onSuccess: () => {
       toast.success('Post created successfully!');
-      // reset form fields
-      setSongLink('');
+      // Reset form fields
+      setSongQuery('');
       setText('');
-      onPostCreated(); // callback to notify for post updates
+      onPostCreated(); // Callback to notify for post updates
     },
     onError: (error) => {
       toast.error('Error creating post: ' + (error.response?.data?.message || error.message));
     },
   });
 
-  // handle form submission
-  const handleSubmit = (e) => {
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!userID) {
       toast.error('User not logged in');
       return;
     }
-    if (!songLink) {
-      toast.error('Please enter a song link');
+    if (!songQuery) {
+      toast.error('Please enter a song name or query');
       return;
     }
     if (!text) {
       toast.error('Please enter some content');
       return;
     }
-    createPost({ userID, songLink, content: text });
+
+
+    try {
+      // Fetch Spotify link using the /search route
+      const searchRes = await axios.get('/api/search', { params: { q: songQuery } });
+
+
+      if (searchRes.data && searchRes.data.data) {
+        const songLink = searchRes.data.data; // Spotify link from search
+
+
+        // Create the post
+        createPost({ userID, songLink, content: text });
+      } else {
+        toast.error('No song found with the provided query.');
+      }
+    } catch (error) {
+      console.error('Error during song search:', error.response || error.message);
+      toast.error('Error searching for the song');
+    }
   };
+
 
   return (
     <div className='flex p-4 items-start gap-4 border-b border-gray-700'>
@@ -87,9 +111,9 @@ const CreatePost = ({ onPostCreated }) => {
         <input
           type='text'
           className='input w-full p-0 text-lg resize-none border-none focus:outline-none border-gray-800'
-          placeholder='Enter song link'
-          value={songLink}
-          onChange={(e) => setSongLink(e.target.value)}
+          placeholder='Enter song name or link'
+          value={songQuery}
+          onChange={(e) => setSongQuery(e.target.value)}
         />
         <div className='flex justify-between border-t py-2 border-t-gray-700'>
           <div className='flex gap-1 items-center'>
@@ -111,4 +135,7 @@ const CreatePost = ({ onPostCreated }) => {
   );
 };
 
+
 export default CreatePost;
+
+
