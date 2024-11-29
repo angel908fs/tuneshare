@@ -9,9 +9,8 @@ import toast from 'react-hot-toast';
 
 const CreatePost = ({ onPostCreated }) => {
   const [text, setText] = useState(""); // for content input
-  const [songQuery, setSongQuery] = useState(""); // for song search query
+  const [songQuery, setSongQuery] = useState(""); // for song search query or link
   const [userID, setUserID] = useState('');
-
 
   // Retrieve user ID from JWT token in cookie
   useEffect(() => {
@@ -24,7 +23,6 @@ const CreatePost = ({ onPostCreated }) => {
       console.log('No token found in the cookie.');
     }
   }, []);
-
 
   // Mutation to handle post creation
   const { mutate: createPost, isError, isLoading, error } = useMutation({
@@ -55,6 +53,15 @@ const CreatePost = ({ onPostCreated }) => {
     },
   });
 
+  // Function to check if input is a valid URL
+  const isValidURL = (str) => {
+    try {
+      new URL(str);
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   // Handle form submission
   const handleSubmit = async (e) => {
@@ -64,7 +71,7 @@ const CreatePost = ({ onPostCreated }) => {
       return;
     }
     if (!songQuery) {
-      toast.error('Please enter a song name or query');
+      toast.error('Please enter a song name or link');
       return;
     }
     if (!text) {
@@ -72,27 +79,31 @@ const CreatePost = ({ onPostCreated }) => {
       return;
     }
 
+    let songLink = "";
 
-    try {
-      // Fetch Spotify link using the /search route
-      const searchRes = await axios.get('/api/search', { params: { q: songQuery } });
-
-
-      if (searchRes.data && searchRes.data.data) {
-        const songLink = searchRes.data.data; // Spotify link from search
-
-
-        // Create the post
-        createPost({ userID, songLink, content: text });
-      } else {
-        toast.error('No song found with the provided query.');
+    if (isValidURL(songQuery)) {
+      // Use the provided link directly if it's a valid URL
+      songLink = songQuery;
+    } else {
+      try {
+        // Fetch Spotify link using the /search route
+        const searchRes = await axios.get('/api/search', { params: { q: songQuery } });
+        if (searchRes.data && searchRes.data.data) {
+          songLink = searchRes.data.data; // Spotify link from search
+        } else {
+          toast.error('No song found with the provided query.');
+          return;
+        }
+      } catch (error) {
+        console.error('Error during song search:', error.response || error.message);
+        toast.error('Error searching for the song');
+        return;
       }
-    } catch (error) {
-      console.error('Error during song search:', error.response || error.message);
-      toast.error('Error searching for the song');
     }
-  };
 
+    // Create the post
+    createPost({ userID, songLink, content: text });
+  };
 
   return (
     <div className='flex p-4 items-start gap-4 border-b border-gray-700'>
@@ -135,7 +146,4 @@ const CreatePost = ({ onPostCreated }) => {
   );
 };
 
-
 export default CreatePost;
-
-
