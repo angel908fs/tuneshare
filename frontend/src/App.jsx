@@ -1,6 +1,6 @@
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import Cookies from 'js-cookie'; // assuming you use js-cookie for handling cookies
+import Cookies from 'js-cookie'; 
 
 import HomePage from './pages/home/HomePage';
 import LoginPage from './pages/auth/Login/LoginPage';
@@ -10,8 +10,8 @@ import ProfilePage from './pages/Profile/ProfilePage';
 
 import LeftPanel from './components/common/Sidebar';
 import RightPanel from './components/common/Rightbar';
-import { Toaster } from 'react-hot-toast'; // adds flare aka notifications on doing something
-import { QueryClient, QueryClientProvider } from 'react-query'; // or correct source
+import { Toaster } from 'react-hot-toast'; 
+import { QueryClient, QueryClientProvider } from 'react-query'; 
 
 const queryClient = new QueryClient();
 

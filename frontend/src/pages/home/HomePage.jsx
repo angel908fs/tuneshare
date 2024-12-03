@@ -6,10 +6,10 @@ import CreatePost from "./CreatePost";
 const HomePage = () => {
 	const [feedType, setFeedType] = useState("Trending");
 
-	const [feedKey, setFeedKey] = useState(0); // Key to force re-render posts
+	const [feedKey, setFeedKey] = useState(0); // key to force re-render posts
 
     const handlePostCreated = () => {
-        setFeedKey((prevKey) => prevKey + 1); // Increment key to refresh them
+        setFeedKey((prevKey) => prevKey + 1); // increment key to refresh them
     };
 
 	return (

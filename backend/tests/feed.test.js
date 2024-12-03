@@ -4,8 +4,8 @@ const router = require("../routes/feed.js");
 const User = require("../models/user.js");
 const Post = require("../models/post.js");
 
-jest.mock("../models/user.js"); // Mock User model
-jest.mock("../models/post.js"); // Mock Post model
+jest.mock("../models/user.js");
+jest.mock("../models/post.js");
 
 const app = express();
 app.use(express.json());
@@ -13,7 +13,7 @@ app.use("/", router);
 
 describe("POST /load-feed", () => {
     beforeEach(() => {
-        jest.clearAllMocks(); // Clear mocks before each test
+        jest.clearAllMocks(); // clear mocks before each test
     });
 
     it("should return 400 if userID is missing", async () => {
@@ -44,7 +44,7 @@ describe("POST /load-feed", () => {
     });
 
     it("should return 404 if user is not found", async () => {
-        User.findOne.mockResolvedValueOnce(null); // Mock user not found
+        User.findOne.mockResolvedValueOnce(null); // mock user not found
 
         const res = await request(app)
             .post("/load-feed")
@@ -61,7 +61,7 @@ describe("POST /load-feed", () => {
             sort: jest.fn().mockReturnThis(),
             skip: jest.fn().mockReturnThis(),
             limit: jest.fn().mockReturnThis(),
-            populate: jest.fn().mockResolvedValueOnce([])  // No posts found
+            populate: jest.fn().mockResolvedValueOnce([])  // no posts found
         }));
 
         const res = await request(app)
@@ -81,7 +81,7 @@ describe("POST /load-feed", () => {
             sort: jest.fn().mockReturnThis(),
             skip: jest.fn().mockReturnThis(),
             limit: jest.fn().mockReturnThis(),
-            populate: jest.fn().mockResolvedValueOnce(mockPosts)  // Posts found
+            populate: jest.fn().mockResolvedValueOnce(mockPosts)  // some posts found
         }));
 
         const res = await request(app)

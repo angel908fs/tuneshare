@@ -1,35 +1,34 @@
 const mongoose = require('mongoose');
-const { v4: uuidv4 } = require('uuid');    // For generating UUIDs (User IDs)
+const { v4: uuidv4 } = require('uuid');   
 
 
 // User Schema
 const userSchema = new mongoose.Schema(
     {   
-        // Personal User data
+        // personal user data
         username:{type: String,maxlength: 16, required: true, unique: true},
         email:{type: String,required: true, unique: true},
         user_id:{type: String, default: uuidv4},
         password:{type: String, required: true},
 
-        // Profile specific data
-        followers:[{type: String, ref: 'User'}],                // The type is a mongo object (i.e. another user)
+        // profile specific data
+        followers:[{type: String, ref: 'User'}],  
         following:[{type: String, ref: 'User'}],
         bio:{type: String, maxlength: 256},    
         
         followers_count: { type: Number, default: 0 },
         following_count: { type: Number, default: 0 },
 
-        posts:[{type: String, ref: 'Post'}],                    // A whole schema needs to be created for this seperately (export as 'Post'), but it's here for referance
-        profile_picture:{type: String},                                               // This wont actually hold a picture, but maybe a URL due to DB size restraints 
+        posts:[{type: String, ref: 'Post'}], 
+        profile_picture:{type: String}, 
     
-        // API Keys
+        // API keys
         user_api_key:{type: String},             // Holds user's temp API key (If they are signed into spotify) -> This is a future implementation
 
     }, 
 
-    {timestamps: true}                // Generates 'createdAT' and 'updatedAt' timestamps
+    {timestamps: true}                // generates 'createdAT' and 'updatedAt' timestamps
 ); 
 
-// Create and export the User model
 const User = mongoose.model('User', userSchema);
 module.exports = User;

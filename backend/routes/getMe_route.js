@@ -15,5 +15,5 @@ router.get('/me', authToken,async (req, res) => {
 });
 export default router;
 
-// Goes into server.js : app.use('/api',getMe); getMe or whatever you want to call it
+// goes into server.js : app.use('/api',getMe); getMe or whatever you want to call it
 // it will go above everything
