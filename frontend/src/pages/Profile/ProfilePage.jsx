@@ -11,6 +11,7 @@ import EditProfileModal from "./EditProfileModal";
 import { FaArrowLeft } from "react-icons/fa6";
 import { IoCalendarOutline } from "react-icons/io5";
 import { MdEdit } from "react-icons/md";
+import toast from "react-hot-toast";
 
 const ProfilePage = () => {
   const [coverImg, setCoverImg] = useState(null);
@@ -39,18 +40,21 @@ const ProfilePage = () => {
  
      if (res.data.success) {
      console.log(`Successfully followed user: ${targetUserId}`);
+     toast.success("successfully followed user");
      setShowFollowAlert(true); // show alert
      setTimeout(() => setShowFollowAlert(false), 5000); // hide after 3 seconds
      
      } else if (res.data.error) {
-     console.error("Failed to follow user:", res.data.message);
+        toast.error("could not follow user");
+        console.error("Failed to follow user:", res.data.message);
      }
    } catch (error) {
     if (error.response) {
       // handle 409 specifically
       if (error.response.status === 409) {
-        console.error("User is already following this user.");
-        console.error("Error message:", error.response.data.message);
+        toast.success("user is already being followed");
+        console.log("User is already following this user.");
+        console.log("Error message:", error.response.data.message);
       } else {
         // handle other response errors
         console.error("Error response:", error.response.data.message);
