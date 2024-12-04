@@ -22,7 +22,7 @@ describe("POST /load-feed", () => {
             .send({ page: 1 });
 
         expect(res.statusCode).toBe(400);
-        expect(res.body).toEqual({ success: false, message: "missing user id in request body" });
+        expect(res.body).toEqual({ success: false, message: "Invalid request parameters." });
     });
 
     it("should return 400 if page is missing", async () => {
@@ -31,7 +31,7 @@ describe("POST /load-feed", () => {
             .send({ userid: "1" });
 
         expect(res.statusCode).toBe(400);
-        expect(res.body).toEqual({ success: false, message: "missing page in request body" });
+        expect(res.body).toEqual({ success: false, message: "Invalid request parameters." });
     });
 
     it("should return 400 if page is less than 1", async () => {
@@ -40,7 +40,7 @@ describe("POST /load-feed", () => {
             .send({ userid: "1", page: 0 });
 
         expect(res.statusCode).toBe(400);
-        expect(res.body).toEqual({ success: false, message: "page parameter must be greater than or equal to 1" });
+        expect(res.body).toEqual({ success: false, message: "Invalid request parameters." });
     });
 
     it("should return 404 if user is not found", async () => {
@@ -51,10 +51,10 @@ describe("POST /load-feed", () => {
             .send({ userid: "1", page: 1 });
 
         expect(res.statusCode).toBe(404);
-        expect(res.body).toEqual({ success: false, message: "user not found" });
+        expect(res.body).toEqual({ success: false, message: "User not found." });
     });
 
-    it("should return 404 if no posts are available", async () => {
+    it("should return 200 if no posts are available", async () => {
         const mockUser = { user_id: "1", following: ["2", "3"] };
         User.findOne.mockResolvedValueOnce(mockUser);
         Post.find.mockImplementation(() => ({
@@ -68,15 +68,24 @@ describe("POST /load-feed", () => {
             .post("/load-feed")
             .send({ userid: "1", page: 1 });
 
-        expect(res.statusCode).toBe(404);
+        expect(res.statusCode).toBe(200);
         expect(res.body).toEqual({ success: true, message: "no posts available at the time" });
     });
 
     it("should return 200 with posts if posts are found", async () => {
-        const mockUser = { user_id: "1", following: ["2", "3"] };
-        const mockPosts = [{ _id: "post1", user_id: { username: "user2" }, content: "Post content" }];
+        const mockUser = { user_id: "1", following: ["2", "3"], posts: [
+            '{"post_id": "post1","content":"Post content 1"}',
+            '{"post_id": "post2","content":"Post content 2"}',
+        ],
+     };
+        const mockPosts = [{ _id: "post1", user_id: { username: "user2" }, content: "Post content",
+        toObject: jest.fn().mockReturnValue({
+            _id: "post1", user_id: "1", content: "Post content 1",
+        }),
+     }];
 
         User.findOne.mockResolvedValueOnce(mockUser);
+        User.find.mockResolvedValueOnce(mockUser);
         Post.find.mockImplementation(() => ({
             sort: jest.fn().mockReturnThis(),
             skip: jest.fn().mockReturnThis(),
@@ -89,7 +98,7 @@ describe("POST /load-feed", () => {
             .send({ userid: "1", page: 1 });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body).toEqual({ success: true, message: "posts have been retrieved successfully", data: mockPosts });
+        expect(res.body).toEqual({ success: true, message: "Posts retrieved successfully.", data: mockPosts });
     });
 
     it("should return 500 if there is a server error", async () => {
@@ -100,6 +109,6 @@ describe("POST /load-feed", () => {
             .send({ userid: "1", page: 1 });
 
         expect(res.statusCode).toBe(500);
-        expect(res.body).toEqual({ success: false, message: "internal server error", error: "Database error" });
+        expect(res.body).toEqual({ success: false, message: "Internal server error.", error: "Database error" });
     });
 });
