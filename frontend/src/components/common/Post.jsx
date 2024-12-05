@@ -112,46 +112,73 @@ const Post = ({ post }) => {
                         )}
                         <span>{post.content || "<no content specified>"}</span>
                         {post.song_link && (
-                            <div className="spotify-metadata mt-3 p-3 border border-gray-700 rounded">
-                                <a
-                                    href={post.song_link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-500"
-                                >
-                                    {post.song_link}
-                                </a>
-                                {trackMetadata && (
-                                    <div className="song-details mt-2 flex flex-col items-start">
-                                        {trackMetadata.album.images[0] && (
-                                            <img
-                                                src={trackMetadata.album.images[0].url}
-                                                alt="Song Cover"
-                                                className="w-32 h-32 rounded-lg object-cover"
-                                            />
-                                        )}
-                                        <p className="mt-2">
-                                            <strong>Song:</strong> {trackMetadata.name}
-                                        </p>
-                                        <p>
-                                            <strong>Artist:</strong>{" "}
-                                            {trackMetadata.artists.map((artist) => artist.name).join(", ")}
-                                        </p>
-                                        <p>
-                                            <strong>Album:</strong> {trackMetadata.album.name}
-                                        </p>
-                                        {trackMetadata.preview_url && (
-                                            <audio
-                                                className="mt-2"
-                                                controls
-                                                src={trackMetadata.preview_url}
+                            <div className="spotify-metadata mt-3 p-12 border border-gray-700 rounded relative overflow-hidden">
+                            {trackMetadata && (
+                                <>
+                                    {/* Background Blur Effect */}
+                                    {trackMetadata.album.images[0] && (
+                                        <div
+                                            className="absolute inset-0 -z-10 bg-cover bg-center"
+                                            style={{
+                                                backgroundImage: `url(${trackMetadata.album.images[0].url})`,
+                                                filter: "blur(20px) brightness(0.5)", // Darker blur effect
+                                            }}
+                                        ></div>
+                                    )}
+                        
+                                    <div className="flex gap-4 items-center relative">
+                                        {/* Left Column: Album Cover */}
+                                        <div className="w-1/2 flex justify-center items-center">
+                                            {trackMetadata.album.images[0] && (
+                                                <a
+                                                    href={post.song_link}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    <img
+                                                        src={trackMetadata.album.images[0].url}
+                                                        alt="Song Cover"
+                                                        className="w-50 h-50 rounded-lg object-cover hover:opacity-80 transition-opacity duration-200"
+                                                    />
+                                                </a>
+                                            )}
+                                        </div>
+                        
+                                        {/* Right Column: Song Metadata */}
+                                        <div className="w-1/2 flex flex-col justify-center">
+                                            {/* Transparent Effect */}
+                                            <div
+                                                style={{
+                                                    color: "rgba(255, 255, 255, 0.6)", // More transparent white
+                                                    textShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)", // Shadow for readability
+                                                }}
                                             >
-                                                Your browser does not support the audio element.
-                                            </audio>
-                                        )}
+                                                {/* Song Name */}
+                                                <a
+                                                    href={post.song_link}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-3xl font-bold hover:underline"
+                                                >
+                                                    {trackMetadata.name}
+                                                </a>
+                                                {/* Artist */}
+                                                <p className="text-lg mt-2">
+                                                    {trackMetadata.artists
+                                                        .map((artist) => artist.name)
+                                                        .join(", ")}
+                                                </p>
+                                                {/* Album */}
+                                                <p className="text-sm mt-1">
+                                                    <strong>Album:</strong> {trackMetadata.album.name}
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
-                                )}
-                            </div>
+                                </>
+                            )}
+                        </div>
+                                   
                         )}
                     </div>
                     <div className="flex justify-between mt-3">
