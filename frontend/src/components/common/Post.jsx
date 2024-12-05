@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
-// Spotify API Functions
+// get access token
 const getSpotifyAccessToken = async () => {
     const client_id = import.meta.env.VITE_CLIENT_ID;
     const client_secret = import.meta.env.VITE_CLIENT_SECRET;
@@ -25,15 +25,13 @@ const getSpotifyAccessToken = async () => {
         }
     );
 
-    return response.data.access_token; // Return the access token
+    return response.data.access_token;
 };
 
 const getSpotifyTrackMetadata = async (spotifyUrl) => {
     try {
         const trackId = spotifyUrl.split("/track/")[1].split("?")[0];
         const token = await getSpotifyAccessToken();
-
-        // Replace 'US' with the desired market code
         const market = 'US';
 
         const response = await axios.get(`https://api.spotify.com/v1/tracks/${trackId}`, {
@@ -41,12 +39,12 @@ const getSpotifyTrackMetadata = async (spotifyUrl) => {
                 Authorization: `Bearer ${token}`,
             },
             params: {
-                market, // Include the market parameter
+                market, 
             },
         });
         
         console.log("Track Metadata:", response.data);
-        return response.data; // Track metadata
+        return response.data;
     } catch (error) {
         console.error("Error fetching track metadata:", error);
     }
@@ -115,42 +113,38 @@ const Post = ({ post }) => {
                             <div className="spotify-metadata mt-3 p-12 border border-gray-700 rounded relative overflow-hidden">
                             {trackMetadata && (
                                 <>
-                                    {/* Background Blur Effect */}
                                     {trackMetadata.album.images[0] && (
                                         <div
                                             className="absolute inset-0 -z-10 bg-cover bg-center"
                                             style={{
                                                 backgroundImage: `url(${trackMetadata.album.images[0].url})`,
-                                                filter: "blur(20px) brightness(0.5)", // Darker blur effect
+                                                filter: "blur(20px) brightness(0.5)",
                                             }}
                                         ></div>
                                     )}
                         
                                     <div className="flex gap-4 items-center relative">
-                                        {/* Left Column: Album Cover */}
                                         <div className="w-1/2 flex justify-center items-center">
                                             {trackMetadata.album.images[0] && (
                                                 <a
                                                     href={post.song_link}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                >
+                                                > {/* Album Cover */}
                                                     <img
-                                                        src={trackMetadata.album.images[0].url}
+                                                        src={trackMetadata.album.images[0].url} 
                                                         alt="Song Cover"
-                                                        className="w-50 h-50 rounded-lg object-cover hover:opacity-80 transition-opacity duration-200"
+                                                        className="w-50 h-50 rounded-lg object-cover transition-transform duration-300 transform hover:scale-110"
                                                     />
                                                 </a>
                                             )}
                                         </div>
                         
-                                        {/* Right Column: Song Metadata */}
                                         <div className="w-1/2 flex flex-col justify-center">
-                                            {/* Transparent Effect */}
                                             <div
                                                 style={{
-                                                    color: "rgba(255, 255, 255, 0.6)", // More transparent white
-                                                    textShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)", // Shadow for readability
+                                                    color: "rgba(255, 255, 255, 0.6)", 
+                                                    textShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)", 
                                                 }}
                                             >
                                                 {/* Song Name */}
@@ -178,6 +172,7 @@ const Post = ({ post }) => {
                                 </>
                             )}
                         </div>
+                        
                                    
                         )}
                     </div>
