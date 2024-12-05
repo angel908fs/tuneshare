@@ -11,9 +11,6 @@ import axios from "axios";
 const getSpotifyAccessToken = async () => {
     const client_id = import.meta.env.VITE_CLIENT_ID;
     const client_secret = import.meta.env.VITE_CLIENT_SECRET;
-    console.log("Client ID:", import.meta.env.VITE_CLIENT_ID);
-console.log("Client Secret:", import.meta.env.VITE_CLIENT_SECRET);
-
 
     const response = await axios.post(
         "https://accounts.spotify.com/api/token",
@@ -36,12 +33,19 @@ const getSpotifyTrackMetadata = async (spotifyUrl) => {
         const trackId = spotifyUrl.split("/track/")[1].split("?")[0];
         const token = await getSpotifyAccessToken();
 
+        // Replace 'US' with the desired market code
+        const market = 'US';
+
         const response = await axios.get(`https://api.spotify.com/v1/tracks/${trackId}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
+            params: {
+                market, // Include the market parameter
+            },
         });
-
+        
+        console.log("Track Metadata:", response.data);
         return response.data; // Track metadata
     } catch (error) {
         console.error("Error fetching track metadata:", error);
@@ -108,7 +112,7 @@ const Post = ({ post }) => {
                         )}
                         <span>{post.content || "<no content specified>"}</span>
                         {post.song_link && (
-                            <div className="spotify-metadata">
+                            <div className="spotify-metadata mt-3 p-3 border border-gray-700 rounded">
                                 <a
                                     href={post.song_link}
                                     target="_blank"
@@ -118,8 +122,15 @@ const Post = ({ post }) => {
                                     {post.song_link}
                                 </a>
                                 {trackMetadata && (
-                                    <div className="song-details mt-2">
-                                        <p>
+                                    <div className="song-details mt-2 flex flex-col items-start">
+                                        {trackMetadata.album.images[0] && (
+                                            <img
+                                                src={trackMetadata.album.images[0].url}
+                                                alt="Song Cover"
+                                                className="w-32 h-32 rounded-lg object-cover"
+                                            />
+                                        )}
+                                        <p className="mt-2">
                                             <strong>Song:</strong> {trackMetadata.name}
                                         </p>
                                         <p>
@@ -129,6 +140,15 @@ const Post = ({ post }) => {
                                         <p>
                                             <strong>Album:</strong> {trackMetadata.album.name}
                                         </p>
+                                        {trackMetadata.preview_url && (
+                                            <audio
+                                                className="mt-2"
+                                                controls
+                                                src={trackMetadata.preview_url}
+                                            >
+                                                Your browser does not support the audio element.
+                                            </audio>
+                                        )}
                                     </div>
                                 )}
                             </div>
