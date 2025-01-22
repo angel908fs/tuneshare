@@ -7,6 +7,7 @@
 * Bryan Camarillo
 * Ryan Moua
 * Pineapple Wang
+* Suada Ly
 
 ## Requirements
 These are the requirements needed to run TuneShare
