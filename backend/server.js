@@ -16,6 +16,7 @@ const followUserRoutes = require('./routes/follow_route.js');
 const createPostRoutes = require('./routes/post_creation.js');
 const profileRoutes = require('./routes/profile.js');
 const userSearchRoutes = require('./routes/user_search.js')
+const likesRoutes = require('./routes/likes.js');
 
 dotenv.config();
 const PORT = 8080;
@@ -41,6 +42,7 @@ app.use('/api', followUserRoutes);
 app.use('/api', createPostRoutes);
 app.use('/api', profileRoutes);
 app.use('/api', userSearchRoutes)
+app.use('/api', likesRoutes);
 
 app.use(defaultRoute);
 app.use(invalidRoutes); // THIS HAS TO STAY LAST
