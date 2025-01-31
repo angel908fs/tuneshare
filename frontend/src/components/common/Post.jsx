@@ -51,10 +51,20 @@ const getSpotifyTrackMetadata = async (spotifyUrl) => {
     }
 };
 
+const getLikeCount = async (postID) => {
+    console.log("post id" + postID);
+    const res = await axios.post('/api/like-count', {
+        postID: postID,
+    });
+    console.log(res);
+    return res.data.likes | 0;
+}
+
 const Post = ({ post }) => {
     const [comment, setComment] = useState("");
     const [trackMetadata, setTrackMetadata] = useState(null);
     const [isLiked, setIsLiked] = useState(false);
+    const [likes, setLikes] = useState(null)
 
 
     const postOwner = post;
@@ -72,6 +82,9 @@ const Post = ({ post }) => {
             }
         };
         fetchMetadata();
+        const likes = getLikeCount(postID);
+    
+
 
         // get user ID from JWT token in cookie
         let currentUserId = "";
