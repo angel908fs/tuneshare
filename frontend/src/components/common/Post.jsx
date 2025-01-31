@@ -6,6 +6,8 @@ import { FaTrash } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import Cookies from "js-cookie";
+import { jwtDecode } from "jwt-decode";
 
 // get access token
 const getSpotifyAccessToken = async () => {
@@ -43,7 +45,6 @@ const getSpotifyTrackMetadata = async (spotifyUrl) => {
             },
         });
         
-        console.log("Track Metadata:", response.data);
         return response.data;
     } catch (error) {
         console.error("Error fetching track metadata:", error);
@@ -53,12 +54,15 @@ const getSpotifyTrackMetadata = async (spotifyUrl) => {
 const Post = ({ post }) => {
     const [comment, setComment] = useState("");
     const [trackMetadata, setTrackMetadata] = useState(null);
+    const [isLiked, setIsLiked] = useState(false);
+
 
     const postOwner = post;
-    const isLiked = false;
     const isMyPost = true;
     const formattedDate = "1h";
     const isCommenting = false;
+    const postID = post.post_id;
+    const [userIdFromCookie, setUserIdFromCookie] = useState("");
 
     useEffect(() => {
         const fetchMetadata = async () => {
@@ -68,13 +72,38 @@ const Post = ({ post }) => {
             }
         };
         fetchMetadata();
+
+        // get user ID from JWT token in cookie
+        let currentUserId = "";
+        const cookieValue = Cookies.get("tuneshare_cookie");
+        if (cookieValue) {
+          const decodedToken = jwtDecode(cookieValue);
+          currentUserId = decodedToken.user_id;
+          setUserIdFromCookie(currentUserId);
+        } else {
+          console.log("No token found in the cookie.");
+        }
     }, [post.song_link]);
 
     const handleDeletePost = () => {};
     const handlePostComment = (e) => {
         e.preventDefault();
     };
-    const handleLikePost = () => {};
+    const handleLikePost = async () => {
+        if (isLiked) {
+            const res = await axios.post('/api/like', {
+                postID: postID,
+            });
+            setIsLiked(true);
+            console.log(res);
+        } else {
+            const res = await axios.post('/api/unlike', {
+                postID: postID,
+            });
+            setIsLiked(false);
+            console.log(res);
+        }
+    };
 
     return (
         <>
