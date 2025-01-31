@@ -82,7 +82,7 @@ const Post = ({ post }) => {
             }
         };
         fetchMetadata();
-        const likes = getLikeCount(postID);
+        setLikes(post.likes || 0);
     
 
 
@@ -103,19 +103,24 @@ const Post = ({ post }) => {
         e.preventDefault();
     };
     const handleLikePost = async () => {
-        if (isLiked) {
-            const res = await axios.post('/api/like', {
-                postID: postID,
-            });
-            setIsLiked(true);
-            console.log(res);
-        } else {
-            const res = await axios.post('/api/unlike', {
-                postID: postID,
-            });
-            setIsLiked(false);
-            console.log(res);
+        try {
+            let newLikes;
+            if (isLiked) {
+                const res = await axios.post('/api/unlike', { postID: postID });
+                if (res.status == 200) newLikes = likes - 1; 
+                setIsLiked(false);
+            } else {
+                const res = await axios.post('/api/like', { postID: postID });
+                if (res.status == 200) newLikes = likes + 1; 
+                setIsLiked(true);
+            }
+    
+            setLikes(newLikes);
+            console.log(`Updated likes count: ${newLikes}`);
+        } catch (error) {
+            console.error("Error updating likes:", error);
         }
+    
     };
 
     return (
@@ -297,7 +302,7 @@ const Post = ({ post }) => {
                                         isLiked ? "text-pink-500" : ""
                                     }`}
                                 >
-                                    {post.likes.length}
+                                    {likes}
                                 </span>
                             </div>
                         </div>
