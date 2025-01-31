@@ -51,7 +51,7 @@ router.post("/unlike", async (req, res) => {
 
 // get method to get like counts 
 // takes in a postID value and returns a number representing the like count of a post
-router.get("/like-count", async (req, res) => {
+router.post("/like-count", async (req, res) => {
     if (!req.body.postID) {
         return res.status(400).send({ success: false, message: "Missing required parameter: postID" });
     }

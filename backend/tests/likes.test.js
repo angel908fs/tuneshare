@@ -112,13 +112,13 @@ describe("POST /unlike", () => {
     });
 });
 
-describe("GET /like", () => {
+describe("POST /like", () => {
     beforeEach(() => {
         jest.clearAllMocks(); 
     });
 
     it("should return 400 if postID is missing", async () => {
-        const res = await request(app).get("/like-count").send({});
+        const res = await request(app).post("/like-count").send({});
 
         expect(res.statusCode).toBe(400);
         expect(res.body).toEqual({success: false, message: "Missing required parameter: postID"});
@@ -127,7 +127,7 @@ describe("GET /like", () => {
     it("should return 404 if the post does not exist", async () => {
         Post.findOne.mockResolvedValueOnce(null);
 
-        const res = await request(app).get("/like-count").send({postID: postID});
+        const res = await request(app).post("/like-count").send({postID: postID});
 
         expect(res.statusCode).toBe(404);
         expect(res.body).toEqual({success: false, message: "Post does not exist"});
@@ -137,7 +137,7 @@ describe("GET /like", () => {
         const mockPost = {post_id: postID, likes: 10};
         Post.findOne.mockResolvedValueOnce(mockPost); 
 
-        const res = await request(app).get("/like-count").send({postID: postID});
+        const res = await request(app).post("/like-count").send({postID: postID});
 
         expect(res.statusCode).toBe(200);
         expect(res.body).toEqual({success: true, message: "like count retrieved successfully", data: {likes: 10}});
@@ -147,7 +147,7 @@ describe("GET /like", () => {
         // Simulate a database error
         Post.findOne.mockRejectedValueOnce(new Error("Database error"));
 
-        const res = await request(app).get("/like-count").send({postID: postID});
+        const res = await request(app).post("/like-count").send({postID: postID});
 
         expect(res.statusCode).toBe(500);
         expect(res.body).toEqual({success: false, message: "Server error", error: "Database error"});
