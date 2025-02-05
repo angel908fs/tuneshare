@@ -45,18 +45,35 @@ router.post("/unlike", async (req, res) => {
     if (!req.body.postID) {
         return res.status(400).send({ success: false, message: "Missing required parameter: postID" });
     }
+    if (!req.body.userID) {
+        return res.status(400).send({ success: false, message: "Missing required parameter: userID" });
+    }
 
     const postID = req.body.postID;
+    const userID = req.body.userID;
 
     try {
         const post = await Post.findOne({post_id: postID});
+        const user = await User.findOne({user_id: userID})
+
         if (!post) {
-           if(!post){ return res.status(404).send({success: false, message: "Post does not exist" });}
+           return res.status(404).send({success: false, message: "Post does not exist" });
         }
-        if (post.likes > 0) { // add this check to avoid having negative like counts
+        if (!user) {
+            return res.status(404).send({success: false, message: "User does not exist" });
+        }
+        
+        if (!user.liked_posts.includes(postID)) {
+            return res.status(400).send({ success: false, message: "cannot unlike post that has not been liked" });
+        }
+        user.liked_posts = user.liked_posts.filter(id => id !== postID);
+        await user.save();
+        
+        if (post.likes > 0) {
             post.likes -= 1;
-        } 
-        await post.save();
+            await post.save();
+        }
+            
         return res.status(200).send({success: true, message: "post unliked successfully"})
     } catch (error) {
         return res.status(500).send({success: false, message: "Server error", error: error.message});
