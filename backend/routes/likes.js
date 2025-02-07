@@ -112,4 +112,23 @@ router.post("/like-count", async (req, res) => {
 
 });
 
+router.post("/user-liked-posts", async (req, res) => {
+    if (!req.body.userID) {
+        return res.status(400).send({ success: false, message: "Missing required parameter: userID" });
+    }
+
+    const userID = req.body.userID;
+
+    try {
+        const user = await User.findOne({ user_id: userID });
+        if (!user) {
+            return res.status(404).send({ success: false, message: "User does not exist" });
+        }
+
+        return res.status(200).send({ success: true, message: "user likes retrieved successfully", data: {liked_posts: user.liked_posts} });
+    } catch (error) {
+        return res.status(500).send({ success: false, message: "Server error", error: error.message });
+    }
+});
+
 module.exports = router;

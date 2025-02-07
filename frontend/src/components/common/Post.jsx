@@ -60,11 +60,11 @@ const getLikeCount = async (postID) => {
     return res.data.likes | 0;
 }
 
-const Post = ({ post }) => {
+const Post = ({ post, likedPosts }) => {
     const [comment, setComment] = useState("");
     const [trackMetadata, setTrackMetadata] = useState(null);
     const [isLiked, setIsLiked] = useState(false);
-    const [likes, setLikes] = useState(null)
+    const [likes, setLikes] = useState(null);
 
 
     const postOwner = post;
@@ -96,6 +96,10 @@ const Post = ({ post }) => {
         } else {
           console.log("No token found in the cookie.");
         }
+        console.log(likedPosts);
+        if (likedPosts.data.liked_posts.includes(postID)) {
+            setIsLiked(true);
+        }
     }, [post.song_link]);
 
     const handleDeletePost = () => {};
@@ -106,11 +110,11 @@ const Post = ({ post }) => {
         try {
             let newLikes;
             if (isLiked) {
-                const res = await axios.post('/api/unlike', { postID: postID });
+                const res = await axios.post('/api/unlike', { postID: postID, userID: userIdFromCookie});
                 if (res.status == 200) newLikes = likes - 1; 
                 setIsLiked(false);
             } else {
-                const res = await axios.post('/api/like', { postID: postID });
+                const res = await axios.post('/api/like', { postID: postID, userID: userIdFromCookie });
                 if (res.status == 200) newLikes = likes + 1; 
                 setIsLiked(true);
             }
