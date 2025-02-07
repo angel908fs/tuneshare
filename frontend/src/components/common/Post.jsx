@@ -7,6 +7,8 @@ import { FaPlay, FaPause } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import Cookies from "js-cookie";
+import { jwtDecode } from "jwt-decode";
 
 // Get Spotify Access Token
 const getSpotifyAccessToken = async () => {
@@ -107,17 +109,31 @@ get30SecPreview(spotifySongUrl).then(previewUrl => {
     }
 });
 
+const getLikeCount = async (postID) => {
+    console.log("post id" + postID);
+    const res = await axios.post('/api/like-count', {
+        postID: postID,
+    });
+    console.log(res);
+    return res.data.likes | 0;
+}
+
+
 const Post = ({ post }) => {
     const [comment, setComment] = useState("");
     const [trackMetadata, setTrackMetadata] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);  // Track playback state
+    const [isLiked, setIsLiked] = useState(false);
+    const [likes, setLikes] = useState(null)
+
 
     const postOwner = post;
-    const isLiked = false;
     const isMyPost = true;
     const formattedDate = "1h";
     const isCommenting = false;
+    const postID = post.post_id;
+    const [userIdFromCookie, setUserIdFromCookie] = useState("");
 
     useEffect(() => {
         const fetchMetadata = async () => {
@@ -127,13 +143,46 @@ const Post = ({ post }) => {
             }
         };
         fetchMetadata();
+        setLikes(post.likes || 0);
+    
+
+
+        // get user ID from JWT token in cookie
+        let currentUserId = "";
+        const cookieValue = Cookies.get("tuneshare_cookie");
+        if (cookieValue) {
+          const decodedToken = jwtDecode(cookieValue);
+          currentUserId = decodedToken.user_id;
+          setUserIdFromCookie(currentUserId);
+        } else {
+          console.log("No token found in the cookie.");
+        }
     }, [post.song_link]);
 
     const handleDeletePost = () => {};
     const handlePostComment = (e) => {
         e.preventDefault();
     };
-    const handleLikePost = () => {};
+    const handleLikePost = async () => {
+        try {
+            let newLikes;
+            if (isLiked) {
+                const res = await axios.post('/api/unlike', { postID: postID });
+                if (res.status == 200) newLikes = likes - 1; 
+                setIsLiked(false);
+            } else {
+                const res = await axios.post('/api/like', { postID: postID });
+                if (res.status == 200) newLikes = likes + 1; 
+                setIsLiked(true);
+            }
+    
+            setLikes(newLikes);
+            console.log(`Updated likes count: ${newLikes}`);
+        } catch (error) {
+            console.error("Error updating likes:", error);
+        }
+    
+    };
 
     const togglePlayPause = async () => {
         if (!post.song_link) return;
@@ -278,6 +327,15 @@ const Post = ({ post }) => {
                                         </div>
                                     </>
                                 )}
+
+                                {isLiked && <FaRegHeart className="w-4 h-4 cursor-pointer text-pink-500" />}
+                                <span
+                                    className={`text-sm text-slate-500 group-hover:text-pink-500 ${
+                                        isLiked ? "text-pink-500" : ""
+                                    }`}
+                                >
+                                    {likes}
+                                </span>
                             </div>
                         )}
                     </div>

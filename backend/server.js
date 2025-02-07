@@ -4,7 +4,6 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 const connectToDB = require('./config/db.js');
-
 const loginRoutes = require('./routes/login.js');
 const defaultRoute = require('./routes/default_route.js');
 const invalidRoutes = require('./routes/invalid_routes.js');
@@ -17,6 +16,9 @@ const createPostRoutes = require('./routes/post_creation.js');
 const profileRoutes = require('./routes/profile.js');
 const userSearchRoutes = require('./routes/user_search.js');
 const deezerRoutes = require('./routes/deezer.js');
+const userSearchRoutes = require('./routes/user_search.js')
+const likesRoutes = require('./routes/likes.js');
+
 
 dotenv.config();
 const PORT = 8080;
@@ -43,7 +45,8 @@ app.use('/api', createPostRoutes);
 app.use('/api', profileRoutes);
 app.use('/api', userSearchRoutes);
 app.use('/api', deezerRoutes);
-
+app.use('/api', userSearchRoutes)
+app.use('/api', likesRoutes);
 app.use(defaultRoute);
 app.use(invalidRoutes); // THIS HAS TO STAY LAST
 
