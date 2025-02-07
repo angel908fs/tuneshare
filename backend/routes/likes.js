@@ -1,6 +1,8 @@
 const express = require("express");
 let router = express.Router();
 const Post = require("../models/post.js");
+const User = require("../models/user.js");
+
 
 router.post("/like", async (req, res) => {
     if (!req.body.postID) {
@@ -36,7 +38,6 @@ router.post("/like", async (req, res) => {
 
         return res.status(200).send({ success: true, message: "Post liked successfully" });
     } catch (error) {
-        console.error("Error liking post:", error);  // Log error for debugging
         return res.status(500).send({ success: false, message: "Server error", error: error.message });
     }
 });
@@ -80,7 +81,6 @@ router.post("/unlike", async (req, res) => {
 
         return res.status(200).send({ success: true, message: "Post unliked successfully" });
     } catch (error) {
-        console.error("Error unliking post:", error);  // Log error for debugging
         return res.status(500).send({ success: false, message: "Server error", error: error.message });
     }
 });
