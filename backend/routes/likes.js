@@ -14,30 +14,33 @@ router.post("/like", async (req, res) => {
     const userID = req.body.userID;
 
     try {
-        const post = await Post.findOne({post_id: postID});
-        const user = await User.findOne({user_id: userID});
-        if(!post) { 
-            return res.status(404).send({success: false, message: "Post does not exist" });
-        }
-        if (!user) {
-            return res.status(404).send({success: false, message: "User does not exist" });
+        const post = await Post.findOne({ post_id: postID });
+        if (!post) {
+            return res.status(404).send({ success: false, message: "Post does not exist" });
         }
 
-        if (user.liked_posts.includes(postID)) {
+        const user = await User.findOne({ user_id: userID });
+        if (!user) {
+            return res.status(404).send({ success: false, message: "User does not exist" });
+        }
+
+        if (user.liked_posts && user.liked_posts.includes(postID)) {
             return res.status(200).send({ success: true, message: "Post already liked by user" });
         }
+
         user.liked_posts.push(postID);
         await user.save();
-        
+
         post.likes += 1;
         await post.save();
-        
-        return res.status(200).send({success: true, message: "post liked successfully"})
-    } catch (error) {
-        return res.status(500).send({success: false, message: "Server error", error: error.message});
-    }
 
+        return res.status(200).send({ success: true, message: "Post liked successfully" });
+    } catch (error) {
+        console.error("Error liking post:", error);  // Log error for debugging
+        return res.status(500).send({ success: false, message: "Server error", error: error.message });
+    }
 });
+
 
 // post method to unlike a post
 // takes in a postID value and decreases the number of likes of a post by one
@@ -53,32 +56,35 @@ router.post("/unlike", async (req, res) => {
     const userID = req.body.userID;
 
     try {
-        const post = await Post.findOne({post_id: postID});
-        const user = await User.findOne({user_id: userID});
-
+        const post = await Post.findOne({ post_id: postID });
         if (!post) {
-           return res.status(404).send({success: false, message: "Post does not exist" });
+            return res.status(404).send({ success: false, message: "Post does not exist" });
         }
+
+        const user = await User.findOne({ user_id: userID });
         if (!user) {
-            return res.status(404).send({success: false, message: "User does not exist" });
+            return res.status(404).send({ success: false, message: "User does not exist" });
         }
-        
-        if (!user.liked_posts.includes(postID)) {
-            return res.status(400).send({ success: false, message: "cannot unlike post that has not been liked" });
+
+        if (!user.liked_posts || !user.liked_posts.includes(postID)) {
+            return res.status(400).send({ success: false, message: "Cannot unlike a post that has not been liked" });
         }
+
         user.liked_posts = user.liked_posts.filter(id => id !== postID);
         await user.save();
-        
+
         if (post.likes > 0) {
             post.likes -= 1;
             await post.save();
         }
-            
-        return res.status(200).send({success: true, message: "post unliked successfully"})
+
+        return res.status(200).send({ success: true, message: "Post unliked successfully" });
     } catch (error) {
-        return res.status(500).send({success: false, message: "Server error", error: error.message});
+        console.error("Error unliking post:", error);  // Log error for debugging
+        return res.status(500).send({ success: false, message: "Server error", error: error.message });
     }
 });
+
 
 
 // get method to get like counts 
