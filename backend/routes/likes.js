@@ -15,7 +15,7 @@ router.post("/like", async (req, res) => {
 
     try {
         const post = await Post.findOne({post_id: postID});
-        const user = await User.findOne({user_id: userID})
+        const user = await User.findOne({user_id: userID});
         if(!post) { 
             return res.status(404).send({success: false, message: "Post does not exist" });
         }
@@ -54,7 +54,7 @@ router.post("/unlike", async (req, res) => {
 
     try {
         const post = await Post.findOne({post_id: postID});
-        const user = await User.findOne({user_id: userID})
+        const user = await User.findOne({user_id: userID});
 
         if (!post) {
            return res.status(404).send({success: false, message: "Post does not exist" });
