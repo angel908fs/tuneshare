@@ -3,11 +3,12 @@ import { BiRepost } from "react-icons/bi";
 import { FaRegHeart } from "react-icons/fa";
 import { FaRegBookmark } from "react-icons/fa6";
 import { FaTrash } from "react-icons/fa";
+import { FaPlay, FaPause } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
-// get access token
+// Get Spotify Access Token
 const getSpotifyAccessToken = async () => {
     const client_id = import.meta.env.VITE_CLIENT_ID;
     const client_secret = import.meta.env.VITE_CLIENT_SECRET;
@@ -28,6 +29,7 @@ const getSpotifyAccessToken = async () => {
     return response.data.access_token;
 };
 
+// Get Spotify Track Metadata
 const getSpotifyTrackMetadata = async (spotifyUrl) => {
     try {
         const trackId = spotifyUrl.split("/track/")[1].split("?")[0];
@@ -38,21 +40,78 @@ const getSpotifyTrackMetadata = async (spotifyUrl) => {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
-            params: {
-                market, 
-            },
+            params: { market },
         });
-        
-        console.log("Track Metadata:", response.data);
+
+        console.log("Spotify Track Metadata:", response.data);
         return response.data;
     } catch (error) {
         console.error("Error fetching track metadata:", error);
+        return null;
     }
 };
+
+// Search for the Song on Deezer (Using Backend Proxy)
+const searchDeezerTrack = async (trackName, artistName) => {
+    const query = `${artistName} ${trackName}`.trim();
+
+    console.log("Sending search request for:", query); // Debugging request
+
+    try {
+        const response = await axios.get(`http://localhost:8080/api/deezer-search`, {
+            params: { query }
+        });
+
+        if (response.data.data.length > 0) {
+            const track = response.data.data[0]; // Take the first result
+            console.log("Deezer Track Found:", track);
+            return track.preview; // 30-sec preview URL
+        } else {
+            console.warn("No preview available from Deezer.");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching track from Deezer:", error.message);
+        return null;
+    }
+};
+
+
+// Main function: Get 30-Second Preview from Spotify or Deezer
+const get30SecPreview = async (spotifyUrl) => {
+    const spotifyTrack = await getSpotifyTrackMetadata(spotifyUrl);
+    
+    if (!spotifyTrack) {
+        console.error("Could not retrieve track data from Spotify.");
+        return null;
+    }
+
+    // Check if Spotify has a preview URL
+    if (spotifyTrack.preview_url) {
+        console.log("Using Spotify preview:", spotifyTrack.preview_url);
+        return spotifyTrack.preview_url;
+    }
+
+    // If Spotify has no preview, try Deezer
+    console.log("No Spotify preview found. Searching on Deezer...");
+    return await searchDeezerTrack(spotifyTrack.name, spotifyTrack.artists[0].name);
+};
+
+// Example Usage
+const spotifySongUrl = "https://open.spotify.com/track/3n3Ppam7vgaVa1iaRUc9Lp";
+get30SecPreview(spotifySongUrl).then(previewUrl => {
+    if (previewUrl) {
+        console.log("🎵 30-sec Preview URL:", previewUrl);
+    } else {
+        console.log("No preview available.");
+    }
+});
 
 const Post = ({ post }) => {
     const [comment, setComment] = useState("");
     const [trackMetadata, setTrackMetadata] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
+    const [isPlaying, setIsPlaying] = useState(false);  // Track playback state
 
     const postOwner = post;
     const isLiked = false;
@@ -75,6 +134,55 @@ const Post = ({ post }) => {
         e.preventDefault();
     };
     const handleLikePost = () => {};
+
+    const togglePlayPause = async () => {
+        if (!post.song_link) return;
+    
+        if (!isPlaying) {
+            // If not playing, fetch preview URL and play
+            const preview = await get30SecPreview(post.song_link);
+            if (preview) {
+                playWithMPV(preview);
+                setIsPlaying(true);
+            } else {
+                alert("No preview available for this track.");
+            }
+        } else {
+            // If playing, send pause command
+            pauseMPV();
+            setIsPlaying(false);
+        }
+    };
+    
+
+    // Function to play audio using MPV
+    const playWithMPV = (url) => {
+        fetch(`http://localhost:8080/api/play?url=${encodeURIComponent(url)}`)
+            .then((res) => res.json())
+            .then((data) => console.log(data))
+            .catch((err) => console.error("Error playing with MPV:", err));
+    };
+
+    // Function to pause MPV playback
+    const pauseMPV = () => {
+        fetch(`http://localhost:8080/api/pause`)
+            .then((res) => res.json())
+            .then((data) => console.log("Paused MPV:", data))
+            .catch((err) => console.error("Error pausing MPV:", err));
+    };
+
+    const handlePlayPreview = async () => {
+        if (!post.song_link) return;
+    
+        const preview = await get30SecPreview(post.song_link);
+        if (preview) {
+            console.log("Preview URL found:", preview);
+            playWithMPV(preview); // Call the function here
+        } else {
+            alert("No preview available for this track.");
+        }
+    };
+    
 
     return (
         <>
@@ -100,168 +208,78 @@ const Post = ({ post }) => {
                             </span>
                         )}
                     </div>
-                    <div className="flex flex-col gap-3 overflow-hidden">
-                        {post.img && (
-                            <img
-                                src={post.img}
-                                className="h-80 object-contain rounded-lg border border-gray-700"
-                                alt=""
-                            />
-                        )}
+                     {/* Post Text Content */}
+                     <div className="flex flex-col gap-3 overflow-hidden">
                         <span>{post.content || "<no content specified>"}</span>
+
+                        {/* Song Metadata Section */}
                         {post.song_link && (
-                            <div className="spotify-metadata mt-3 p-12 border border-gray-700 rounded relative overflow-hidden">
-                            {trackMetadata && (
-                                <>
-                                    {trackMetadata.album.images[0] && (
-                                        <div
-                                            className="absolute inset-0 -z-10 bg-cover bg-center"
-                                            style={{
-                                                backgroundImage: `url(${trackMetadata.album.images[0].url})`,
-                                                filter: "blur(20px) brightness(0.5)",
-                                            }}
-                                        ></div>
-                                    )}
-                        
-                                    <div className="flex gap-4 items-center relative">
-                                        <div className="w-1/2 flex justify-center items-center">
-                                            {trackMetadata.album.images[0] && (
-                                                <a
-                                                    href={post.song_link}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                > {/* Album Cover */}
-                                                    <img
-                                                        src={trackMetadata.album.images[0].url} 
-                                                        alt="Song Cover"
-                                                        className="w-50 h-50 rounded-lg object-cover transition-transform duration-300 transform hover:scale-110"
-                                                    />
-                                                </a>
-                                            )}
-                                        </div>
-                        
-                                        <div className="w-1/2 flex flex-col justify-center">
+                            <div className="spotify-metadata mt-3 p-4 border border-gray-700 rounded relative overflow-hidden">
+                                {trackMetadata && (
+                                    <>
+                                        {/* Album Background Blur */}
+                                        {trackMetadata.album.images[0] && (
                                             <div
+                                                className="absolute inset-0 -z-10 bg-cover bg-center"
                                                 style={{
-                                                    color: "rgba(255, 255, 255, 0.6)", 
-                                                    textShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)", 
+                                                    backgroundImage: `url(${trackMetadata.album.images[0].url})`,
+                                                    filter: "blur(20px) brightness(0.5)",
                                                 }}
-                                            >
-                                                {/* Song Name */}
+                                            ></div>
+                                        )}
+
+                                        {/* Song Details */}
+                                        <div className="flex gap-4 items-center relative">
+                                            {/* Album Cover */}
+                                            <div className="w-1/2 flex justify-center items-center">
+                                                {trackMetadata.album.images[0] && (
+                                                    <a
+                                                        href={post.song_link}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                    >
+                                                        <img
+                                                            src={trackMetadata.album.images[0].url}
+                                                            alt="Song Cover"
+                                                            className="w-50 h-50 rounded-lg object-cover transition-transform duration-300 transform hover:scale-110"
+                                                        />
+                                                    </a>
+                                                )}
+                                            </div>
+
+                                            {/* Song Information */}
+                                            <div className="w-1/2 flex flex-col justify-center">
                                                 <a
                                                     href={post.song_link}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="text-3xl font-bold hover:underline"
+                                                    className="text-2xl font-bold hover:underline"
                                                 >
                                                     {trackMetadata.name}
                                                 </a>
-                                                {/* Artist */}
                                                 <p className="text-lg mt-2">
                                                     {trackMetadata.artists
                                                         .map((artist) => artist.name)
                                                         .join(", ")}
                                                 </p>
-                                                {/* Album */}
                                                 <p className="text-sm mt-1">
                                                     <strong>Album:</strong> {trackMetadata.album.name}
                                                 </p>
+
+                                                {/* Play Button */}
+                                                <button
+                                                    onClick={togglePlayPause}
+                                                    className="mt-3 px-4 py-2 bg-cover text-white rounded-md hover:bg-grey-700 flex items-center gap-2"
+                                                >
+                                                    {isPlaying ? <FaPause /> : <FaPlay />} 
+                                                    {isPlaying ? "Pause" : "Play Preview"}
+                                                </button>
                                             </div>
                                         </div>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                        
-                                   
-                        )}
-                    </div>
-                    <div className="flex justify-between mt-3">
-                        <div className="flex gap-4 items-center w-2/3 justify-between">
-                            <div
-                                className="flex gap-1 items-center cursor-pointer group"
-                                onClick={() => document.getElementById("comments_modal" + post._id).showModal()}
-                            >
-                                <FaRegComment className="w-4 h-4 text-slate-500 group-hover:text-sky-400" />
-                                <span className="text-sm text-slate-500 group-hover:text-sky-400">
-                                    {post.comments.length}
-                                </span>
-                            </div>
-                            <dialog id={`comments_modal${post._id}`} className="modal border-none outline-none">
-                                <div className="modal-box rounded border border-gray-600">
-                                    <h3 className="font-bold text-lg mb-4">COMMENTS</h3>
-                                    <div className="flex flex-col gap-3 max-h-60 overflow-auto">
-                                        {post.comments.length === 0 && (
-                                            <p className="text-sm text-slate-500">
-                                                No comments yet 🤔 Be the first one 😉
-                                            </p>
-                                        )}
-                                        {post.comments.map((comment) => (
-                                            <div key={comment._id} className="flex gap-2 items-start">
-                                                <div className="avatar">
-                                                    <div className="w-8 rounded-full">
-                                                        <img
-                                                            src={comment.user.profileImg || "/avatar-placeholder.png"}
-                                                        />
-                                                    </div>
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    <div className="flex items-center gap-1">
-                                                        <span className="font-bold">{comment.user.fullName}</span>
-                                                        <span className="text-gray-700 text-sm">
-                                                            @{comment.user.username}
-                                                        </span>
-                                                    </div>
-                                                    <div className="text-sm">{comment.text}</div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <form
-                                        className="flex gap-2 items-center mt-4 border-t border-gray-600 pt-2"
-                                        onSubmit={handlePostComment}
-                                    >
-                                        <textarea
-                                            className="textarea w-full p-1 rounded text-md resize-none border focus:outline-none border-gray-800"
-                                            placeholder="Add a comment..."
-                                            value={comment}
-                                            onChange={(e) => setComment(e.target.value)}
-                                        />
-                                        <button className="btn btn-primary rounded-full btn-sm text-white px-4">
-                                            {isCommenting ? (
-                                                <span className="loading loading-spinner loading-md"></span>
-                                            ) : (
-                                                "Post"
-                                            )}
-                                        </button>
-                                    </form>
-                                </div>
-                                <form method="dialog" className="modal-backdrop">
-                                    <button className="outline-none">close</button>
-                                </form>
-                            </dialog>
-                            <div className="flex gap-1 items-center group cursor-pointer">
-                                <BiRepost className="w-6 h-6 text-slate-500 group-hover:text-green-500" />
-                                <span className="text-sm text-slate-500 group-hover:text-green-500">0</span>
-                            </div>
-                            <div className="flex gap-1 items-center group cursor-pointer" onClick={handleLikePost}>
-                                {!isLiked && (
-                                    <FaRegHeart className="w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500" />
+                                    </>
                                 )}
-                                {isLiked && <FaRegHeart className="w-4 h-4 cursor-pointer text-pink-500" />}
-
-                                <span
-                                    className={`text-sm text-slate-500 group-hover:text-pink-500 ${
-                                        isLiked ? "text-pink-500" : ""
-                                    }`}
-                                >
-                                    {post.likes.length}
-                                </span>
                             </div>
-                        </div>
-                        <div className="flex w-1/3 justify-end gap-2 items-center">
-                            <FaRegBookmark className="w-4 h-4 cursor-pointer text-slate-500 hover:text-yellow-500" />
-                        </div>
+                        )}
                     </div>
                 </div>
             </div>
