@@ -7,6 +7,7 @@ import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 import toast from 'react-hot-toast';
 
+
 // get access token
 const getSpotifyAccessToken = async () => {
   const client_id = import.meta.env.VITE_CLIENT_ID;
@@ -35,6 +36,8 @@ const CreatePost = ({ onPostCreated }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchBar, setShowSearchBar] = useState(false);
+  const [spotifyToken, setSpotifyToken] = useState("");
+
 
 
 
@@ -49,26 +52,42 @@ const CreatePost = ({ onPostCreated }) => {
       console.log('No token found in the cookie.');
     }
   }, []);
+
+  useEffect(() => {
+    const fetchToken = async() => {
+      const token = await getSpotifyAccessToken();
+      setSpotifyToken(token);
+    };
+    fetchToken();
+  }, [setSpotifyToken]);
   
   const fetchSpotifyTracks = async (query) => {
-    if (!query) return;
+    if (!query || !spotifyToken) return;
     try {
-      const response = await axios.get('/api/spotify-search?q=${query}');
-      setSearchResults(response.data.tracks);
+      const response = await axios.get(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=10`,
+      {
+        headers: {
+          Authorization: `Bearer ${spotifyToken}`,
+        },
+      }
+    );
+    setSearchResults (response.data.tracks.items);
     } catch (error){
-      {/* will change error here later */}
-      console.error("error fetching spotify data:",error);
+      // will change later
+      console.error("Error fetching Spotify data:",error);
     }
+    
   };
 
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-    fetchSpotifyTracks(e.targe.value);
+    const query = e.target.value;
+    setSearchQuery(query);
+    fetchSpotifyTracks(query);
   };
 
   const selectSong = (track) => {
-    setSongLink(track.url);
-    setSearchQuery(track.name);
+    setSongLink(track.external_urls.spotify);
+    setSearchQuery(`{track.name} - {track.artists.map(artist => artist.name).join(", ")}`);
     setShowSearchBar(false); {/*Hide search bar after selection */}
   };
 
@@ -133,10 +152,10 @@ const CreatePost = ({ onPostCreated }) => {
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
-        {/* music icon with collasbile search */}
+
         <div className="relative">
           <FaMusic
-          className="fill-primary w-5 h-5 cursor-pointer"
+          className="fill-primary w- h-5 cursor-pointer"
           onClick={() => setShowSearchBar(!showSearchBar)}
           />
           {showSearchBar && (
@@ -149,14 +168,24 @@ const CreatePost = ({ onPostCreated }) => {
                 onChange={handleSearchChange}
                 />
               {searchResults.length > 0 && (
-                <ul className="mt-2 max-h-40 overflow-y-auto">
-                  {searchResults.map ((track,index) => (
+                <ul className="mt-2 max-h-40 overflow-y-auto bg-gray-900 rounded-lg p-2">
+                  {searchResults.map ((track) => (
                     <li
-                      key = {index}
-                      className="p-2 hover:bg-gray-700 curose-pointer"
+                      key = {track.id}
+                      className="flex items-center gap-3 p-2 hover:bg-gray-700 cursor-pointer"
                       onClick={() => selectSong(track)}
                       >
-                        {track.name} - {track.artist}
+                        {/*Album Cover */}
+                        <img src = {track.album.images[0]?.url} 
+                        alt = {track.name} 
+                        className="w-12 h-12 rounded-sm" />
+                        {/* Song Details */}
+                        <div>
+                          <p className="text-white font-medium">{track.name}</p>
+                          <p className="text-gray-400 text-sm">
+                            {track.artists.map((artist) => artist.name).join(", ")}
+                          </p>
+                        </div>
                       </li>
                   ))}
                 </ul>
