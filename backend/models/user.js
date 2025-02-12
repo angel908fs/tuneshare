@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema(
     
         // API keys
         user_api_key:{type: String},             // Holds user's temp API key (If they are signed into spotify) -> This is a future implementation
-
+        liked_posts:[{type:String, ref: 'Post'}] // holds a list of the IDs of the posts the user has liked
     }, 
 
     {timestamps: true}                // generates 'createdAT' and 'updatedAt' timestamps

@@ -1,6 +1,6 @@
 import { FaRegComment } from "react-icons/fa";
 import { BiRepost } from "react-icons/bi";
-import { FaRegHeart } from "react-icons/fa";
+import { FaRegHeart, FaHeart } from "react-icons/fa";
 import { FaRegBookmark } from "react-icons/fa6";
 import { FaTrash } from "react-icons/fa";
 import { useState, useEffect } from "react";
@@ -60,11 +60,11 @@ const getLikeCount = async (postID) => {
     return res.data.likes | 0;
 }
 
-const Post = ({ post }) => {
+const Post = ({ post, likedPosts }) => {
     const [comment, setComment] = useState("");
     const [trackMetadata, setTrackMetadata] = useState(null);
     const [isLiked, setIsLiked] = useState(false);
-    const [likes, setLikes] = useState(null)
+    const [likes, setLikes] = useState(null);
 
 
     const postOwner = post;
@@ -96,6 +96,10 @@ const Post = ({ post }) => {
         } else {
           console.log("No token found in the cookie.");
         }
+        console.log(likedPosts);
+        if (likedPosts.data.liked_posts.includes(postID)) {
+            setIsLiked(true);
+        }
     }, [post.song_link]);
 
     const handleDeletePost = () => {};
@@ -106,11 +110,11 @@ const Post = ({ post }) => {
         try {
             let newLikes;
             if (isLiked) {
-                const res = await axios.post('/api/unlike', { postID: postID });
+                const res = await axios.post('/api/unlike', { postID: postID, userID: userIdFromCookie});
                 if (res.status == 200) newLikes = likes - 1; 
                 setIsLiked(false);
             } else {
-                const res = await axios.post('/api/like', { postID: postID });
+                const res = await axios.post('/api/like', { postID: postID, userID: userIdFromCookie });
                 if (res.status == 200) newLikes = likes + 1; 
                 setIsLiked(true);
             }
@@ -295,7 +299,7 @@ const Post = ({ post }) => {
                                 {!isLiked && (
                                     <FaRegHeart className="w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500" />
                                 )}
-                                {isLiked && <FaRegHeart className="w-4 h-4 cursor-pointer text-pink-500" />}
+                                {isLiked && <FaHeart className="w-4 h-4 cursor-pointer text-pink-500" />}
 
                                 <span
                                     className={`text-sm text-slate-500 group-hover:text-pink-500 ${

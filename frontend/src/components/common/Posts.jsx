@@ -8,6 +8,7 @@ import { jwtDecode } from "jwt-decode";
 const Posts = ({ context, profileUserId }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [posts, setPosts] = useState([]);
+    const [likedPosts, setLikedPosts] = useState([]);
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -44,6 +45,12 @@ const Posts = ({ context, profileUserId }) => {
                 } else {
                     console.error("Failed to fetch posts:", response.data.message);
                 }
+
+                const liked_posts = await axios.post("/api/user-liked-posts", {
+                    userID: userId
+                });
+                setLikedPosts(liked_posts.data);
+
             } catch (error) {
                 console.error("Error fetching posts:", error);
             } finally {
@@ -67,7 +74,7 @@ const Posts = ({ context, profileUserId }) => {
             {!isLoading && posts && (
                 <div>
                     {posts.map((post) => (
-                        <Post key={post._id} post={post} />
+                        <Post key={post._id} post={post} likedPosts={likedPosts}/>
                     ))}
                 </div>
             )}
