@@ -1,26 +1,23 @@
 const express = require("express");
 let router = express.Router();
+const User = require("../models/user.js");
+const Comment = require("../models/comment.js");
 
-router.post("/post-comment", (req, res, next) => { 
-    if (!req.body.commentID) {
-        return res.status(400).send({ success: false, message: "Missing required parameter: postID" });
+router.post("/post-comment",  async (req, res, next) => { 
+    if (!req.body.content) {
+        return res.status(400).send({ success: false, message: "missing required parameter: comment" });
     }
     if (!req.body.userID) {
-        return res.status(400).send({ success: false, message: "Missing required parameter: userID" });
+        return res.status(400).send({ success: false, message: "issing required parameter: userID" });
     }
 
-    const postID = req.body.postID;
+    const content= req.body.content;
     const userID = req.body.userID;
 
     try {
-        const post = await Post.findOne({ post_id: postID });
-        if (!post) {
-            return res.status(404).send({ success: false, message: "Post does not exist" });
-        }
-
         const user = await User.findOne({ user_id: userID });
         if (!user) {
-            return res.status(404).send({ success: false, message: "User does not exist" });
+            return res.status(404).send({ success: false, message: "user does not exist" });
         }
 
         if (user.liked_posts && user.liked_posts.includes(postID)) {
@@ -33,9 +30,9 @@ router.post("/post-comment", (req, res, next) => {
         post.likes += 1;
         await post.save();
 
-        return res.status(200).send({ success: true, message: "Post liked successfully" });
+        return res.status(200).send({ success: true, message: "comment posted successfully" });
     } catch (error) {
-        return res.status(500).send({ success: false, message: "Server error", error: error.message });
+        return res.status(500).send({ success: false, message: "server error", error: error.message });
     }
 });
 
