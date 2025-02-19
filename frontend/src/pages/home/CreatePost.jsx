@@ -1,6 +1,6 @@
 import { BsEmojiSmileFill, BsTrophy } from "react-icons/bs";
 import { FaMusic } from "react-icons/fa";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import Cookies from 'js-cookie';
@@ -37,6 +37,7 @@ const CreatePost = ({ onPostCreated }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchBar, setShowSearchBar] = useState(false);
   const [spotifyToken, setSpotifyToken] = useState("");
+  const searchBarRef = useRef(null); // create ref for the search bar
 
 
 
@@ -61,6 +62,18 @@ const CreatePost = ({ onPostCreated }) => {
     fetchToken();
   }, [setSpotifyToken]);
   
+  useEffect(() => {
+    function handleClickOutside(event){
+      if(searchBarRef.current && !searchBarRef.current.contains(event.target)){
+        setShowSearchBar(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const fetchSpotifyTracks = async (query) => {
     if (!query || !spotifyToken) return;
     try {
@@ -88,8 +101,8 @@ const CreatePost = ({ onPostCreated }) => {
   const selectSong = (track) => {
     setSongLink(track.external_urls.spotify);
     setSearchQuery(`${track.name} - ${track.artists.map(artist => artist.name).join(", ")}`);
-    setShowSearchBar(false); {/*Hide search bar after selection */}
-  };
+    setShowSearchBar(false); 
+  }
 
   // mutation to handle post creation
   const { mutate: createPost, isError, isLoading, error } = useMutation({
@@ -147,67 +160,60 @@ const CreatePost = ({ onPostCreated }) => {
       </div>
       <form className='flex flex-col gap-2 w-full' onSubmit={handleSubmit}>
         <textarea
-          className='textarea w-full p-0 text-lg resize-none border-none focus:outline-none border-gray-800'
+          className='textarea w-full p-0 text-lg resize-none border-none focus:outline-none'
           placeholder='What is happening?!'
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
 
-        <div className='relative flex items-center gap-2'>
-          <FaMusic
-          className="flex-wrap fill-primary w-5 h-5 cursor-pointer"
-          onClick={() => setShowSearchBar(!showSearchBar)}
-          />
+        <div className="relative w-full max-w-sm" ref = {searchBarRef}>
+          <div className= "flex items-center gap-2 bg-gray-800 p-3 rounded-lg border border-gray-700">
+          <FaMusic 
+            className = "text-blue-400 w-5 h-5 cursor-pointer"
+          /> 
           <input
           type='text'
-          className='input w-full p-0 text-lg resize-none border-none focus:outline-none border-gray-800'
-          placeholder='Search for Song... (Click on Icon)'
-          value={songLink}
-          onChange={(e) => setSongLink(e.target.value)}
-        />
-          
-          {showSearchBar && (
-            <div className="z-50 absolute top-8 left-0 bg-gray-800 p-2 w-64 rounded-lg shadow-lg">
-              <input
-                type = "text"
-                className="w-full p-2 text-sm bg-gray-900 text-white rounded"
-                placeholder="Search for a song..."
-                value = {searchQuery}
-                onChange={handleSearchChange}
-                />
-              {searchResults.length > 0 && (
-                <ul className="mt-5 max-h-80 overflow-y-auto z-50 bg-gray-900 rounded-lg p-2">
-                  {searchResults.map ((track) => (
-                    <li
-                      key = {track.id}
-                      className="flex items-center gap-3 p-2 hover:bg-gray-700 cursor-pointer"
-                      onClick={() => selectSong(track)}
-                      >
-                        {/*Album Cover */}
-                        <img src = {track.album.images[0]?.url} 
-                        alt = {track.name} 
-                        className="w-12 h-12 rounded-sm" />
-                        {/* Song Details */}
-                        <div>
-                          <p className="text-white font-medium">{track.name}</p>
-                          <p className="text-gray-400 text-sm">
-                            {track.artists.map((artist) => artist.name).join(", ")}
-                          </p>
-                        </div>
-                      </li>
-                  ))}
-                </ul>
-              )}
-              </div>
+          className='w-full bg-transparent text-lg border-none focus:outline-none placeholder-gray-400'
+          placeholder='Search for Song...'
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            fetchSpotifyTracks(e.target.value);
+            setShowSearchBar(true)
+          }}
+          />
+          </div>
+          {showSearchBar && searchResults.length > 0 && (
+            <div className="z-50 absolute top-12 left-0 w-full bg-gray-900 p-2 rounded-lg shadow-lg border border-gray-700">
+              <ul className="max-h-60 overflow-y-auto">
+                {searchResults.map ((track) => (
+                  <li
+                    key = {track.id}
+                    className="flex items-center gap-3 p-2 hover:bg-gray-700 cursor-pointer"
+                    onClick={() => {
+                      selectSong(track);
+                      setShowSearchBar(false);
+                    }}
+                  >
+                    {/*Album Cover */}
+                    <img 
+                      src = {track.album.images[0]?.url} 
+                      alt = {track.name} 
+                      className="w-12 h-12 rounded-sm"
+                    />
+                    {/* Song Details */}
+                    <div>
+                      <p className="text-white font-medium">{track.name}</p>
+                      <p className="text-gray-400 text-sm">
+                        {track.artists.map((artist) => artist.name).join(", ")}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </div>
-        {/*<input
-          type='text'
-          className='input w-full p-0 text-lg resize-none border-none focus:outline-none border-gray-800'
-          placeholder='Search for Song...'
-          value={songLink}
-          onChange={(e) => setSongLink(e.target.value)}
-        />*/}
         <div className='flex justify-between border-t py-2 border-t-gray-700'>
           <div className='flex-wrap gap-1 items-center'>
             <BsEmojiSmileFill className='fill-primary w-5 h-5 cursor-pointer' />
