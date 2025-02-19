@@ -155,11 +155,19 @@ const CreatePost = ({ onPostCreated }) => {
 
         <div className="relative">
           <FaMusic
-          className="fill-primary w- h-5 cursor-pointer"
+          className="flex-wrap fill-primary w-5 h-5 cursor-pointer"
           onClick={() => setShowSearchBar(!showSearchBar)}
           />
+          <input
+          type='text'
+          className='input w-full p-0 text-lg resize-none border-none focus:outline-none border-gray-800'
+          placeholder='Search for Song...'
+          value={songLink}
+          onChange={(e) => setSongLink(e.target.value)}
+        />
+          
           {showSearchBar && (
-            <div className="absolute top-8 left-0 bg-gray-800 p-2 w-64 rounded-lg shadow-lg">
+            <div className="z-50 absolute top-8 left-0 bg-gray-800 p-2 w-64 rounded-lg shadow-lg">
               <input
                 type = "text"
                 className="w-full p-2 text-sm bg-gray-900 text-white rounded"
@@ -168,7 +176,7 @@ const CreatePost = ({ onPostCreated }) => {
                 onChange={handleSearchChange}
                 />
               {searchResults.length > 0 && (
-                <ul className="mt-2 max-h-40 overflow-y-auto bg-gray-900 rounded-lg p-2">
+                <ul className="mt-5 max-h-80 overflow-y-auto z-50 bg-gray-900 rounded-lg p-2">
                   {searchResults.map ((track) => (
                     <li
                       key = {track.id}
@@ -193,17 +201,17 @@ const CreatePost = ({ onPostCreated }) => {
               </div>
           )}
         </div>
-        <input
+        {/*<input
           type='text'
           className='input w-full p-0 text-lg resize-none border-none focus:outline-none border-gray-800'
-          placeholder='Enter song link'
+          placeholder='Search for Song...'
           value={songLink}
           onChange={(e) => setSongLink(e.target.value)}
-        />
+        />*/}
         {/*creating search bar maybe here? 
         <FaMusic className="fill-primary w-5 h-5 cursor-pointer " />*/}
         <div className='flex justify-between border-t py-2 border-t-gray-700'>
-          <div className='flex gap-1 items-center'>
+          <div className='flex-wrap gap-1 items-center'>
             <BsEmojiSmileFill className='fill-primary w-5 h-5 cursor-pointer' />
           </div>
           <button
