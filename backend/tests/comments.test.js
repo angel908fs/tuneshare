@@ -86,3 +86,71 @@ describe("POST /post-comment", () => {
         expect(res.body.error).toBe("Database error");
     });
 });
+
+describe("DELETE /delete-comment", () => {
+    beforeEach(() => {
+        jest.clearAllMocks(); // Clear mocks before each test
+    });
+
+    it("should return 400 if commentID is missing", async () => {
+        const res = await request(app).delete("/delete-comment").send({ userID: "123", postID: "456" });
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toEqual({ success: false, message: "missing required parameter: commentID" });
+    });
+
+    it("should return 400 if userID is missing", async () => {
+        const res = await request(app).delete("/delete-comment").send({ commentID: "789", postID: "456" });
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toEqual({ success: false, message: "missing required parameter: userID" });
+    });
+
+    it("should return 400 if postID is missing", async () => {
+        const res = await request(app).delete("/delete-comment").send({ commentID: "789", userID: "123" });
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toEqual({ success: false, message: "missing required parameter: postID" });
+    });
+
+    it("should return 404 if comment does not exist", async () => {
+        Comment.findOne.mockResolvedValue(null);
+        const res = await request(app).delete("/delete-comment").send({ commentID: "789", userID: "123", postID: "456" });
+        expect(res.statusCode).toBe(404);
+        expect(res.body).toEqual({ success: false, message: "comment does not exist" });
+    });
+
+    it("should return 404 if user does not exist", async () => {
+        Comment.findOne.mockResolvedValue({ _id: "789" });
+        User.findOne.mockResolvedValue(null);
+        const res = await request(app).delete("/delete-comment").send({ commentID: "789", userID: "123", postID: "456" });
+        expect(res.statusCode).toBe(404);
+        expect(res.body).toEqual({ success: false, message: "user does not exist" });
+    });
+
+    it("should return 404 if post does not exist", async () => {
+        Comment.findOne.mockResolvedValue({ _id: "789" });
+        User.findOne.mockResolvedValue({ user_id: "123", comments: ["789"] });
+        Post.findOne.mockResolvedValue(null);
+        const res = await request(app).delete("/delete-comment").send({ commentID: "789", userID: "123", postID: "456" });
+        expect(res.statusCode).toBe(404);
+        expect(res.body).toEqual({ success: false, message: "post does not exist" });
+    });
+
+    it("should return 200 if comment is deleted successfully", async () => {
+        Comment.findOne.mockResolvedValue({ _id: "789" });
+        User.findOne.mockResolvedValue({ user_id: "123", comments: ["789"], save: jest.fn().mockResolvedValue() });
+        Post.findOne.mockResolvedValue({ post_id: "456", comments: ["789"], save: jest.fn().mockResolvedValue() });
+        Comment.deleteOne.mockResolvedValue({ deletedCount: 1 });
+
+        const res = await request(app).delete("/delete-comment").send({ commentID: "789", userID: "123", postID: "456" });
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toEqual({ success: true, message: "comment deleted successfully" });
+    });
+
+    it("should return 500 if there is a server error", async () => {
+        Comment.findOne.mockRejectedValue(new Error("Database error"));
+        const res = await request(app).delete("/delete-comment").send({ commentID: "789", userID: "123", postID: "456" });
+        expect(res.statusCode).toBe(500);
+        expect(res.body.success).toBe(false);
+        expect(res.body.message).toBe("server error");
+        expect(res.body.error).toBe("Database error");
+    });
+});
