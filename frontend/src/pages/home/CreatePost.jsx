@@ -87,7 +87,7 @@ const CreatePost = ({ onPostCreated }) => {
 
   const selectSong = (track) => {
     setSongLink(track.external_urls.spotify);
-    setSearchQuery(`{track.name} - {track.artists.map(artist => artist.name).join(", ")}`);
+    setSearchQuery(`${track.name} - ${track.artists.map(artist => artist.name).join(", ")}`);
     setShowSearchBar(false); {/*Hide search bar after selection */}
   };
 
@@ -153,7 +153,7 @@ const CreatePost = ({ onPostCreated }) => {
           onChange={(e) => setText(e.target.value)}
         />
 
-        <div className="relative">
+        <div className='relative flex items-center gap-2'>
           <FaMusic
           className="flex-wrap fill-primary w-5 h-5 cursor-pointer"
           onClick={() => setShowSearchBar(!showSearchBar)}
@@ -161,7 +161,7 @@ const CreatePost = ({ onPostCreated }) => {
           <input
           type='text'
           className='input w-full p-0 text-lg resize-none border-none focus:outline-none border-gray-800'
-          placeholder='Search for Song...'
+          placeholder='Search for Song... (Click on Icon)'
           value={songLink}
           onChange={(e) => setSongLink(e.target.value)}
         />
@@ -208,8 +208,6 @@ const CreatePost = ({ onPostCreated }) => {
           value={songLink}
           onChange={(e) => setSongLink(e.target.value)}
         />*/}
-        {/*creating search bar maybe here? 
-        <FaMusic className="fill-primary w-5 h-5 cursor-pointer " />*/}
         <div className='flex justify-between border-t py-2 border-t-gray-700'>
           <div className='flex-wrap gap-1 items-center'>
             <BsEmojiSmileFill className='fill-primary w-5 h-5 cursor-pointer' />
