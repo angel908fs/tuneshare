@@ -90,7 +90,6 @@ router.delete("/delete-comment", async (req, res, next) => {
 
         return res.status(200).send({ success: true, message: "comment deleted successfully" });
     } catch (error) {
-        console.log(error)
         return res.status(500).send({ success: false, message: "server error", error: error.message });
     }
 });
