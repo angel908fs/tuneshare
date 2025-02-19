@@ -8,5 +8,5 @@ const commentSchema = new mongoose.Schema({
     created_at: { type: Date, default: Date.now }
 });
 
-const Comment = mongoose.model('Post', commentSchema);
+const Comment = mongoose.model('Comment', commentSchema);
 module.exports = Comment;

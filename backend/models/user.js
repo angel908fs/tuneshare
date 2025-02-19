@@ -14,8 +14,11 @@ const userSchema = new mongoose.Schema(
         // profile specific data
         followers:[{type: String, ref: 'User'}],  
         following:[{type: String, ref: 'User'}],
+        
         bio:{type: String, maxlength: 256},    
         
+        comments: [{type: String, ref: 'Comment'}],
+
         followers_count: { type: Number, default: 0 },
         following_count: { type: Number, default: 0 },
 

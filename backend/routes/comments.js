@@ -2,32 +2,42 @@ const express = require("express");
 let router = express.Router();
 const User = require("../models/user.js");
 const Comment = require("../models/comment.js");
+const Post = require("../models.post.js");
 
 router.post("/post-comment",  async (req, res, next) => { 
-    if (!req.body.content) {
+    if (!req.body.comment) {
         return res.status(400).send({ success: false, message: "missing required parameter: comment" });
     }
     if (!req.body.userID) {
-        return res.status(400).send({ success: false, message: "issing required parameter: userID" });
+        return res.status(400).send({ success: false, message: "missing required parameter: userID" });
+    }
+    if (!req.body.postID) {
+        return res.status(400).send({ success: false, message: "missing required parameter: userID" });
     }
 
-    const content= req.body.content;
+    const comment = req.body.comment;
     const userID = req.body.userID;
+    const postID = req.body.postID;
 
     try {
-        const user = await User.findOne({ user_id: userID });
+        const user = await User.findOne({user_id: userID});
         if (!user) {
-            return res.status(404).send({ success: false, message: "user does not exist" });
+            return res.status(404).send({success: false, message: "user does not exist"});
         }
-
-        if (user.liked_posts && user.liked_posts.includes(postID)) {
-            return res.status(200).send({ success: true, message: "Post already liked by user" });
+        const post = await Post.findOne({ post_id: postID });
+        if (!post) {
+            return res.status(404).send({success:false, message: "post does not exist"})
         }
+        const newComment = new Comment({
+            user_id: userID,
+            comment: comment
+        });
+        await newComment.save()
 
-        user.liked_posts.push(postID);
+        user.comments.push(newComment.comment_id);
         await user.save();
 
-        post.likes += 1;
+        post.comments.push(newComment.comment_id);
         await post.save();
 
         return res.status(200).send({ success: true, message: "comment posted successfully" });
