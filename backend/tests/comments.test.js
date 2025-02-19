@@ -15,7 +15,7 @@ app.use("/", router);
 
 describe("POST /post-comment", () => {
     beforeEach(() => {
-        jest.clearAllMocks(); // Clear mocks before each test
+        jest.clearAllMocks(); 
     });
 
     it("should return 400 if comment is missing", async () => {
@@ -89,7 +89,7 @@ describe("POST /post-comment", () => {
 
 describe("DELETE /delete-comment", () => {
     beforeEach(() => {
-        jest.clearAllMocks(); // Clear mocks before each test
+        jest.clearAllMocks(); 
     });
 
     it("should return 400 if commentID is missing", async () => {
@@ -127,7 +127,7 @@ describe("DELETE /delete-comment", () => {
 
     it("should return 404 if post does not exist", async () => {
         Comment.findOne.mockResolvedValue({ _id: "789" });
-        User.findOne.mockResolvedValue({ user_id: "123", comments: ["789"] });
+        User.findOne.mockResolvedValue({ user_id: "123", comments: { pull: jest.fn() }, save: jest.fn().mockResolvedValue() });
         Post.findOne.mockResolvedValue(null);
         const res = await request(app).delete("/delete-comment").send({ commentID: "789", userID: "123", postID: "456" });
         expect(res.statusCode).toBe(404);
@@ -136,8 +136,8 @@ describe("DELETE /delete-comment", () => {
 
     it("should return 200 if comment is deleted successfully", async () => {
         Comment.findOne.mockResolvedValue({ _id: "789" });
-        User.findOne.mockResolvedValue({ user_id: "123", comments: ["789"], save: jest.fn().mockResolvedValue() });
-        Post.findOne.mockResolvedValue({ post_id: "456", comments: ["789"], save: jest.fn().mockResolvedValue() });
+        User.findOne.mockResolvedValue({ user_id: "123", comments: { pull: jest.fn() }, save: jest.fn().mockResolvedValue() });
+        Post.findOne.mockResolvedValue({ post_id: "456", comments: { pull: jest.fn() }, save: jest.fn().mockResolvedValue() });
         Comment.deleteOne.mockResolvedValue({ deletedCount: 1 });
 
         const res = await request(app).delete("/delete-comment").send({ commentID: "789", userID: "123", postID: "456" });
