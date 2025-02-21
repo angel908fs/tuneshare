@@ -192,6 +192,14 @@ const CreatePost = ({ onPostCreated }) => {
                   setSongCover("");
                 }
               }}
+              onKeyDown={(e) => {
+                if (e.key === "Backspace" && songCover) {
+                  setSongLink("");
+                  setSearchQuery("");
+                  setSongCover("");
+                  setShowSearchBar(true);
+                }
+              }}
             />
           </div>
 
