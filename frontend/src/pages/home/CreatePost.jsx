@@ -175,7 +175,7 @@ const CreatePost = ({ onPostCreated }) => {
               className="absolute inset-0 bg-cover bg-center rounded-lg"
               style={{
                 backgroundImage: `url(${songCover})`,
-                filter: "blur(15px) brightness(0.8)",
+                filter: "blur(8px) brightness(0.8)",
               }}
             ></div>
           )}
