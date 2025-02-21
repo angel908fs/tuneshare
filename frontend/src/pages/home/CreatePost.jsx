@@ -169,53 +169,53 @@ const CreatePost = ({ onPostCreated }) => {
         />
           {/* search bar */}
           <div className="relative w-full max-w-sm" ref={searchBarRef}>
-  {/* Background Blurred Album Cover */}
-  {songCover && (
-    <div
-      className="absolute inset-0 -z-10 bg-cover bg-center rounded-lg"
-      style={{
-        backgroundImage: `url(${songCover})`,
-        filter: "blur(15px) brightness(0.5)",
-      }}
-    ></div>
-  )}
+          {/* background blurred qlbum cover */}
+          {songCover && (
+            <div
+              className="absolute inset-0 bg-cover bg-center rounded-lg"
+              style={{
+                backgroundImage: `url(${songCover})`,
+                filter: "blur(25px) brightness(0.5)",
+              }}
+            ></div>
+          )}
 
-  {/* Search Bar */}
-  <div className="flex items-center gap-2 bg-gray-800/70 p-3 rounded-lg border border-gray-700 relative">
-    {songCover ? (
-      <img
-        src={songCover}
-        alt="Album Cover"
-        className="w-8 h-8 rounded-sm"
-      />
-    ) : (
-      <FaMusic className="text-blue-400 w-5 h-5 cursor-pointer" />
-    )}
+          {/* Search Bar */}
+          <div className="flex items-center gap-2 bg-gray-800/70 p-3 rounded-lg border border-gray-700 relative">
+            {songCover ? (
+              <img
+                src={songCover}
+                alt="Album Cover"
+                className="w-8 h-8 rounded-sm"
+              />
+            ) : (
+              <FaMusic className="text-blue-400 w-5 h-5 cursor-pointer" />
+            )}
 
-    <input
-      type="text"
-      className="w-full bg-transparent text-lg border-none focus:outline-none placeholder-gray-400 text-white"
-      placeholder="Search for Song..."
-      value={searchQuery}
-      onChange={(e) => {
-        setSearchQuery(e.target.value);
-        fetchSpotifyTracks(e.target.value);
-        setShowSearchBar(true);
+            <input
+              type="text"
+              className="w-full bg-transparent text-lg border-none focus:outline-none placeholder-gray-400 text-white/60"
+              placeholder="Search for Song..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                fetchSpotifyTracks(e.target.value);
+                setShowSearchBar(true);
 
-        if (e.target.value === "") {
-          setSongCover("");
-        }
-      }}
-      onKeyDown={(e) => {
-        if (e.key === "Backspace" && songCover) {
-          setSongLink("");
-          setSearchQuery("");
-          setSongCover("");
-          setShowSearchBar(true);
-        }
-      }}
-    />
-  </div>
+                if (e.target.value === "") {
+                  setSongCover("");
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Backspace" && songCover) {
+                  setSongLink("");
+                  setSearchQuery("");
+                  setSongCover("");
+                  setShowSearchBar(true);
+                }
+              }}
+            />
+          </div>
 
 
           {/* song dropdown */}
