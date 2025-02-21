@@ -187,6 +187,10 @@ const CreatePost = ({ onPostCreated }) => {
                 setSearchQuery(e.target.value);
                 fetchSpotifyTracks(e.target.value);
                 setShowSearchBar(true);
+
+                if (e.target.value === "") {
+                  setSongCover("");
+                }
               }}
             />
           </div>
