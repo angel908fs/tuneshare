@@ -169,39 +169,54 @@ const CreatePost = ({ onPostCreated }) => {
         />
           {/* search bar */}
           <div className="relative w-full max-w-sm" ref={searchBarRef}>
-          <div className="flex items-center gap-2 bg-gray-800 p-3 rounded-lg border border-gray-700">
-            {songCover && (
-              <img
-                src={songCover}
-                alt="Album Cover"
-                className="w-8 h-8 rounded-sm"
-              />
-            )}
-            {!songCover && <FaMusic className="text-blue-400 w-5 h-5 cursor-pointer" />}
-            <input
-              type="text"
-              className="w-full bg-transparent text-lg border-none focus:outline-none placeholder-gray-400"
-              placeholder="Search for Song..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                fetchSpotifyTracks(e.target.value);
-                setShowSearchBar(true);
+  {/* Background Blurred Album Cover */}
+  {songCover && (
+    <div
+      className="absolute inset-0 -z-10 bg-cover bg-center rounded-lg"
+      style={{
+        backgroundImage: `url(${songCover})`,
+        filter: "blur(15px) brightness(0.5)",
+      }}
+    ></div>
+  )}
 
-                if (e.target.value === "") {
-                  setSongCover("");
-                }
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Backspace" && songCover) {
-                  setSongLink("");
-                  setSearchQuery("");
-                  setSongCover("");
-                  setShowSearchBar(true);
-                }
-              }}
-            />
-          </div>
+  {/* Search Bar */}
+  <div className="flex items-center gap-2 bg-gray-800/70 p-3 rounded-lg border border-gray-700 relative">
+    {songCover ? (
+      <img
+        src={songCover}
+        alt="Album Cover"
+        className="w-8 h-8 rounded-sm"
+      />
+    ) : (
+      <FaMusic className="text-blue-400 w-5 h-5 cursor-pointer" />
+    )}
+
+    <input
+      type="text"
+      className="w-full bg-transparent text-lg border-none focus:outline-none placeholder-gray-400 text-white"
+      placeholder="Search for Song..."
+      value={searchQuery}
+      onChange={(e) => {
+        setSearchQuery(e.target.value);
+        fetchSpotifyTracks(e.target.value);
+        setShowSearchBar(true);
+
+        if (e.target.value === "") {
+          setSongCover("");
+        }
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Backspace" && songCover) {
+          setSongLink("");
+          setSearchQuery("");
+          setSongCover("");
+          setShowSearchBar(true);
+        }
+      }}
+    />
+  </div>
+
 
           {/* song dropdown */}
           {showSearchBar && searchResults.length > 0 && (
