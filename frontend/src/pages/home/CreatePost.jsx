@@ -177,7 +177,7 @@ const CreatePost = ({ onPostCreated }) => {
                 className="w-8 h-8 rounded-sm"
               />
             )}
-            <FaMusic className="text-blue-400 w-5 h-5 cursor-pointer" />
+            {!songCover && <FaMusic className="text-blue-400 w-5 h-5 cursor-pointer" />}
             <input
               type="text"
               className="w-full bg-transparent text-lg border-none focus:outline-none placeholder-gray-400"
