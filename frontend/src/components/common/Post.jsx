@@ -1,6 +1,7 @@
 import { FaRegComment } from "react-icons/fa";
 import { BiRepost } from "react-icons/bi";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
+import { FaPlay, FaPause } from "react-icons/fa";
 import { FaRegBookmark } from "react-icons/fa6";
 import { FaTrash } from "react-icons/fa";
 import { useState, useEffect } from "react";
@@ -60,11 +61,64 @@ const getLikeCount = async (postID) => {
     return res.data.likes | 0;
 }
 
+// Search for the Song on Deezer (Using Backend Proxy)
+const searchDeezerTrack = async (trackName, artistName) => {
+    const query = `${artistName} ${trackName}`.trim();
+
+
+    console.log("Sending search request for:", query); // Debugging request
+
+
+    try {
+        const response = await axios.get(`http://localhost:8080/api/deezer-search`, {
+            params: { query }
+        });
+
+
+        if (response.data.data.length > 0) {
+            const track = response.data.data[0]; // Take the first result
+            console.log("Deezer Track Found:", track);
+            return track.preview; // 30-sec preview URL
+        } else {
+            console.warn("No preview available from Deezer.");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching track from Deezer:", error.message);
+        return null;
+    }
+};
+
+// Main function: Get 30-Second Preview from Spotify or Deezer
+const get30SecPreview = async (spotifyUrl) => {
+    const spotifyTrack = await getSpotifyTrackMetadata(spotifyUrl);
+   
+    if (!spotifyTrack) {
+        console.error("Could not retrieve track data from Spotify.");
+        return null;
+    }
+
+
+    // Check if Spotify has a preview URL
+    if (spotifyTrack.preview_url) {
+        console.log("Using Spotify preview:", spotifyTrack.preview_url);
+        return spotifyTrack.preview_url;
+    }
+
+
+    // If Spotify has no preview, try Deezer
+    console.log("No Spotify preview found. Searching on Deezer...");
+    return await searchDeezerTrack(spotifyTrack.name, spotifyTrack.artists[0].name);
+};
+
 const Post = ({ post, likedPosts }) => {
     const [comment, setComment] = useState("");
     const [trackMetadata, setTrackMetadata] = useState(null);
     const [isLiked, setIsLiked] = useState(false);
     const [likes, setLikes] = useState(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState(null);
+    const [audio, setAudio] = useState(null);
 
 
     const postOwner = post;
@@ -127,6 +181,43 @@ const Post = ({ post, likedPosts }) => {
     
     };
 
+    const togglePlayPause = async () => {
+        if (!post.song_link) return;
+    
+        // Stop any existing audio before playing a new one
+        if (audio) {
+            audio.pause();
+            setIsPlaying(false);
+            setAudio(null);
+        }
+    
+        if (!isPlaying) {
+            if (!previewUrl) {
+                const preview = await get30SecPreview(post.song_link);
+                if (preview) {
+                    setPreviewUrl(preview);
+                    const newAudio = new Audio(preview);
+                    newAudio.play();
+                    setAudio(newAudio);
+                    setIsPlaying(true);
+    
+                    // Reset when audio ends
+                    newAudio.onended = () => setIsPlaying(false);
+                } else {
+                    alert("No preview available for this track.");
+                }
+            } else {
+                // If preview URL is already stored, play it
+                const newAudio = new Audio(previewUrl);
+                newAudio.play();
+                setAudio(newAudio);
+                setIsPlaying(true);
+    
+                newAudio.onended = () => setIsPlaying(false);
+            }
+        }
+    };
+    
     return (
         <>
             <div className="flex gap-2 items-start p-4 border-b border-gray-700">
@@ -217,6 +308,14 @@ const Post = ({ post, likedPosts }) => {
                                                 <p className="text-sm mt-1">
                                                     <strong>Album:</strong> {trackMetadata.album.name}
                                                 </p>
+                                                {/* Play Button BELOW the Album Cover */}
+                                                <button
+                                                    onClick={togglePlayPause}
+                                                    className="mt-2 px-4 py-2 bg-cover text-white rounded-md hover:scale-110 flex items-center gap-2"
+                                                >
+                                                    {isPlaying ? <FaPause /> : <FaPlay />}
+                                                    {isPlaying ? "Pause" : "Play Preview"}
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
