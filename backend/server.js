@@ -17,6 +17,7 @@ const createPostRoutes = require('./routes/post_creation.js');
 const profileRoutes = require('./routes/profile.js');
 const userSearchRoutes = require('./routes/user_search.js')
 const likesRoutes = require('./routes/likes.js');
+const deezerRoutes = require('./routes/deezer.js');
 
 dotenv.config();
 const PORT = 8080;
@@ -27,7 +28,7 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors({
-    origin: 'http://localhost:3000',  // Frontend URL
+  origin: ['http://localhost:3000', 'http://localhost:5173'],   // Allow both frontend ports
     credentials:true,
 }));
 
@@ -43,6 +44,7 @@ app.use('/api', createPostRoutes);
 app.use('/api', profileRoutes);
 app.use('/api', userSearchRoutes)
 app.use('/api', likesRoutes);
+app.use('/api', deezerRoutes);
 
 app.use(defaultRoute);
 app.use(invalidRoutes); // THIS HAS TO STAY LAST
