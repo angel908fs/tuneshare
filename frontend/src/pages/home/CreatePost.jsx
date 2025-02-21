@@ -146,11 +146,11 @@ const CreatePost = ({ onPostCreated }) => {
       toast.error('Please enter a song link');
       return;
     }
-    if (!text) {
-      toast.error('Please enter some content');
-      return;
-    }
-    createPost({ userID, songLink, content: text });
+    // if (!text) {
+    //   toast.error('Please enter some content');
+    //   return;
+    // }
+    createPost({ userID, songLink, content: text || " "});
   };
 
   return (
@@ -168,14 +168,14 @@ const CreatePost = ({ onPostCreated }) => {
           onChange={(e) => setText(e.target.value)}
         />
           {/* search bar */}
-          <div className="relative w-full max-w-sm" ref={searchBarRef}>
+          <div className="relative w-full max-w-sm mt-4 mb-4" ref={searchBarRef}>
           {/* background blurred qlbum cover */}
           {songCover && (
             <div
               className="absolute inset-0 bg-cover bg-center rounded-lg"
               style={{
                 backgroundImage: `url(${songCover})`,
-                filter: "blur(25px) brightness(0.5)",
+                filter: "blur(15px) brightness(0.8)",
               }}
             ></div>
           )}
