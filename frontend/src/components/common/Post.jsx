@@ -283,40 +283,49 @@ const Post = ({ post, likedPosts }) => {
                                         </div>
                         
                                         <div className="w-1/2 flex flex-col justify-center">
-                                            <div
-                                                style={{
-                                                    color: "rgba(255, 255, 255, 0.6)", 
-                                                    textShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)", 
-                                                }}
+                                        <div
+                                            style={{
+                                                color: "rgba(255, 255, 255, 0.6)", 
+                                                textShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)", 
+                                            }}
+                                            className="flex flex-col items-center"
+                                        >
+                                            {/* Song Name */}
+                                            <a
+                                                href={post.song_link}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-3xl font-bold text-center hover:underline"
                                             >
-                                                {/* Song Name */}
-                                                <a
-                                                    href={post.song_link}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-3xl font-bold hover:underline"
-                                                >
-                                                    {trackMetadata.name}
-                                                </a>
-                                                {/* Artist */}
-                                                <p className="text-lg mt-2">
-                                                    {trackMetadata.artists
-                                                        .map((artist) => artist.name)
-                                                        .join(", ")}
-                                                </p>
-                                                {/* Album */}
-                                                <p className="text-sm mt-1">
-                                                    <strong>Album:</strong> {trackMetadata.album.name}
-                                                </p>
-                                                {/* Play Button BELOW the Album Cover */}
+                                                {trackMetadata.name}
+                                            </a>
+                                            {/* Artist */}
+                                            <p className="text-xl text-center mt-2">
+                                                {trackMetadata.artists.map((artist) => artist.name).join(", ")}
+                                            </p>
+                                            {/* Album */}
+                                            <p className="text-sm text-center mt-1">
+                                                <strong>Album:</strong> {trackMetadata.album.name}
+                                            </p>
+                                            
+                                            {/* Play Button BELOW the Album Cover */}
+                                            <div className="mt-4 flex justify-center w-full">
                                                 <button
+                                                    style={{
+                                                        color: "rgba(255, 255, 255, 0.6)", 
+                                                        textShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)",
+                                                         
+                                                    }}
                                                     onClick={togglePlayPause}
-                                                    className="mt-2 px-4 py-2 bg-cover text-white rounded-md hover:scale-110 flex items-center gap-2"
+                                                    className="mt-4 bg-cover text-white rounded-full transition-transform duration-300 transform hover:scale-125 flex items-center justify-center text-4xl mx-auto"
                                                 >
                                                     {isPlaying ? <FaPause /> : <FaPlay />}
-                                                    {isPlaying ? "Pause" : "Play Preview"}
+                                                    {isPlaying ? "" : ""}
+
                                                 </button>
                                             </div>
+                                        </div>
+
                                         </div>
                                     </div>
                                 </>
