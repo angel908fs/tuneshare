@@ -11,6 +11,8 @@ import EditProfileModal from "./EditProfileModal";
 import { FaArrowLeft } from "react-icons/fa6";
 import { IoCalendarOutline } from "react-icons/io5";
 import { MdEdit } from "react-icons/md";
+import { CiLink } from "react-icons/ci";
+import { FaSpotify } from "react-icons/fa";
 import toast from "react-hot-toast";
 
 const ProfilePage = () => {
@@ -174,7 +176,7 @@ const ProfilePage = () => {
                 </div>
               </div>
               {/* Edit profile button */}
-              <div className="flex justify-end px-4 mt-5">
+              <div className="flex justify-center px-4 mt-5">
                 {isMyProfile && <EditProfileModal />}
                 {!isMyProfile && (
                   <button
@@ -198,8 +200,8 @@ const ProfilePage = () => {
                 )}
               </div>
 
-              <div className="flex flex-col gap-4 mt-14 px-4 items-center">
-                <div className="flex flex-col">
+              <div className="flex flex-col gap-4 mt-1 px-4">
+                <div className="flex flex-col items-center">
                   <span className="font-bold text-lg">
                     {userData?.username}
                   </span>
@@ -209,17 +211,25 @@ const ProfilePage = () => {
                   <span className="text-sm my-1">{userData?.bio}</span>
                 </div>
 
-                <div className="flex gap-2 flex-wrap">
-                  <div className="flex gap-2 items-center">
+                <div className="flex justify-between items-center w-full px-4">
+                  <div className="flex gap-2 ">
+                    {/*Date joined */}
                     <IoCalendarOutline className="w-4 h-4 text-slate-500" />
                     <span className="text-sm text-slate-500">
                       Joined{" "}
                       {new Date(userData?.createdAt).toLocaleDateString()}
                     </span>
+                    {/*Link in profile */}
+                    <CiLink className = "flex w-6 h-6 text-slate-500"/>
+                    <span className ="text-sm text-slate-500">
+                      {" "}
+                    </span>
+                    <FaSpotify className = "flex w-6 h-6 text-slate-500"/>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <div className="flex gap-1 items-center">
+                {/* Following and Followers # */}
+                <div className="flex gap-2 justify-center">
+                  <div className="flex gap-1">
                     <span className="font-bold text-xs">
                       {userData?.following_count}
                     </span>
