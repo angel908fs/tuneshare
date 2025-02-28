@@ -94,4 +94,22 @@ router.delete("/delete-comment", async (req, res, next) => {
     }
 });
 
+router.post("/get-comments", async (req, res) => {
+    if (!req.body.postID) {
+        return res.status(400).send({ success: false, message: "missing required parameter: postID" });
+    }
+    try {
+        const postID = req.body.postID;
+        const post = await Post.findOne({ post_id: postID })
+        if (!post) {
+            return res.status(404).json({ success: false, message: "post does not exist" });
+        }
+        const comments = await Comment.find({ comment_id: { $in: post.comments } });
+
+        return res.status(200).json({ success: true, data: {comments: comments} });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: "server error", error: error.message });
+    }
+});
+
 module.exports = router;
