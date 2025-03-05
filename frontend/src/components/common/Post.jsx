@@ -150,6 +150,7 @@ const Post = ({ post, likedPosts }) => {
       if (res.data.success) {
         // The array is in res.data.data.comments
         setComments(res.data.data.comments);
+        console.log(res.data.data.comments);
       } else {
         setErrorComments(res.data.message || "Unknown error fetching comments");
       }
@@ -433,7 +434,7 @@ const Post = ({ post, likedPosts }) => {
                             <span className="font-bold">{commentObj.username}</span>
                             <span className="text-gray-700 text-sm">@{commentObj.username}</span>
                           </div>
-                          <div className="text-sm">{commentObj.content}</div>
+                          <div className="text-sm">{commentObj.comment}</div>
 
                           {/* Delete button if this is my comment */}
                           {commentObj.user_id === userIdFromCookie && (

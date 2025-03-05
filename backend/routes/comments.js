@@ -125,7 +125,7 @@ router.post("/get-comments", async (req, res) => {
         const enrichedComments = comments.map(comment => ({
             comment_id: comment.comment_id,
             user_id: comment.user_id,
-            content: comment.content,
+            comment: comment.comment,
             created_at: comment.created_at,
             username: userMap[comment.user_id]?.username || "Unknown User",
             profile_picture: userMap[comment.user_id]?.profile_picture || null
