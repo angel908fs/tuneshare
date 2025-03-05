@@ -105,7 +105,7 @@ router.post("/get-comments", async (req, res) => {
         if (!post) {
             return res.status(404).json({ success: false, message: "post does not exist" });
         }
-        const comments = await Comment.find({ comment_id: { $in: post.comments } });
+        const comments = await Comment.find({ comment_id: { $in: post.comments } }).sort({ created_at: -1 });
         const userIDs = [...new Set(comments.map(comment => comment.user_id))];
 
         const users = await User.find(

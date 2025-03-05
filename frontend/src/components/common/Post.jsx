@@ -282,7 +282,7 @@ const Post = ({ post, likedPosts }) => {
       <div className="flex gap-2 items-start p-4 border-b border-gray-700">
         <div className="avatar">
           <Link to={`/profile/${postOwner.user_id}`} className="w-8 rounded-full overflow-hidden">
-            <img src={postOwner.profileImg || "/avatar-placeholder.png"} />
+            <img src={postOwner.profileImg || "/avatar-placeholder.png"} alt="profile" />
           </Link>
         </div>
         <div className="flex flex-col flex-1">
@@ -301,6 +301,8 @@ const Post = ({ post, likedPosts }) => {
               </span>
             )}
           </div>
+
+          {/* POST BODY */}
           <div className="flex flex-col gap-3 overflow-hidden">
             {post.img && (
               <img
@@ -310,7 +312,8 @@ const Post = ({ post, likedPosts }) => {
               />
             )}
             <span>{post.content || "<no content specified>"}</span>
-            {/* Song Link / Track Metadata */}
+
+            {/* OPTIONAL: SPOTIFY/DEEZER PREVIEW */}
             {post.song_link && (
               <div className="spotify-metadata mt-3 p-12 border border-gray-700 rounded relative overflow-hidden">
                 {trackMetadata && (
@@ -341,7 +344,6 @@ const Post = ({ post, likedPosts }) => {
                           </a>
                         )}
                       </div>
-
                       <div className="w-1/2 flex flex-col justify-center">
                         <div
                           style={{
@@ -350,7 +352,6 @@ const Post = ({ post, likedPosts }) => {
                           }}
                           className="flex flex-col items-center"
                         >
-                          {/* Song Name */}
                           <a
                             href={post.song_link}
                             target="_blank"
@@ -359,16 +360,12 @@ const Post = ({ post, likedPosts }) => {
                           >
                             {trackMetadata.name}
                           </a>
-                          {/* Artist */}
                           <p className="text-xl text-center mt-2">
                             {trackMetadata.artists.map((artist) => artist.name).join(", ")}
                           </p>
-                          {/* Album */}
                           <p className="text-sm text-center mt-1">
                             <strong>Album:</strong> {trackMetadata.album.name}
                           </p>
-
-                          {/* Play Button */}
                           <div className="mt-4 flex justify-center w-full">
                             <button
                               style={{
@@ -390,10 +387,10 @@ const Post = ({ post, likedPosts }) => {
             )}
           </div>
 
-          {/* POST FOOTER: COMMENTS, REPOST, LIKE, BOOKMARK */}
+          {/* POST FOOTER */}
           <div className="flex justify-between mt-3">
             <div className="flex gap-4 items-center w-2/3 justify-between">
-              {/* COMMENTS ICON: OPENS MODAL */}
+              {/* COMMENT ICON */}
               <div
                 className="flex gap-1 items-center cursor-pointer group"
                 onClick={handleOpenCommentsModal}
@@ -404,7 +401,7 @@ const Post = ({ post, likedPosts }) => {
                 </span>
               </div>
 
-              {/* COMMENTS MODAL */}
+              {/* COMMENT MODAL */}
               <dialog id={`comments_modal${post.post_id}`} className="modal border-none outline-none">
                 <div className="modal-box rounded border border-gray-600">
                   <h3 className="font-bold text-lg mb-4">COMMENTS</h3>
@@ -430,16 +427,28 @@ const Post = ({ post, likedPosts }) => {
                           </div>
                         </div>
                         <div className="flex flex-col">
-                          <div className="flex items-center gap-1">
-                            <span className="font-bold">{commentObj.username}</span>
-                            <span className="text-gray-700 text-sm">@{commentObj.username}</span>
+                          {/* 
+                            1) Link to the user's profile for the comment author
+                            2) Show created_at
+                          */}
+                          <div className="flex items-center gap-2">
+                            <Link
+                              to={`/profile/${commentObj.user_id}`}
+                              className="font-bold hover:underline"
+                            >
+                              {commentObj.username}
+                            </Link>
+                            <span className="text-xs text-gray-400 ml-1">
+                              {new Date(commentObj.created_at).toLocaleString()}
+                            </span>
                           </div>
-                          <div className="text-sm">{commentObj.comment}</div>
+                          {/* The actual comment text */}
+                          <div className="text-sm mt-1">{commentObj.comment}</div>
 
                           {/* Delete button if this is my comment */}
                           {commentObj.user_id === userIdFromCookie && (
                             <button
-                              className="text-xs text-red-400 hover:text-red-600 underline"
+                              className="text-xs text-red-400 hover:text-red-600 underline mt-1"
                               onClick={() => handleDeleteComment(commentObj.comment_id)}
                             >
                               Delete
@@ -450,7 +459,7 @@ const Post = ({ post, likedPosts }) => {
                     ))}
                   </div>
 
-                  {/* FORM: POST A NEW COMMENT */}
+                  {/* POST A NEW COMMENT */}
                   <form
                     className="flex gap-2 items-center mt-4 border-t border-gray-600 pt-2"
                     onSubmit={handlePostComment}
@@ -481,7 +490,10 @@ const Post = ({ post, likedPosts }) => {
               </div>
 
               {/* LIKE BUTTON */}
-              <div className="flex gap-1 items-center group cursor-pointer" onClick={handleLikePost}>
+              <div
+                className="flex gap-1 items-center group cursor-pointer"
+                onClick={handleLikePost}
+              >
                 {!isLiked && (
                   <FaRegHeart className="w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500" />
                 )}
