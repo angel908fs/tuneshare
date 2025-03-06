@@ -6,6 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const userSchema = new mongoose.Schema(
     {   
         // personal user data
+        fullName: {type: String, maxlength:25, default: ""}, // added name
         username:{type: String,maxlength: 16, required: true, unique: true},
         email:{type: String,required: true, unique: true},
         user_id:{type: String, default: uuidv4},
@@ -15,7 +16,8 @@ const userSchema = new mongoose.Schema(
         followers:[{type: String, ref: 'User'}],  
         following:[{type: String, ref: 'User'}],
         
-        bio:{type: String, maxlength: 256},    
+        bio:{type: String, maxlength: 256, default: ""},
+        link: {type: String, maxlength: 512, default: ""},    // added link 
         
         comments: [{type: String, ref: 'Comment'}],
         

@@ -11,6 +11,8 @@ import EditProfileModal from "./EditProfileModal";
 import { FaArrowLeft } from "react-icons/fa6";
 import { IoCalendarOutline } from "react-icons/io5";
 import { MdEdit } from "react-icons/md";
+import { CiLink } from "react-icons/ci";
+import { FaSpotify } from "react-icons/fa";
 import toast from "react-hot-toast";
 
 const ProfilePage = () => {
@@ -39,11 +41,15 @@ const ProfilePage = () => {
      });
  
      if (res.data.success) {
-     console.log(`Successfully followed user: ${targetUserId}`);
-     toast.success("successfully followed user");
-     setShowFollowAlert(true); // show alert
-     setTimeout(() => setShowFollowAlert(false), 5000); // hide after 3 seconds
-     
+      console.log(`Successfully followed user: ${targetUserId}`);
+      toast.success("successfully followed user");
+      setShowFollowAlert(true); // show alert
+      setTimeout(() => setShowFollowAlert(false), 5000); // hide after 3 seconds
+      setUserData((prevUserData)=> ({
+        ...prevUserData,
+        isFollowing: !prevUserData.isFollowing,
+     }));
+
      } else if (res.data.error) {
         toast.error("could not follow user");
         console.error("Failed to follow user:", res.data.message);
@@ -88,11 +94,10 @@ const ProfilePage = () => {
         });
 
         if (response.data.success) {
-          //console.log(response.data.data);
           setUserData(response.data.data.user);
           setPosts(response.data.data.posts);
           setError(null);
-          setIsMyProfile(currentUserId === response.data.data.user.user_id);
+          setIsMyProfile(currentUserId === response.data.data.user?.user_id);
         } else {
           setError(response.data.message);
         }
@@ -107,16 +112,33 @@ const ProfilePage = () => {
     fetchProfileData();
   }, [userId]);
 
-  const handleImgChange = (e, state) => {
+  const handleProfilePicChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        state === "coverImg" && setCoverImg(reader.result);
-        state === "profileImg" && setProfileImg(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload =async () => {
+      setProfileImg(reader.result);
+
+      try{
+        const response = await axios.put ("/api/profile/update", {
+          user_id: userIdFromCookie,
+          profile_picture: reader.result,
+        });
+
+        if (response.data.success) {
+          toast.success("Profile picture updated!");
+          setUserData((prev) => ({ ...prev, profile_picture: reader.result }));
+
+        } else {
+          toast.error("Failed to update profile picture.");
+        }
+      } catch (error) {
+        console.error ("Error updating profile picture:", error);
+        toast.error("Error updating profile picture.");
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -138,47 +160,20 @@ const ProfilePage = () => {
             )}
               <div className="flex gap-10 px-4 py-2 items-center">
                 <Link to="/">
-                  <FaArrowLeft className="w-4 h-4" />
+                  <FaArrowLeft className="w-8 h-8" />
                 </Link>
-                <div className="flex flex-col">
-                  <p className="font-bold text-lg">{userData?.username}</p>
-                  <span className="text-sm text-slate-500">
-                    {posts?.length} posts
-                  </span>
-                </div>
               </div>
               {/* COVER IMG */}
-              <div className="relative group/cover">
-                <img
-                  src={coverImg || userData?.coverImg || "cover.png"}
-                  className="h-52 w-full object-cover"
-                  alt="cover image"
-                />
-                {isMyProfile && (
-                  <div
-                    className="absolute top-2 right-2 rounded-full p-2 bg-gray-800 bg-opacity-75 cursor-pointer opacity-0 group-hover/cover:opacity-100 transition duration-200"
-                    onClick={() => coverImgRef.current.click()}
-                  >
-                    <MdEdit className="w-5 h-5 text-white" />
-                  </div>
-                )}
-
-                <input
-                  type="file"
-                  hidden
-                  accept="image/*"
-                  ref={coverImgRef}
-                  onChange={(e) => handleImgChange(e, "coverImg")}
-                />
+              <div className="flex justify-center">
                 <input
                   type="file"
                   hidden
                   accept="image/*"
                   ref={profileImgRef}
-                  onChange={(e) => handleImgChange(e, "profileImg")}
+                  onChange={handleProfilePicChange}
                 />
                 {/* USER AVATAR */}
-                <div className="avatar absolute -bottom-16 left-4">
+                <div className="avatar"> {/* Avatar positioning  */}
                   <div className="w-32 rounded-full relative group/avatar">
                     <img
                       src={
@@ -188,28 +183,30 @@ const ProfilePage = () => {
                       }
                       alt="Profile"
                     />
+                    {/*This is the edit pfp button */}
                     <div className="absolute top-5 right-3 p-1 bg-primary rounded-full group-hover/avatar:opacity-100 opacity-0 cursor-pointer">
                       {isMyProfile && (
                         <MdEdit
                           className="w-4 h-4 text-white"
-                          onClick={() => profileImgRef.current.click()}
+                          onClick={() => profileImgRef.current && profileImgRef.current.click()}
                         />
                       )}
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="flex justify-end px-4 mt-5">
-                {isMyProfile && <EditProfileModal />}
+              {/* Edit profile button */}
+              <div className="flex justify-center px-4 mt-5">
+                {isMyProfile && <EditProfileModal userData = {userData} setUserData={setUserData}/>}
                 {!isMyProfile && (
                   <button
                     className="btn btn-outline rounded-full btn-sm"
-                    onClick={(e) => {
+                    onClick={async (e) => {
 											e.preventDefault();
-											handleFollow(userId);			
+											await handleFollow(userId);			
 										  }} 
                   >
-                    Follow
+                    {userData?.isFollowing ? "Unfollow" : "Follow"}
                   </button>
                 )}
                 {(coverImg || profileImg) && isMyProfile && (
@@ -223,28 +220,45 @@ const ProfilePage = () => {
                 )}
               </div>
 
-              <div className="flex flex-col gap-4 mt-14 px-4">
-                <div className="flex flex-col">
+              <div className="flex flex-col gap-4 mt-1 px-4">
+                <div className="flex flex-col items-center">
                   <span className="font-bold text-lg">
-                    {userData?.username}
+                    {userData?.fullName || "User"}
                   </span>
                   <span className="text-sm text-slate-500">
                     @{userData?.username}
                   </span>
-                  <span className="text-sm my-1">{userData?.bio}</span>
+                  <span className="text-sm my-1">
+                    {userData?.bio}
+                  </span>
                 </div>
 
-                <div className="flex gap-2 flex-wrap">
-                  <div className="flex gap-2 items-center">
+                <div className="flex justify-between items-center w-full px-4">
+                  <div className="flex gap-2 ">
+                    {/*Date joined */}
                     <IoCalendarOutline className="w-4 h-4 text-slate-500" />
                     <span className="text-sm text-slate-500">
                       Joined{" "}
                       {new Date(userData?.createdAt).toLocaleDateString()}
                     </span>
+                    {/*Link in profile */}
+                    {userData?.link && (
+                      <a
+                      href = {userData.link}
+                      target="_blank"
+                      rel = "noopener noreferrer"
+                      className = "text-sm text-primary underline"
+                      >
+                        <CiLink className="inline w-4 h-4" />
+                        {userData.link}
+                      </a>
+                    )}
+                    <FaSpotify className = "flex w-6 h-6 text-slate-500"/>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <div className="flex gap-1 items-center">
+                {/* Following and Followers # */}
+                <div className="flex gap-2 justify-center">
+                  <div className="flex gap-1">
                     <span className="font-bold text-xs">
                       {userData?.following_count}
                     </span>
@@ -268,17 +282,6 @@ const ProfilePage = () => {
                   Posts
                   {feedType === "posts" && (
                     <div className="absolute bottom-0 w-10 h-1 rounded-full bg-primary" />
-                  )}
-                </div>
-                <div
-                  className={`flex justify-center flex-1 p-3 hover:bg-secondary transition duration-300 relative cursor-pointer ${
-                    feedType === "likes" ? "" : "text-slate-500"
-                  }`}
-                  onClick={() => setFeedType("likes")}
-                >
-                  Likes
-                  {feedType === "likes" && (
-                    <div className="absolute bottom-0 w-10  h-1 rounded-full bg-primary" />
                   )}
                 </div>
               </div>
