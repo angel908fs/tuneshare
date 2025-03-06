@@ -34,7 +34,11 @@ router.post("/load-feed", async (req, res) => {
         // create a mapping of user_id to posts array
         const userPostsMap = {};
         userPosts.forEach(u => {
-            userPostsMap[u.user_id] = u.posts.map(post => JSON.parse(post));
+            userPostsMap[u.user_id] = { 
+                username: u.username,
+                profile_picture: u.profile_picture,
+                posts: u.posts?.map(post => JSON.parse(post))
+            };
         });
 
         // fetch posts from the Post collection
@@ -45,10 +49,12 @@ router.post("/load-feed", async (req, res) => {
 
         // enrich posts with username
         const enrichedPosts = posts.map(post => {
-            const userPostData = userPostsMap[post.user_id]?.find(userPost => userPost.post_id === post.post_id);
+            const userData = userPostsMap[post.user_id] || {};
+            const userPostData = userData.posts?.find(userPost => userPost.post_id === post.post_id);
             return {
                 ...post.toObject(),
-                username: userPosts.find(u => u.user_id === post.user_id).username,
+                username: userData.username || "Unknown",
+                profile_picture: userData.profile_picture || "/avatar-placeholder.png", // default avatar
                 content: userPostData ? userPostData.content : null,
             };
         });

@@ -41,11 +41,15 @@ const ProfilePage = () => {
      });
  
      if (res.data.success) {
-     console.log(`Successfully followed user: ${targetUserId}`);
-     toast.success("successfully followed user");
-     setShowFollowAlert(true); // show alert
-     setTimeout(() => setShowFollowAlert(false), 5000); // hide after 3 seconds
-     
+      console.log(`Successfully followed user: ${targetUserId}`);
+      toast.success("successfully followed user");
+      setShowFollowAlert(true); // show alert
+      setTimeout(() => setShowFollowAlert(false), 5000); // hide after 3 seconds
+      setUserData((prevUserData)=> ({
+        ...prevUserData,
+        isFollowing: !prevUserData.isFollowing,
+     }));
+
      } else if (res.data.error) {
         toast.error("could not follow user");
         console.error("Failed to follow user:", res.data.message);
@@ -90,11 +94,10 @@ const ProfilePage = () => {
         });
 
         if (response.data.success) {
-          //console.log(response.data.data);
           setUserData(response.data.data.user);
           setPosts(response.data.data.posts);
           setError(null);
-          setIsMyProfile(currentUserId === response.data.data.user.user_id);
+          setIsMyProfile(currentUserId === response.data.data.user?.user_id);
         } else {
           setError(response.data.message);
         }
@@ -109,16 +112,33 @@ const ProfilePage = () => {
     fetchProfileData();
   }, [userId]);
 
-  const handleImgChange = (e, state) => {
+  const handleProfilePicChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        state === "coverImg" && setCoverImg(reader.result);
-        state === "profileImg" && setProfileImg(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload =async () => {
+      setProfileImg(reader.result);
+
+      try{
+        const response = await axios.put ("/api/profile/update", {
+          user_id: userIdFromCookie,
+          profile_picture: reader.result,
+        });
+
+        if (response.data.success) {
+          toast.success("Profile picture updated!");
+          setUserData((prev) => ({ ...prev, profile_picture: reader.result }));
+
+        } else {
+          toast.error("Failed to update profile picture.");
+        }
+      } catch (error) {
+        console.error ("Error updating profile picture:", error);
+        toast.error("Error updating profile picture.");
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -150,7 +170,7 @@ const ProfilePage = () => {
                   hidden
                   accept="image/*"
                   ref={profileImgRef}
-                  onChange={(e) => handleImgChange(e, "profileImg")}
+                  onChange={handleProfilePicChange}
                 />
                 {/* USER AVATAR */}
                 <div className="avatar"> {/* Avatar positioning  */}
@@ -168,7 +188,7 @@ const ProfilePage = () => {
                       {isMyProfile && (
                         <MdEdit
                           className="w-4 h-4 text-white"
-                          onClick={() => profileImgRef.current.click()}
+                          onClick={() => profileImgRef.current && profileImgRef.current.click()}
                         />
                       )}
                     </div>
@@ -177,16 +197,16 @@ const ProfilePage = () => {
               </div>
               {/* Edit profile button */}
               <div className="flex justify-center px-4 mt-5">
-                {isMyProfile && <EditProfileModal />}
+                {isMyProfile && <EditProfileModal userData = {userData} setUserData={setUserData}/>}
                 {!isMyProfile && (
                   <button
                     className="btn btn-outline rounded-full btn-sm"
-                    onClick={(e) => {
+                    onClick={async (e) => {
 											e.preventDefault();
-											handleFollow(userId);			
+											await handleFollow(userId);			
 										  }} 
                   >
-                    Follow
+                    {userData?.isFollowing ? "Unfollow" : "Follow"}
                   </button>
                 )}
                 {(coverImg || profileImg) && isMyProfile && (
@@ -203,12 +223,14 @@ const ProfilePage = () => {
               <div className="flex flex-col gap-4 mt-1 px-4">
                 <div className="flex flex-col items-center">
                   <span className="font-bold text-lg">
-                    {userData?.username}
+                    {userData?.fullName || "User"}
                   </span>
                   <span className="text-sm text-slate-500">
                     @{userData?.username}
                   </span>
-                  <span className="text-sm my-1">{userData?.bio}</span>
+                  <span className="text-sm my-1">
+                    {userData?.bio}
+                  </span>
                 </div>
 
                 <div className="flex justify-between items-center w-full px-4">
@@ -220,10 +242,17 @@ const ProfilePage = () => {
                       {new Date(userData?.createdAt).toLocaleDateString()}
                     </span>
                     {/*Link in profile */}
-                    <CiLink className = "flex w-6 h-6 text-slate-500"/>
-                    <span className ="text-sm text-slate-500">
-                      {" "}
-                    </span>
+                    {userData?.link && (
+                      <a
+                      href = {userData.link}
+                      target="_blank"
+                      rel = "noopener noreferrer"
+                      className = "text-sm text-primary underline"
+                      >
+                        <CiLink className="inline w-4 h-4" />
+                        {userData.link}
+                      </a>
+                    )}
                     <FaSpotify className = "flex w-6 h-6 text-slate-500"/>
                   </div>
                 </div>
