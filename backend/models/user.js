@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema(
         link: {type: String, maxlength: 512, default: ""},    // added link 
         
         comments: [{type: String, ref: 'Comment'}],
-
+        
         followers_count: { type: Number, default: 0 },
         following_count: { type: Number, default: 0 },
 

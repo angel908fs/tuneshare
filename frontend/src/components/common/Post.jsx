@@ -270,10 +270,9 @@ const Post = ({ post, likedPosts }) => {
 
         newAudio.onended = () => setIsPlaying(false);
       }
-    }
-  };
-
+ 
   const postOwner = post || {};
+
   const isMyPost = true; 
   const formattedDate = "1h"; 
 
@@ -283,6 +282,7 @@ const Post = ({ post, likedPosts }) => {
         <div className="avatar">
           <Link to={`/profile/${postOwner.user_id}`} className="w-8 rounded-full overflow-hidden">
             <img src={postOwner?.profile_picture || "/avatar-placeholder.png"} alt="profile" />
+
           </Link>
         </div>
         <div className="flex flex-col flex-1">

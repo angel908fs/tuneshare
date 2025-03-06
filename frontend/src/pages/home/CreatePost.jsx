@@ -38,6 +38,7 @@ const CreatePost = ({ onPostCreated }) => {
   const [showSearchBar, setShowSearchBar] = useState(false);
   const [spotifyToken, setSpotifyToken] = useState("");
   const searchBarRef = useRef(null); // create ref for the search bar
+  const [songCover, setSongCover] = useState("");
 
 
 
@@ -101,6 +102,7 @@ const CreatePost = ({ onPostCreated }) => {
   const selectSong = (track) => {
     setSongLink(track.external_urls.spotify);
     setSearchQuery(`${track.name} - ${track.artists.map(artist => artist.name).join(", ")}`);
+    setSongCover(track.album.images[0]?.url);
     setShowSearchBar(false); 
   }
 
@@ -144,11 +146,11 @@ const CreatePost = ({ onPostCreated }) => {
       toast.error('Please enter a song link');
       return;
     }
-    if (!text) {
-      toast.error('Please enter some content');
-      return;
-    }
-    createPost({ userID, songLink, content: text });
+    // if (!text) {
+    //   toast.error('Please enter some content');
+    //   return;
+    // }
+    createPost({ userID, songLink, content: text || " "});
   };
 
   return (
@@ -165,24 +167,58 @@ const CreatePost = ({ onPostCreated }) => {
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
+          {/* search bar */}
+          <div className="relative w-full max-w-sm mt-4 mb-4" ref={searchBarRef}>
+          {/* background blurred qlbum cover */}
+          {songCover && (
+            <div
+              className="absolute inset-0 bg-cover bg-center rounded-lg"
+              style={{
+                backgroundImage: `url(${songCover})`,
+                filter: "blur(8px) brightness(0.8)",
+              }}
+            ></div>
+          )}
 
-        <div className="relative w-full max-w-sm" ref = {searchBarRef}>
-          <div className= "flex items-center gap-2 bg-gray-800 p-3 rounded-lg border border-gray-700">
-          <FaMusic 
-            className = "text-blue-400 w-5 h-5 cursor-pointer"
-          /> 
-          <input
-          type='text'
-          className='w-full bg-transparent text-lg border-none focus:outline-none placeholder-gray-400'
-          placeholder='Search for Song...'
-          value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            fetchSpotifyTracks(e.target.value);
-            setShowSearchBar(true)
-          }}
-          />
+          {/* Search Bar */}
+          <div className="flex items-center gap-2 bg-gray-800/70 p-3 rounded-lg border border-gray-700 relative">
+            {songCover ? (
+              <img
+                src={songCover}
+                alt="Album Cover"
+                className="w-8 h-8 rounded-sm"
+              />
+            ) : (
+              <FaMusic className="text-blue-400 w-5 h-5 cursor-pointer" />
+            )}
+
+            <input
+              type="text"
+              className="w-full bg-transparent text-lg border-none focus:outline-none placeholder-gray-400 text-white/60"
+              placeholder="Search for Song..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                fetchSpotifyTracks(e.target.value);
+                setShowSearchBar(true);
+
+                if (e.target.value === "") {
+                  setSongCover("");
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Backspace" && songCover) {
+                  setSongLink("");
+                  setSearchQuery("");
+                  setSongCover("");
+                  setShowSearchBar(true);
+                }
+              }}
+            />
           </div>
+
+
+          {/* song dropdown */}
           {showSearchBar && searchResults.length > 0 && (
             <div className="z-50 absolute top-12 left-0 w-full bg-gray-900 p-2 rounded-lg shadow-lg border border-gray-700">
               <ul className="max-h-60 overflow-y-auto">
