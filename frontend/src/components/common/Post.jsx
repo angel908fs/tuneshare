@@ -270,12 +270,12 @@ const Post = ({ post, likedPosts }) => {
 
         newAudio.onended = () => setIsPlaying(false);
       }
- 
+    }
+  }
   const postOwner = post || {};
 
   const isMyPost = true; 
   const formattedDate = "1h"; 
-
   return (
     <>
       <div className="flex gap-2 items-start p-4 border-b border-gray-700">
