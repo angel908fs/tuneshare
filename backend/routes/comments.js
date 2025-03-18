@@ -57,7 +57,7 @@ router.delete("/delete-comment", async (req, res, next) => {
     if (!req.body.postID) {
         return res.status(400).send({ success: false, message: "missing required parameter: postID" });
     }
-    
+
     const commentID = req.body.commentID;
     const userID = req.body.userID;
     const postID = req.body.postID;
@@ -93,5 +93,51 @@ router.delete("/delete-comment", async (req, res, next) => {
         return res.status(500).send({ success: false, message: "server error", error: error.message });
     }
 });
+
+router.post("/get-comments", async (req, res) => {
+    if (!req.body.postID) {
+        return res.status(400).send({ success: false, message: "missing required parameter: postID" });
+    }
+    try {
+        const postID = req.body.postID;
+        const post = await Post.findOne({ post_id: postID });
+
+        if (!post) {
+            return res.status(404).json({ success: false, message: "post does not exist" });
+        }
+        const comments = await Comment.find({ comment_id: { $in: post.comments } }).sort({ created_at: -1 });
+        const userIDs = [...new Set(comments.map(comment => comment.user_id))];
+
+        const users = await User.find(
+            { user_id: { $in: userIDs } },
+            "user_id username profile_picture"
+        );
+
+        const userMap = {};
+        users.forEach(user => {
+            userMap[user.user_id] = {
+                user_id: user.user_id,
+                username: user.username,
+                profile_picture: user.profile_picture
+            };
+        });
+
+        const enrichedComments = comments.map(comment => ({
+            comment_id: comment.comment_id,
+            user_id: comment.user_id,
+            comment: comment.comment,
+            created_at: comment.created_at,
+            username: userMap[comment.user_id]?.username || "Unknown User",
+            profile_picture: userMap[comment.user_id]?.profile_picture || null
+        }));
+
+        return res.status(200).json({ success: true, data: { comments: enrichedComments } });
+
+    } catch (error) {
+        return res.status(500).json({ success: false, message: "server error", error: error.message });
+    }
+});
+
+
 
 module.exports = router;
