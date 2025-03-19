@@ -51,6 +51,7 @@ const getSpotifyTrackMetadata = async (spotifyUrl) => {
   }
 };
 
+
 const searchDeezerTrack = async (trackName, artistName) => {
   const query = `${artistName} ${trackName}`.trim();
   console.log("Sending search request for:", query); // Debugging request
@@ -275,7 +276,6 @@ const Post = ({ post, likedPosts }) => {
   const postOwner = post || {};
 
   const isMyPost = true; 
-  const formattedDate = "1h"; 
   return (
     <>
       <div className="flex gap-2 items-start p-4 border-b border-gray-700">
@@ -290,10 +290,10 @@ const Post = ({ post, likedPosts }) => {
             <Link to={`/profile/${postOwner.user_id}`} className="font-bold">
               {postOwner.username}
             </Link>
-            <span className="text-gray-700 flex gap-1 text-sm">
+            <span className="text-gray-500 flex gap-1 text-sm">
               <Link to={`/profile/${postOwner.user_id}`}>@{postOwner.username}</Link>
               <span>·</span>
-              <span>{formattedDate}</span>
+              <span>{new Date(post.created_at).toLocaleString()}</span>
             </span>
             {isMyPost && (
               <span className="flex justify-end flex-1">
