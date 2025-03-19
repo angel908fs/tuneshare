@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import RightPanelSkeleton from "../skeletons/RightPanelSkeleton";
-import { USERS_FOR_RIGHT_PANEL } from "../../utils/db/dummy";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from 'js-cookie';
@@ -16,48 +15,76 @@ const RightPanel = () => {
 	const [searchTerm, setSearchTerm] = useState(""); 
 	const [searchResults, setSearchResults] = useState([]);
 	const [loadingSearch, setLoadingSearch] = useState(false); 
+	const [suggestedUsers, setSuggestedUsers] = useState([]);
   
-	useEffect(() => {
-  	// get user ID from JWT token in cookie
-	  const cookieValue = Cookies.get("tuneshare_cookie");
-	  let currentUserId = "";
-	  if (cookieValue) {
-		  const decodedToken = jwtDecode(cookieValue);
-		  currentUserId = decodedToken.user_id;
-		  setUserIdFromCookie(currentUserId);
-		  //console.log("User ID from cookie:", userIdFromCookie);
-	  } else {
-	  console.log("No token found in the cookie.");}
-  }, []);
-
-
-    // handle Follow Action
-	const handleFollow = async (targetUserId) => {
-		 //console.log(`Following user: ${targetUserId}`);
-		try {
-		  const response = await axios.post('/api/follow', {
-			userID: userIdFromCookie,
-			target_userID: targetUserId,
-		  });
+	// Function to fetch suggested users
+	const fetchSuggestedUsers = async () => {
+		if (!userIdFromCookie || userIdFromCookie.trim() === "") {
+			console.warn("Skipping fetchSuggestedUsers: No valid userIdFromCookie");
+			return;
+		}
 	
-		  if (response.data.success) {
-			console.log(`Successfully followed user: ${targetUserId}`);
-			toast.success("successfully followed user")
-			setFollowedUsers((prev) => [...prev, targetUserId]); // update the list of followed users
-		  } else {
-			toast.success("user is already being followed")
-			console.log("Failed to follow user:", response.data.message);
-		  }
-		} catch (error) {
-			if (error.response.status === 409) {
-				toast.success("user is already being followed")
+		console.log(`Making API request to: /api/suggested-users with userID: ${userIdFromCookie}`);
+	
+		try {
+			const response = await axios.post("/api/suggested-users", { user_id: userIdFromCookie });
+	
+			console.log("Suggested Users Response:", response.data); // Debugging Response Data
+	
+			if (response.data.success) {
+				setSuggestedUsers(response.data.users);
 			} else {
-				toast.error("could not follow user" + error.response.data.message)
+				console.warn("No suggested users found.");
+			}
+		} catch (error) {
+			console.error("Error fetching suggested users:", error.response?.data || error);
+		}
+	};
+	
+
+	// Fetch user ID from JWT cookie
+	useEffect(() => {
+		const cookieValue = Cookies.get("tuneshare_cookie");
+		if (cookieValue) {
+			const decodedToken = jwtDecode(cookieValue);
+			setUserIdFromCookie(decodedToken.user_id);
+		} else {
+			console.log("No token found in the cookie.");
+		}
+	}, []);
+
+	// Fetch suggested users AFTER userIdFromCookie is set
+	useEffect(() => {
+		if (userIdFromCookie) {
+			console.log("Fetching Suggested Users for User ID:", userIdFromCookie); // Debugging
+			fetchSuggestedUsers();
+		}
+	}, [userIdFromCookie]);
+
+	// Handle Follow Action (Now Refreshes Suggested Users)
+	const handleFollow = async (targetUserId) => {
+		try {
+			const response = await axios.post('/api/follow', {
+				userID: userIdFromCookie,
+				target_userID: targetUserId,
+			});
+	
+			if (response.data.success) {
+				toast.success("Successfully followed user");
+				setFollowedUsers((prev) => [...prev, targetUserId]); // Update followed users
+				await fetchSuggestedUsers(); // Refresh suggested users after follow
+			} else {
+				toast.success("User is already being followed");
+			}
+		} catch (error) {
+			if (error.response?.status === 409) {
+				toast.success("User is already being followed");
+			} else {
+				toast.error("Could not follow user");
 				console.error("Error while following user:", error);
 			}
-			
 		}
-	  };
+	};
 
 	const handleSearch = async (e) => {
 		const query = e.target.value;
@@ -95,89 +122,74 @@ const RightPanel = () => {
 					onChange={handleSearch}
 					className="w-full p-2 rounded-md bg-[#1e2124] text-white placeholder-gray-500 mb-4"
 				/>
-	
-				<p className="font-bold">Who to follow</p>
-				<div className="flex flex-col gap-4">
-					{/* Search Results */}
-					{loadingSearch ? (
-						<RightPanelSkeleton />
-					) : searchResults.length === 0 && searchTerm.trim() !== "" ? (
-						<p className="text-center text-gray-500 mt-2">
-							No users found matching "{searchTerm}"
-						</p>
-					) : searchResults.length > 0 ? (
-						searchResults.map((user) => (
-							<Link
-								to={`/profile/${user.user_id}`}
-								className="flex items-center justify-between gap-4"
-								key={user.user_id}
-							>
-								<div className="flex gap-2 items-center">
-									<div className="avatar">
-										<div className="w-8 rounded-full">
-											<img src={user.profileImg || "/avatar-placeholder.png"} alt={user.username} />
+				{/* Show Search Results if SearchTerm Exists */}
+				{searchTerm.trim() ? (
+					<>
+						<p className="font-bold">Search Results</p>
+						<div className="flex flex-col gap-4">
+							{loadingSearch ? (
+								<RightPanelSkeleton />
+							) : searchResults.length === 0 ? (
+								<p className="text-center text-gray-500 mt-2">
+									No users found matching "{searchTerm}"
+								</p>
+							) : (
+								searchResults.map((user) => (
+									<Link to={`/profile/${user.user_id}`} className="flex items-center justify-between gap-4" key={user.user_id}>
+										<div className="flex gap-2 items-center">
+											<div className="avatar">
+												<div className="w-8 rounded-full">
+													<img src={user.profileImg || "/avatar-placeholder.png"} alt={user.username} />
+												</div>
+											</div>
+											<div className="flex flex-col">
+												<span className="font-semibold tracking-tight truncate w-28">{user.username}</span>
+												<span className="text-sm text-slate-500">Followers: {user.followers_count}</span>
+											</div>
 										</div>
-									</div>
-									<div className="flex flex-col">
-										<span className="font-semibold tracking-tight truncate w-28">
-											{user.username}
-										</span>
-										<span className="text-sm text-slate-500">
-											Followers: {user.followers_count}
-										</span>
-									</div>
-								</div>
-								<div>
-									<button
-										className="btn bg-white text-black hover:bg-white hover:opacity-90 rounded-full btn-sm"
-										onClick={(e) => {
-											e.preventDefault();
-											handleFollow(user.user_id);
-										}}
-									>
-										Follow
-									</button>
-								</div>
-							</Link>
-						))
-					) : (
-						USERS_FOR_RIGHT_PANEL?.map((user) => (
-							<Link
-								to={`/profile/${user.username}`}
-								className="flex items-center justify-between gap-4"
-								key={user._id}
-							>
-								<div className="flex gap-2 items-center">
-									<div className="avatar">
-										<div className="w-8 rounded-full">
-											<img src={user.profileImg || "/avatar-placeholder.png"} alt={user.username} />
+										<button className="btn bg-white text-black hover:bg-white hover:opacity-90 rounded-full btn-sm" 
+											onClick={(e) => { e.preventDefault(); handleFollow(user.user_id); }}>
+											Follow
+										</button>
+									</Link>
+								))
+							)}
+						</div>
+					</>
+				) : (
+					/* Show Suggested Users if No Search Term */
+					<>
+						<p className="font-bold">Suggested for you</p>
+						<div className="flex flex-col gap-4">
+							{suggestedUsers.length === 0 ? (
+								<p className="text-center text-gray-500 mt-2">No suggestions available</p>
+							) : (
+								suggestedUsers.map((user) => (
+									<Link to={`/profile/${user.user_id}`} className="flex items-center justify-between gap-4" key={user.user_id}>
+										<div className="flex gap-2 items-center">
+											<div className="avatar">
+												<div className="w-8 rounded-full">
+													<img src={user.profile_picture || "/avatar-placeholder.png"} alt={user.username} />
+												</div>
+											</div>
+											<div className="flex flex-col">
+												<span className="font-semibold tracking-tight truncate w-28">{user.username}</span>
+												<span className="text-sm text-slate-500">Followers: {user.followers_count}</span>
+											</div>
 										</div>
-									</div>
-									<div className="flex flex-col">
-										<span className="font-semibold tracking-tight truncate w-28">
-											{user.fullName}
-										</span>
-										<span className="text-sm text-slate-500">@{user.username}</span>
-									</div>
-								</div>
-								<div>
-									<button
-										className="btn bg-white text-black hover:bg-white hover:opacity-90 rounded-full btn-sm"
-										onClick={(e) => {
-											e.preventDefault();
-											handleFollow(user._id);
-										}}
-									>
-										Follow
-									</button>
-								</div>
-							</Link>
-						))
-					)}
-				</div>
+										<button className="btn bg-white text-black hover:bg-white hover:opacity-90 rounded-full btn-sm" 
+											onClick={(e) => { e.preventDefault(); handleFollow(user.user_id); }}>
+											Follow
+										</button>
+									</Link>
+								))
+							)}
+						</div>
+					</>
+				)}
 			</div>
 		</div>
-	);	
+	);
 };
 
 export default RightPanel;
