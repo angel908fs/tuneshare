@@ -36,7 +36,9 @@ describe("POST /profile", () => {
     });
 
     it("should return 404 if user is not found", async () => {
-        User.findOne.mockResolvedValue(null); // mock user not found
+        User.findOne.mockImplementation(()=> ({
+            select: jest.fn().mockResolvedValue(null)
+         })); // mock user not found
         const response = await request(app).post("/profile").send({ user_id: "123", page: 1 });
         expect(response.status).toBe(404);
         expect(response.body).toEqual({ success: false, message: "user not found" });
@@ -112,7 +114,9 @@ describe("POST /profile", () => {
     });
 
     it("should return 500 if there is a server error", async () => {
-        User.findOne.mockRejectedValue(new Error("Database error")); // mock server error
+        User.findOne.mockImplementation(() => ({
+            select: jest.fn().mockRejectedValue(new Error("Database error"))
+        })); // mock server error
         const response = await request(app).post("/profile").send({ user_id: "123", page: 1 });
         expect(response.status).toBe(500);
         expect(response.body).toEqual({ success: false, message: "internal server error", error: "Database error" });
@@ -125,7 +129,9 @@ describe("PUT /api/profile/update", () => {
     });
 
     it("should return 400 if user_id is missing", async () => {
-        const response = await request(app).put("/api/profile/update").send({ username: "newuser" });
+        User.findOne.mockResolvedValue(null);
+
+        const response = await request(app).put ("/profile/update").send ({ username: "newuser" });
         expect(response.status).toBe(400);
         expect(response.body).toEqual({ success: false, message: "user_id is required" });
     });
@@ -133,7 +139,7 @@ describe("PUT /api/profile/update", () => {
     it("should return 404 if user is not found", async () => {
         User.findOne.mockResolvedValue(null);
 
-        const response = await request(app).put("/api/profile/update").send({ user_id: "123", username: "newuser" });
+        const response = await request(app).put("/profile/update").send({ user_id: "123", username: "newuser" });
         expect(response.status).toBe(404);
         expect(response.body).toEqual({ success: false, message: "User not found." });
     });
@@ -142,7 +148,7 @@ describe("PUT /api/profile/update", () => {
         User.findOne.mockResolvedValueOnce({ user_id: "123", username: "testuser" }); // Current user
         User.findOne.mockResolvedValueOnce({ user_id: "456", username: "newuser" }); // Existing user with new username
 
-        const response = await request(app).put("/api/profile/update").send({ user_id: "123", username: "newuser" });
+        const response = await request(app).put("/profile/update").send({ user_id: "123", username: "newuser" });
         expect(response.status).toBe(400);
         expect(response.body).toEqual({ success: false, message: "Username already taken." });
     });
@@ -151,7 +157,7 @@ describe("PUT /api/profile/update", () => {
         User.findOne.mockResolvedValueOnce({ user_id: "123", email: "old@example.com" }); // Current user
         User.findOne.mockResolvedValueOnce({ user_id: "456", email: "new@example.com" }); // Existing user with new email
 
-        const response = await request(app).put("/api/profile/update").send({ user_id: "123", email: "new@example.com" });
+        const response = await request(app).put("/profile/update").send({ user_id: "123", email: "new@example.com" });
         expect(response.status).toBe(400);
         expect(response.body).toEqual({ success: false, message: "Email already in use." });
     });
@@ -160,7 +166,7 @@ describe("PUT /api/profile/update", () => {
         const hashedPassword = await bcrypt.hash("correctpassword", 10);
         User.findOne.mockResolvedValue({ user_id: "123", password: hashedPassword });
 
-        const response = await request(app).put("/api/profile/update").send({
+        const response = await request(app).put("/profile/update").send({
             user_id: "123",
             currentPassword: "wrongpassword",
             newPassword: "newpassword123"
@@ -171,10 +177,18 @@ describe("PUT /api/profile/update", () => {
     });
 
     it("should successfully update user profile", async () => {
-        const hashedPassword = await bcrypt.hash("correctpassword", 10);
-        User.findOne.mockResolvedValue({ user_id: "123", password: hashedPassword, save: jest.fn() });
 
-        const response = await request(app).put("/api/profile/update").send({
+        const hashedPassword = await bcrypt.hash("correctpassword", 10);
+        User.findOne.mockResolvedValueOnce({ 
+            user_id: "123", 
+            username: "testuser",
+            email: "test@example.com", 
+            password: hashedPassword, 
+            save: jest.fn().mockResolvedValue(true) 
+        })
+        .mockResolvedValueOnce(null);
+
+        const response = await request(app).put("/profile/update").send({
             user_id: "123",
             username: "updateduser",
             bio: "updated bio",
@@ -189,7 +203,7 @@ describe("PUT /api/profile/update", () => {
         const hashedPassword = await bcrypt.hash("correctpassword", 10);
         User.findOne.mockResolvedValue({ user_id: "123", password: hashedPassword, save: jest.fn() });
 
-        const response = await request(app).put("/api/profile/update").send({
+        const response = await request(app).put("/profile/update").send({
             user_id: "123",
             currentPassword: "correctpassword",
             newPassword: "newsecurepassword"
@@ -201,7 +215,7 @@ describe("PUT /api/profile/update", () => {
 
     it("should return 500 if there is a server error", async () => {
         User.findOne.mockRejectedValue(new Error("Database error"));
-        const response = await request(app).put("/api/profile/update").send({ user_id: "123", username: "newuser" });
+        const response = await request(app).put("/profile/update").send({ user_id: "123", username: "newuser" });
 
         expect(response.status).toBe(500);
         expect(response.body).toEqual({ success: false, message: "Internal server error.", error: "Database error" });
