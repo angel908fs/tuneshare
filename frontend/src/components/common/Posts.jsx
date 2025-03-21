@@ -41,9 +41,9 @@ const Posts = ({ context, profileUserId }) => {
       }, []);
     
 
-    useEffect(() => {
         const fetchPosts = async () => {
             try {
+                setIsLoading(true); // Show loading indicator
                 // Retrieve the JWT from the cookie
                 const token = Cookies.get("tuneshare_cookie");
                 
@@ -89,8 +89,9 @@ const Posts = ({ context, profileUserId }) => {
             }
         };
 
-        fetchPosts();
-    }, []);
+        useEffect(() => {
+            fetchPosts(); // Call fetchPosts when component mounts
+        }, []);
 
     return (
         <>
@@ -105,7 +106,8 @@ const Posts = ({ context, profileUserId }) => {
             {!isLoading && posts && (
                 <div>
                     {posts.map((post) => (
-                        <Post key={post._id} post={post} likedPosts={likedPosts} accessToken={accessToken}/>
+                        <Post key={post._id} post={post} likedPosts={likedPosts} accessToken={accessToken} fetchPosts={fetchPosts}/>
+
                     ))}
                 </div>
             )}

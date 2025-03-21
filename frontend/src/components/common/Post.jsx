@@ -71,7 +71,8 @@ const get30SecPreview = async (spotifyUrl, token) => {
   return await searchDeezerTrack(spotifyTrack.name, spotifyTrack.artists[0].name);
 };
 
-const Post = ({ post, likedPosts, accessToken }) => {
+
+const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState([]); // for rendering in modal
   const [loadingComments, setLoadingComments] = useState(false);
@@ -118,8 +119,18 @@ const Post = ({ post, likedPosts, accessToken }) => {
     }
   }, [post.song_link, post.likes, post.post_id, likedPosts, accessToken]);
 
-  const handleDeletePost = () => {
-    // Your delete post logic or route call
+  const handleDeletePost = async (postID) => {
+    try {
+      const res = await axios.delete(`/api/delete-post?userID=${userIdFromCookie}&postID=${postID}`);
+      if (res.data.success) {
+        alert("Post deleted successfully!");
+        fetchPosts();  // 🚀 Refresh the post list dynamically
+      } else {
+        alert(res.data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting post:", error.response?.data || error.message);
+    }
   };
 
   const fetchComments = async () => {
@@ -278,7 +289,7 @@ const Post = ({ post, likedPosts, accessToken }) => {
             </span>
             {isMyPost && (
               <span className="flex justify-end flex-1">
-                <FaTrash className="cursor-pointer hover:text-red-500" onClick={handleDeletePost} />
+               <FaTrash className="cursor-pointer hover:text-red-500" onClick={() => handleDeletePost(post.post_id)} />
               </span>
             )}
           </div>
