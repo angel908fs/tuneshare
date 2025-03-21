@@ -9,6 +9,37 @@ const Posts = ({ context, profileUserId }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [posts, setPosts] = useState([]);
     const [likedPosts, setLikedPosts] = useState([]);
+    const [accessToken, setAccessToken] = useState("")
+
+    const getSpotifyAccessToken = async () => {
+        const client_id = import.meta.env.VITE_CLIENT_ID;
+        const client_secret = import.meta.env.VITE_CLIENT_SECRET;
+        const response = await axios.post(
+          "https://accounts.spotify.com/api/token",
+          new URLSearchParams({ grant_type: "client_credentials" }),
+          {
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              Authorization: `Basic ${btoa(`${client_id}:${client_secret}`)}`,
+            },
+          }
+        );
+        return response.data.access_token;
+      };
+    
+      // 1. Fetch Spotify token once on mount
+      useEffect(() => {
+        const fetchAccessToken = async () => {
+          try {
+            const token = await getSpotifyAccessToken();
+            setAccessToken(token);
+          } catch (err) {
+            console.error("Error fetching Spotify token:", err);
+          }
+        };
+        fetchAccessToken();
+      }, []);
+    
 
         const fetchPosts = async () => {
             try {
@@ -75,7 +106,8 @@ const Posts = ({ context, profileUserId }) => {
             {!isLoading && posts && (
                 <div>
                     {posts.map((post) => (
-                        <Post key={post._id} post={post} likedPosts={likedPosts} fetchPosts={fetchPosts} />
+                        <Post key={post._id} post={post} likedPosts={likedPosts} accessToken={accessToken} fetchPosts={fetchPosts}/>
+
                     ))}
                 </div>
             )}

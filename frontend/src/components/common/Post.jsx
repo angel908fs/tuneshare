@@ -10,30 +10,9 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { jwtDecode}  from "jwt-decode";
 
-const getSpotifyAccessToken = async () => {
-  const client_id = import.meta.env.VITE_CLIENT_ID;
-  const client_secret = import.meta.env.VITE_CLIENT_SECRET;
-
-  const response = await axios.post(
-    "https://accounts.spotify.com/api/token",
-    new URLSearchParams({
-      grant_type: "client_credentials",
-    }),
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: `Basic ${btoa(`${client_id}:${client_secret}`)}`,
-      },
-    }
-  );
-
-  return response.data.access_token;
-};
-
-const getSpotifyTrackMetadata = async (spotifyUrl) => {
+const getSpotifyTrackMetadata = async (spotifyUrl, token) => {
   try {
     const trackId = spotifyUrl.split("/track/")[1].split("?")[0];
-    const token = await getSpotifyAccessToken();
     const market = "US";
 
     const response = await axios.get(`https://api.spotify.com/v1/tracks/${trackId}`, {
@@ -50,6 +29,7 @@ const getSpotifyTrackMetadata = async (spotifyUrl) => {
     console.error("Error fetching track metadata:", error);
   }
 };
+
 
 const searchDeezerTrack = async (trackName, artistName) => {
   const query = `${artistName} ${trackName}`.trim();
@@ -75,8 +55,8 @@ const searchDeezerTrack = async (trackName, artistName) => {
   }
 };
 
-const get30SecPreview = async (spotifyUrl) => {
-  const spotifyTrack = await getSpotifyTrackMetadata(spotifyUrl);
+const get30SecPreview = async (spotifyUrl, token) => {
+  const spotifyTrack = await getSpotifyTrackMetadata(spotifyUrl, token);
   if (!spotifyTrack) {
     console.error("Could not retrieve track data from Spotify.");
     return null;
@@ -91,7 +71,8 @@ const get30SecPreview = async (spotifyUrl) => {
   return await searchDeezerTrack(spotifyTrack.name, spotifyTrack.artists[0].name);
 };
 
-  const Post = ({ post, likedPosts, fetchPosts }) => {
+
+const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState([]); // for rendering in modal
   const [loadingComments, setLoadingComments] = useState(false);
@@ -104,11 +85,13 @@ const get30SecPreview = async (spotifyUrl) => {
   const [likes, setLikes] = useState(null);
   const [userIdFromCookie, setUserIdFromCookie] = useState("");
 
+
+
   useEffect(() => {
     // 1) If post has a song_link, fetch track metadata
     const fetchMetadata = async () => {
-      if (post.song_link) {
-        const metadata = await getSpotifyTrackMetadata(post.song_link);
+      if (accessToken && post.song_link) {
+        const metadata = await getSpotifyTrackMetadata(post.song_link, accessToken);
         setTrackMetadata(metadata);
       }
     };
@@ -134,7 +117,7 @@ const get30SecPreview = async (spotifyUrl) => {
     if (likedPosts?.data?.liked_posts?.includes(post.post_id)) {
       setIsLiked(true);
     }
-  }, [post.song_link, post.likes, post.post_id, likedPosts]);
+  }, [post.song_link, post.likes, post.post_id, likedPosts, accessToken]);
 
   const handleDeletePost = async (postID) => {
     try {
@@ -248,7 +231,7 @@ const get30SecPreview = async (spotifyUrl) => {
   };
 
   const togglePlayPause = async () => {
-    if (!post.song_link) return;
+    if (!post.song_link || !accessToken) return;
 
     // Stop any existing audio before playing a new one
     if (audio) {
@@ -259,7 +242,7 @@ const get30SecPreview = async (spotifyUrl) => {
 
     if (!isPlaying) {
       if (!previewUrl) {
-        const preview = await get30SecPreview(post.song_link);
+        const preview = await get30SecPreview(post.song_link, accessToken);
         if (preview) {
           setPreviewUrl(preview);
           const newAudio = new Audio(preview);
@@ -285,7 +268,6 @@ const get30SecPreview = async (spotifyUrl) => {
   const postOwner = post || {};
 
   const isMyPost = true; 
-  const formattedDate = "1h"; 
   return (
     <>
       <div className="flex gap-2 items-start p-4 border-b border-gray-700">
@@ -300,10 +282,10 @@ const get30SecPreview = async (spotifyUrl) => {
             <Link to={`/profile/${postOwner.user_id}`} className="font-bold">
               {postOwner.username}
             </Link>
-            <span className="text-gray-700 flex gap-1 text-sm">
+            <span className="text-gray-500 flex gap-1 text-sm">
               <Link to={`/profile/${postOwner.user_id}`}>@{postOwner.username}</Link>
               <span>·</span>
-              <span>{formattedDate}</span>
+              <span>{new Date(post.created_at).toLocaleString()}</span>
             </span>
             {isMyPost && (
               <span className="flex justify-end flex-1">
