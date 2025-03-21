@@ -220,7 +220,7 @@ const Post = ({ post, likedPosts, accessToken }) => {
   };
 
   const togglePlayPause = async () => {
-    if (!post.song_link) return;
+    if (!post.song_link || !accessToken) return;
 
     // Stop any existing audio before playing a new one
     if (audio) {
@@ -231,7 +231,7 @@ const Post = ({ post, likedPosts, accessToken }) => {
 
     if (!isPlaying) {
       if (!previewUrl) {
-        const preview = await get30SecPreview(post.song_link);
+        const preview = await get30SecPreview(post.song_link, accessToken);
         if (preview) {
           setPreviewUrl(preview);
           const newAudio = new Audio(preview);
