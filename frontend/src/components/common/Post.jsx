@@ -10,68 +10,6 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { jwtDecode}  from "jwt-decode";
 
-const getSpotifyTrackMetadata = async (spotifyUrl, token) => {
-  try {
-    const trackId = spotifyUrl.split("/track/")[1].split("?")[0];
-    const market = "US";
-
-    const response = await axios.get(`https://api.spotify.com/v1/tracks/${trackId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      params: {
-        market,
-      },
-    });
-
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching track metadata:", error);
-  }
-};
-
-
-const searchDeezerTrack = async (trackName, artistName) => {
-  const query = `${artistName} ${trackName}`.trim();
-  console.log("Sending search request for:", query); // Debugging request
-
-  try {
-    // Adjust the path below if your backend runs on a different port
-    const response = await axios.get(`http://localhost:8080/api/deezer-search`, {
-      params: { query },
-    });
-
-    if (response.data.data.length > 0) {
-      const track = response.data.data[0]; // Take the first result
-      console.log("Deezer Track Found:", track);
-      return track.preview; // 30-sec preview URL
-    } else {
-      console.warn("No preview available from Deezer.");
-      return null;
-    }
-  } catch (error) {
-    console.error("Error fetching track from Deezer:", error.message);
-    return null;
-  }
-};
-
-const get30SecPreview = async (spotifyUrl, token) => {
-  const spotifyTrack = await getSpotifyTrackMetadata(spotifyUrl, token);
-  if (!spotifyTrack) {
-    console.error("Could not retrieve track data from Spotify.");
-    return null;
-  }
-
-  if (spotifyTrack.preview_url) {
-    console.log("Using Spotify preview:", spotifyTrack.preview_url);
-    return spotifyTrack.preview_url;
-  }
-
-  console.log("No Spotify preview found. Searching on Deezer...");
-  return await searchDeezerTrack(spotifyTrack.name, spotifyTrack.artists[0].name);
-};
-
-
 const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState([]); // for rendering in modal
@@ -85,7 +23,57 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
   const [likes, setLikes] = useState(null);
   const [userIdFromCookie, setUserIdFromCookie] = useState("");
 
+  const onlyUseSpotifyApi = false;
 
+  const getSpotifyTrackMetadata = async (spotifyUrl, token) => {
+    try {
+      if (onlyUseSpotifyApi) {
+        console.log("🔄 [Metadata] Using Spotify API directly (bypassing DB)");
+        const trackId = spotifyUrl.split("/track/")[1].split("?")[0];
+        const response = await axios.get(`https://api.spotify.com/v1/tracks/${trackId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { market: "US" },
+        });
+        return response.data;
+      }
+
+      const response = await axios.post("/api/song-metadata", {
+        spotifyUrl,
+        spotifyToken: token,
+      });
+
+      if (response.data.success) {
+        const source = response.data.from;
+        if (source === "db") {
+          console.log("✅ [Metadata] Fetched from database (already cached)" + " " + response.data.data.song_name);
+        } else if (source === "spotify") {
+          console.log("✅ [Metadata] Fetched from Spotify API (and saved to DB)" + " " + response.data.data.song_name);
+        }
+
+        const song = response.data.data;
+
+        return {
+          name: song.song_name,
+          artists: song.artist_names.map((name) => ({ name })),
+          album: {
+              name: song.album_name,
+              images: [{ url: song.album_image_url }],
+          },
+          preview_url: song.deezer_preview_url || song.preview_url || null,
+          preview_source: song.deezer_preview_url
+              ? "deezer"
+              : song.preview_url
+              ? "spotify"
+              : "none",
+        };
+      }
+
+      return null;
+    } catch (error) {
+      console.error("❌ [Metadata] Failed to fetch:", error.message);
+      return null;
+    }
+  };
 
   useEffect(() => {
     // 1) If post has a song_link, fetch track metadata
@@ -229,42 +217,51 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
       console.error("Error updating likes:", error);
     }
   };
-
+ 
   const togglePlayPause = async () => {
     if (!post.song_link || !accessToken) return;
 
     // Stop any existing audio before playing a new one
     if (audio) {
-      audio.pause();
-      setIsPlaying(false);
-      setAudio(null);
+        audio.pause();
+        setIsPlaying(false);
+        setAudio(null);
     }
 
     if (!isPlaying) {
-      if (!previewUrl) {
-        const preview = await get30SecPreview(post.song_link, accessToken);
-        if (preview) {
-          setPreviewUrl(preview);
-          const newAudio = new Audio(preview);
-          newAudio.play();
-          setAudio(newAudio);
-          setIsPlaying(true);
+        if (!previewUrl) {
+            const metadata = await getSpotifyTrackMetadata(post.song_link, accessToken);
+            const preview = metadata?.preview_url;
 
-          newAudio.onended = () => setIsPlaying(false);
+            if (preview) {
+                setPreviewUrl(preview);
+                setTrackMetadata(metadata); // 💾 Save metadata for later
+
+                const newAudio = new Audio(preview);
+                newAudio.play();
+                setAudio(newAudio);
+                setIsPlaying(true);
+
+                console.log(`🎧 Playing "${metadata.name}" from ${metadata.preview_source} preview`);
+
+                newAudio.onended = () => setIsPlaying(false);
+            } else {
+                alert("No preview available for this track.");
+            }
         } else {
-          alert("No preview available for this track.");
-        }
-      } else {
-        // If preview URL is already stored, just play it
-        const newAudio = new Audio(previewUrl);
-        newAudio.play();
-        setAudio(newAudio);
-        setIsPlaying(true);
+            const newAudio = new Audio(previewUrl);
+            newAudio.play();
+            setAudio(newAudio);
+            setIsPlaying(true);
 
-        newAudio.onended = () => setIsPlaying(false);
-      }
+            console.log(`🎧 Playing "${trackMetadata?.name}" from cached preview URL`);
+
+            newAudio.onended = () => setIsPlaying(false);
+        }
     }
-  }
+};
+
+  
   const postOwner = post || {};
 
   const isMyPost = true; 

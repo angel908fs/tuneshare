@@ -15,7 +15,8 @@ const songSchema = new mongoose.Schema(
         duration_ms: { type: Number }, // track length
         explicit: { type: Boolean },
         deezer_preview_url: { type: String },
-        
+        deezer_url: { type: String},
+    
         created_at: { type: Date, default: Date.now }
     }
 );
