@@ -15,15 +15,15 @@ router.post("/song-metadata", async (req, res) => {
 	const body = req.body;
 
 	if (!body || typeof body !== "object") {
-		return res.status(400).json({ success: false, message: "Missing request body." });
+		return res.status(400).json({ success: false, message: "missing request body" });
 	}
 
 	if (!body.spotifyUrl) {
-		return res.status(400).json({ success: false, message: "Missing spotifyUrl." });
+		return res.status(400).json({ success: false, message: "missing spotifyUrl" });
 	}
 
 	if (!body.spotifyToken) {
-		return res.status(400).json({ success: false, message: "Missing spotifyToken." });
+		return res.status(400).json({ success: false, message: "missing spotifyToken" });
 	}
 
 	const spotifyUrl = body.spotifyUrl;
@@ -31,14 +31,13 @@ router.post("/song-metadata", async (req, res) => {
 
 	const spotifyId = extractSpotifyId(spotifyUrl);
 	if (!spotifyId) {
-		return res.status(400).json({ success: false, message: "Invalid Spotify URL." });
+		return res.status(400).json({ success: false, message: "invalid Spotify URL" });
 	}
 
 	try {
 		// Check DB cache
 		const existing = await Song.findOne({ spotify_song_id: spotifyId });
 		if (existing) {
-			console.log("✅ [Metadata] Fetched from database (already cached)");
 			return res.json({ success: true, data: existing, from: "db" });
 		}
 
@@ -65,12 +64,9 @@ router.post("/song-metadata", async (req, res) => {
 				const topResult = deezerResp.data.data[0];
 				deezerPreview = topResult.preview || null;
 				deezerUrl = topResult.link || null;
-				console.log("🎧 [Deezer] Found track:", deezerUrl);
 			} else {
-				console.log("⚠️ [Deezer] No match found.");
 			}
 		} catch (deezerErr) {
-			console.warn("❌ [Deezer] Search failed:", deezerErr.message);
 		}
 
 		// Save song to DB (Spotify + Deezer info)
@@ -88,12 +84,10 @@ router.post("/song-metadata", async (req, res) => {
 			deezer_url: deezerUrl,
 		});
 
-		console.log("✅ [Metadata] Fetched from Spotify API (and saved to DB)");
 		res.json({ success: true, data: newSong, from: "spotify" });
 
 	} catch (err) {
-		console.error("❌ error in /api/song-metadata:", err.message);
-		res.status(500).json({ success: false, message: "Internal server error." });
+		res.status(500).json({ success: false, message: "Internal server error" });
 	}
 });
 
