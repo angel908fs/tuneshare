@@ -44,6 +44,10 @@ router.post("/profile", async(req, res) => {
 
 router.put("/profile/update", async(req, res)=>{
     try{
+        if (!req.body.user_id) {
+            return res.status(400).json({ success: false, message: "user_id is required" });
+        }
+
         const {
             user_id,
             fullName,
@@ -58,11 +62,8 @@ router.put("/profile/update", async(req, res)=>{
 
         const user = await User.findOne({user_id});
         if(!user) {
-            return res.status(404).send({
-                success: false,
-                message: "User not found."
-            });
-        }
+            return res.status(404).send({ success: false, message: "User not found." });
+        } 
         if( username && username !== user.username) {
             const existingUser = await User.findOne({username});
             if (existingUser) {
@@ -104,7 +105,7 @@ router.put("/profile/update", async(req, res)=>{
         return res.status(200).json({ success: true, message: "Profile updated successfully.", data: user });
     } catch (error) {
         console.error("Error updating profile:", error);
-        return res.status(500).json({ success: false, message: "Internal server error." });
+        return res.status(500).send({ success: false, message: "Internal server error.", error: error.message });
     }
 });
 
