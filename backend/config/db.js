@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+
 const connectToDB = async () => {
     if (process.env.NODE_ENV === 'test') {
         console.log('Skipping DB connection in test environment'); // shouldn't connect to DB for unit testing
