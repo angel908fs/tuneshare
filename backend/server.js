@@ -1,7 +1,11 @@
+//import connect from './database/conn.js';
+
 const express = require('express');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const cors = require('cors');
+//const cloudinary = require("cloudinary").v2;
+const Multer = require("multer");
 
 const connectToDB = require('./config/db.js');
 
@@ -18,7 +22,8 @@ const profileRoutes = require('./routes/profile.js');
 const userSearchRoutes = require('./routes/user_search.js')
 const likesRoutes = require('./routes/likes.js');
 const deezerRoutes = require('./routes/deezer.js');
-const commentsRoutes = require('./routes/comments.js')
+const commentsRoutes = require('./routes/comments.js');
+const User = require('./models/user.js');
 
 dotenv.config();
 const PORT = 8080;
@@ -32,6 +37,10 @@ app.use(cors({
   origin: ['http://localhost:3000', 'http://localhost:5173'],   // Allow both frontend ports
     credentials:true,
 }));
+ const storage = new Multer.memoryStorage();
+const upload = Multer({
+  storage,
+});
 
 // routes, /api' connects to the vite config, do not remove
 app.use('/api',accountCreation); // signup, 
@@ -54,11 +63,39 @@ app.use(invalidRoutes); // THIS HAS TO STAY LAST
 // database connection
 connectToDB();
 
+
+// Enable CORS for all origins (can be customized)
+app.use(cors());
+
+app.get('/', (req, res) => {
+  try{
+      User.find({}).then(data => {
+          res.json(data)
+      }).catch(error => {
+          res.status(408).json({ error })
+      })
+  }catch(error){
+      res.json({error})
+  }
+})
+
+app.post("/uploads", async (req, res) => {
+  const body = req.body;
+  try{
+      const newImage = await User.create(body)
+      newImage.save();
+      res.status(201).json({ msg : "New image uploaded...!"})
+  }catch(error){
+      res.status(409).json({ message : error.message })
+  }
+})
+
+  
 // Start server only if not in test environment
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     console.log(`Server running on http://${HOST}:${PORT}`);
-  });
+  }); 
 }
 
 module.exports = app;

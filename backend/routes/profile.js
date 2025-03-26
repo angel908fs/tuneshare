@@ -42,6 +42,9 @@ router.post("/profile", async(req, res) => {
     }
 });
 
+
+
+
 router.put("/profile/update", async(req, res)=>{
     try{
         const {
@@ -93,11 +96,24 @@ router.put("/profile/update", async(req, res)=>{
             user.password = await bcrypt.hash(newPassword, 10);
         }
 
+
+        const body = req.body;
+    try{
+        const newImage = await User.create(body)
+        newImage.save();
+        res.status(201).json({ msg : "New image uploaded...!"})
+    }catch(error){
+        res.status(409).json({ message : error.message })
+    }
+
         // Update other profile fields
         if (fullName) user.fullName = fullName;
         if (bio) user.bio = bio;
         if (link) user.link = link;
         if (profile_picture) user.profile_picture = profile_picture;
+
+
+
 
         await user.save();
         
@@ -109,3 +125,4 @@ router.put("/profile/update", async(req, res)=>{
 });
 
 module.exports = router;
+

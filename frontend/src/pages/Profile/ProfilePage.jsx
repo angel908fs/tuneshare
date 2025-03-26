@@ -15,9 +15,11 @@ import { CiLink } from "react-icons/ci";
 import { FaSpotify } from "react-icons/fa";
 import toast from "react-hot-toast";
 
+const url = "http://localhost:8080/uploads"
+
 const ProfilePage = () => {
   const [coverImg, setCoverImg] = useState(null);
-  const [profileImg, setProfileImg] = useState(null);
+  const [profileImg, setProfileImg] = useState({myFile: ""});
   const [feedType, setFeedType] = useState("posts");
   const [userData, setUserData] = useState(null);
   const [posts, setPosts] = useState([]);
@@ -32,6 +34,23 @@ const ProfilePage = () => {
 
   const { userId } = useParams(); // get userId from URL parameters
   
+
+  const createPicture = async (newImage) => {
+    try{
+      await axios.Us(url, newImage)
+    }catch(error){
+      console.log(error)
+    }
+  }
+
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    createPicture(profileImg)
+    console.log("Uploaded")
+  }
+
+
      // handle Follow Action
 	const handleFollow = async (targetUserId) => {
    try {
@@ -112,34 +131,12 @@ const ProfilePage = () => {
     fetchProfileData();
   }, [userId]);
 
-  const handleProfilePicChange = async (e) => {
+  const handleFileUpload = async (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload =async () => {
-      setProfileImg(reader.result);
-
-      try{
-        const response = await axios.put ("/api/profile/update", {
-          user_id: userIdFromCookie,
-          profile_picture: reader.result,
-        });
-
-        if (response.data.success) {
-          toast.success("Profile picture updated!");
-          setUserData((prev) => ({ ...prev, profile_picture: reader.result }));
-
-        } else {
-          toast.error("Failed to update profile picture.");
-        }
-      } catch (error) {
-        console.error ("Error updating profile picture:", error);
-        toast.error("Error updating profile picture.");
-      }
-    };
-    reader.readAsDataURL(file);
-  };
+    const base64 = await convertToBase64(file);
+    console.log(base64)
+    setProfileImg({ ...profileImg, myFile : base64 })
+  }
 
   return (
     <>
@@ -170,7 +167,7 @@ const ProfilePage = () => {
                   hidden
                   accept="image/*"
                   ref={profileImgRef}
-                  onChange={handleProfilePicChange}
+                  onChange={handleFileUpload}
                 />
                 {/* USER AVATAR */}
                 <div className="avatar"> {/* Avatar positioning  */}
@@ -210,13 +207,24 @@ const ProfilePage = () => {
                   </button>
                 )}
                 {(coverImg || profileImg) && isMyProfile && (
-                  <button
-                    className="btn btn-primary rounded-full btn-sm text-white px-4 ml-2"
-										onClick={(e) => {
-											e.preventDefault();	
-										  }}                  >
-                    Update
-                  </button>
+                   <form onSubmit={handleSubmit}>
+
+                   <label htmlFor="file-upload" className='custom-file-upload'>
+                     <img src={profileImg.myFile} alt="" />
+                   </label>
+           
+                   <input 
+                     type="file"
+                     lable="Image"
+                     name="myFile"
+                     id='file-upload'
+                     accept='.jpeg, .png, .jpg'
+                     onChange={(e) => handleFileUpload(e)}
+                    />
+
+           
+                    <button type='submit'>Update</button>
+                 </form>
                 )}
               </div>
 
@@ -296,3 +304,17 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
+
+
+function convertToBase64(file){
+  return new Promise((resolve, reject) => {
+    const fileReader = new FileReader();
+    fileReader.readAsDataURL(file);
+    fileReader.onload = () => {
+      resolve(fileReader.result)
+    };
+    fileReader.onerror = (error) => {
+      reject(error)
+    }
+  })
+}
