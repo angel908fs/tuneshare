@@ -7,6 +7,7 @@ import LoginPage from './pages/auth/Login/LoginPage';
 import SignUpPage from './pages/auth/signup/SignUpPage';
 import NotificationPage from './pages/notfications/NotificationPage';
 import ProfilePage from './pages/Profile/ProfilePage';
+import AdminPage from './pages/admin/adminPage';
 
 import LeftPanel from './components/common/Sidebar';
 import RightPanel from './components/common/Rightbar';
@@ -18,7 +19,7 @@ const queryClient = new QueryClient();
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
-  const hideSidebars = ['/login', '/signup'].includes(location.pathname);
+  const hideSidebars = ['/login', '/signup', '/admin'].includes(location.pathname);
 
   useEffect(() => {
     const cookieValue = Cookies.get("tuneshare_cookie");
@@ -37,6 +38,7 @@ function App() {
           <Route path='/' element={<HomePage />} />
           <Route path='/notifications' element={<NotificationPage />} />
           <Route path='/profile/:userId' element={<ProfilePage />} />
+          <Route path='/admin' element={<AdminPage/>}/> 
         </Routes>
         {!hideSidebars && <RightPanel />}
         <Toaster />
