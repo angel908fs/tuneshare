@@ -77,10 +77,25 @@ const ProfilePage = () => {
       userID: userIdFromCookie,
       target_userID: targetUserId,
       });
+      if (res.data.success) {
+        console.log(`Successfully Unfollowed user: ${targetUserId}`);
+        toast.success("successfully Unfollowed user");
+        setShowFollowAlert(true); // show alert
+        setTimeout(() => setShowFollowAlert(false), 5000); // hide after 3 seconds
+        setUserData((prevUserData)=> ({
+          ...prevUserData,
+          isFollowing: false,
+          followers_count: prevUserData.followers_count - 1,
+       }));
+      } else {
+        toast.error("could not unfollow user");
+        console.error("Failed to unfollow user:", res.data.message);
+     }
   } catch(error){
-
+      console.error("Error while unfollowing user");
+      toast.error("Error occurred while unfollowing user");
   }
-
+  };
   useEffect(() => {
     // get user ID from JWT token in cookie
     let currentUserId = "";
@@ -212,8 +227,12 @@ const ProfilePage = () => {
                     className="btn btn-outline rounded-full btn-sm"
                     onClick={async (e) => {
 											e.preventDefault();
+                      if(userData?.isFollowing){
+                        await handleUnfollow(userId);
+                      } else {
 											await handleFollow(userId);			
-										  }} 
+                    }
+                  }} 
                   >
                     {userData?.isFollowing ? "Unfollow" : "Follow"}
                   </button>
