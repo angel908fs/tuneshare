@@ -70,7 +70,16 @@ const ProfilePage = () => {
       console.error("Error while following user:", error.message);
     }
   }
-   };
+  };
+  const handleUnfollow = async (targetUserId) =>{
+    try {
+      const res = await axios.post('/api/unfollow', {
+      userID: userIdFromCookie,
+      target_userID: targetUserId,
+      });
+  } catch(error){
+
+  }
 
   useEffect(() => {
     // get user ID from JWT token in cookie
