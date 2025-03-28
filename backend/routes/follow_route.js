@@ -43,4 +43,39 @@ router.post("/follow", async (req, res) => {
 
 });
 
+router.post ("/unfollow", async (req, res) => {
+    if (!req.body.target_userID) {
+        return res.status(400).send({ success: false, message: "Missing required parameter: target_userID" });
+    }
+    if (!req.body.userID) {
+        return res.status(400).send({ success: false, message: "Missing required parameter: userID" });
+    }
+    const userID = req.body.userID;
+    const target_userID = req.body.target_userID;
+    try{
+        const user = await User.findOne({ user_id: userID }); // find the user with the given userID
+        const target_user = await User.findOne({ user_id: target_userID }); // find the friend with the given friendID
+
+        if (!user || !target_user) {                    // check if the user or friend exists
+            if(!user){ return res.status(404).json({success: false, message: "User not found" });}
+            if(!target_user){ return res.status(404).json({success: false, message: "Target user not found" });}
+         }
+        if(!user.following.includes(target_userID) || !target_user.followers.includes(userID)) {    // check if the user is already following, or the target user already has the user as a follower 
+            return res.status(409).json({success: false, message: "User is not following target user" });
+        }
+
+        user.following = user.following.filter(id => id !== target_userID);
+        target_user.followers = target_user.followers.filter( id => id !== userID);
+        user.following_count--;
+        target_user.followers_count--;
+
+        await user.save();
+        await target_user.save();
+        
+        return res.status(200).send({success: true, message: "User unfollowed"});
+    }catch (error){
+        return res.status(500).send({success: false, message: "Server error", error: error.message});
+    }
+});
+
 module.exports = router;
