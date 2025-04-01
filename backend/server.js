@@ -5,6 +5,7 @@ const cors = require('cors');
 
 const connectToDB = require('./config/db.js');
 
+const middleware = require('./middleware/logger.js');
 const loginRoutes = require('./routes/login.js');
 const defaultRoute = require('./routes/default_route.js');
 const invalidRoutes = require('./routes/invalid_routes.js');
@@ -34,6 +35,9 @@ app.use(cors({
   origin: ['http://localhost:3000', 'http://localhost:5173'],   // Allow both frontend ports
     credentials:true,
 }));
+
+//middleware
+app.use(middleware);
 
 // routes, /api' connects to the vite config, do not remove
 app.use('/api',accountCreation); // signup, 
