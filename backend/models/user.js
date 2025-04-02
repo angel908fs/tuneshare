@@ -26,6 +26,7 @@ const userSchema = new mongoose.Schema(
 
         posts:[{type: String, ref: 'Post'}], 
         profile_picture:{type: String}, 
+        verified:{type:Boolean, default:false},
     
         // API keys
         user_api_key:{type: String},             // Holds user's temp API key (If they are signed into spotify) -> This is a future implementation
