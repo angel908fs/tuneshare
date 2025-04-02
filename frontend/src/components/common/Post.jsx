@@ -4,6 +4,7 @@ import { FaRegHeart, FaHeart } from "react-icons/fa";
 import { FaPlay, FaPause } from "react-icons/fa";
 import { FaRegBookmark } from "react-icons/fa6";
 import { FaTrash } from "react-icons/fa";
+import { FaCheckCircle } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -76,6 +77,7 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
   };
 
   useEffect(() => {
+    console.log("Post Owner:", postOwner);
     // 1) If post has a song_link, fetch track metadata
     const fetchMetadata = async () => {
       if (accessToken && post.song_link) {
@@ -276,9 +278,13 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
         </div>
         <div className="flex flex-col flex-1">
           <div className="flex gap-2 items-center">
-            <Link to={`/profile/${postOwner.user_id}`} className="font-bold">
-              {postOwner.username}
-            </Link>
+          <Link to={`/profile/${postOwner.user_id}`} className="font-bold flex items-center gap-1">
+            {postOwner.username}
+            {postOwner.verified && (
+              <FaCheckCircle title="Verified" className="text-blue-400 text-sm" />
+            )}
+
+          </Link>
             <span className="text-gray-500 flex gap-1 text-sm">
               <Link to={`/profile/${postOwner.user_id}`}>@{postOwner.username}</Link>
               <span>·</span>
