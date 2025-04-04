@@ -63,19 +63,23 @@ router.post ("/unfollow", async (req, res) => {
         if(!user.following.includes(target_userID) || !target_user.followers.includes(userID)) {    // check if the user is already following, or the target user already has the user as a follower 
             return res.status(409).json({success: false, message: "User is not following target user" });
         }
-        {/*
-            This is reducing the followers account but once refreshed, it locks into following
+        
+        if(
+            !user.following.some(f => f.toString() === target_userID) ||
+            !target_user.followers.some(f => f.toString() === userID)
+        ) {
+            return res.status(409).json ({success: false, message: "User is not following target user"});
+        }
 
-            */}
-        user.following = user.following.filter(id => id !== target_userID); // look into this
-        target_user.followers = target_user.followers.filter( id => id !== userID);
+        user.following = user.following.filter(id => id.toString() !== target_userID); 
+        target_user.followers = target_user.followers.filter( id => id.toString() !== userID);
         if (user.following_count > 0 ) user.following_count--;
         if (target_user.followers_count > 0) target_user.followers_count--;
 
         await user.save();
         await target_user.save();
         
-        return res.status(200).send({success: true, message: "User unfollowed"});
+        return res.status(200).send({success: true, message: "User unfollowed",isFollowing: false});
     }catch (error){
         return res.status(500).send({success: false, message: "Server error", error: error.message});
     }

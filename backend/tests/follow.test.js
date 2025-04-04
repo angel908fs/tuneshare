@@ -122,3 +122,137 @@ describe("POST /follow", () => {
         expect(res.body).toEqual({ success: false, message: "Server error", error: "Database error" });
     });
 });
+
+describe("POST /unfollow", () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it("should return 400 if userID is missing", async() => {
+        const res = await request(app)
+            .post("/unfollow")
+            .send({ target_userID: u2_id});
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toEqual({success: false, message: "Missing required parameter: userID"});
+    });
+
+    it("should return 400 if target_userID is missing", async () => {
+        const res = await request(app)
+            .post("/unfollow")
+            .send({ userID: u1_id });
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toEqual({success: false, message: "Missing required parameter: target_userID"});
+    });
+    
+    it("should return 4040 if use ris not found", async() => {
+        User.findOne.mockResolvedValueOnce(null);
+        const res = await request(app)
+            .post("/unfollow")
+            .send({ userID: u1_id, target_userID: u2_id });
+
+        expect(res.statusCode).toBe(404);
+        expect(res.body).toEqual({ success: false, message: "User not found"});
+    });
+
+    it("should return 404 if target user is not found", async () => {
+        const mockUser = {
+            user_id: u1_id,
+            following: [u2_id],
+            following_count: 1,
+            save: jest.fn(),
+        };
+        
+        User.findOne
+            .mockResolvedValueOnce(mockUser)
+            .mockResolvedValueOnce(null);
+
+        const res = await request(app)
+            .post("/unfollow")
+            .send({ userID: u1_id, target_userID: u2_id});
+        expect(res.statusCode).toBe(404);
+        expect(res.body).toEqual({success: false, message: "Target user not found" });
+    });
+
+    
+  it("should return 409 if user is not following target user", async () => {
+    const mockUser = {
+      user_id: u1_id,
+      following: [],
+      following_count: 0,
+      save: jest.fn(),
+    };
+
+    const mockTarget = {
+      user_id: u2_id,
+      followers: [],
+      followers_count: 0,
+      save: jest.fn(),
+    };
+
+    User.findOne
+      .mockResolvedValueOnce(mockUser)
+      .mockResolvedValueOnce(mockTarget);
+
+    const res = await request(app)
+      .post("/unfollow")
+      .send({ userID: u1_id, target_userID: u2_id });
+
+    expect(res.statusCode).toBe(409);
+    expect(res.body).toEqual({ success: false, message: "User is not following target user" });
+  });
+
+  it("should successfully unfollow and update counts", async () => {
+    const mockUser = {
+      user_id: u1_id,
+      following: [u2_id],
+      following_count: 1,
+      save: jest.fn(),
+    };
+
+    const mockTarget = {
+      user_id: u2_id,
+      followers: [u1_id],
+      followers_count: 1,
+      save: jest.fn(),
+    };
+
+    User.findOne
+      .mockResolvedValueOnce(mockUser)
+      .mockResolvedValueOnce(mockTarget);
+
+    const res = await request(app)
+      .post("/unfollow")
+      .send({ userID: u1_id, target_userID: u2_id });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: "User unfollowed",
+      isFollowing: false,
+    });
+
+    expect(mockUser.following).not.toContain(u2_id);
+    expect(mockUser.following_count).toBe(0);
+    expect(mockUser.save).toHaveBeenCalled();
+
+    expect(mockTarget.followers).not.toContain(u1_id);
+    expect(mockTarget.followers_count).toBe(0);
+    expect(mockTarget.save).toHaveBeenCalled();
+  });
+
+  it("should return 500 if there is a server error", async () => {
+    User.findOne.mockRejectedValueOnce(new Error("DB error"));
+
+    const res = await request(app)
+      .post("/unfollow")
+      .send({ userID: u1_id, target_userID: u2_id });
+
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual({
+      success: false,
+      message: "Server error",
+      error: "DB error",
+    });
+  });
+});
