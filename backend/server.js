@@ -22,6 +22,7 @@ const deezerRoutes = require('./routes/deezer.js');
 const suggUsersRoutes = require('./routes/suggestedUsers.js');
 const commentsRoutes = require('./routes/comments.js');
 const songsRoutes = require('./routes/songs.js');
+const middlewareRoutes = require('./routes/middleware.js');
 
 dotenv.config();
 const PORT = 8080;
@@ -55,6 +56,7 @@ app.use('/api', deezerRoutes);
 app.use('/api', suggUsersRoutes);
 app.use('/api', commentsRoutes);
 app.use('/api', songsRoutes);
+app.use('/api', middlewareRoutes);
 
 app.use(defaultRoute);
 app.use(invalidRoutes); // THIS HAS TO STAY LAST
