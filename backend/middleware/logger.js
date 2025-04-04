@@ -1,5 +1,3 @@
-
-
 const MiddlewareLog = require('../models/middleware.js');
 
 const loggerMiddleware = async (req, res, next) => {
