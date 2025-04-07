@@ -5,12 +5,18 @@ async function createPost(userID, songLink, postContent)
 {
     try
     {
+        const user = await User.findOne({ user_id: userID });
+        if (!user) {
+            return { success: false, message: "User not found." };
+        }
+
         const newPost = new Post(
         {   
             user_id: userID,
             song_link: songLink,
             content: postContent,
-            comments: []
+            comments: [],
+            verified: user.verified
         });
         
         await newPost.save();
@@ -28,7 +34,8 @@ async function createPost(userID, songLink, postContent)
                 user_id: userID,
                 song_link: songLink,
                 content: postContent,
-                comments: []
+                comments: [],
+                verified: user.verified // optional, just to include in response
             }
         };
     }

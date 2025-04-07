@@ -8,6 +8,7 @@ const postSchema = new mongoose.Schema(
         likes: { type: Number, default: 0 }, // count of likes
         comments: [{ type: String, ref: 'Comment' }], // list of comment IDs
         user_id: { type: String, default: uuidv4, ref: 'User', required: true }, // reference to the user who created the post
+        verified:{type:Boolean, default:false },
         created_at: { type: Date, default: Date.now }
     }
 );

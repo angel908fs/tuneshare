@@ -5,6 +5,7 @@ import { IoNotifications } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { RiLogoutCircleLine } from "react-icons/ri";
+import { FaCheckCircle } from "react-icons/fa";
 import { useMutation } from '@tanstack/react-query';
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -140,7 +141,12 @@ const Sidebar = () => {
 						<div className='flex justify-between flex-1'>
 							<div className='hidden md:block'>
 								<p className='text-white font-bold text-sm w-20 truncate'>{userData?.fullName}</p>
-								<p className='text-slate-500 text-sm'>@{userData?.username}</p>
+								<p className='text-slate-500 text-sm flex items-center gap-1'>
+									@{userData.username}
+									{userData.verified && (
+										<FaCheckCircle title="Verified" className="text-blue-400 text-xs" />
+									)}
+								</p>							
 							</div>
 							<RiLogoutCircleLine className='w-5 h-5 cursor-pointer' 
 							onClick={(e) => {
