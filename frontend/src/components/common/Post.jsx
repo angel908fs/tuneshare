@@ -277,7 +277,7 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
         <div className="flex flex-col flex-1">
           <div className="flex gap-2 items-center">
             <Link to={`/profile/${postOwner.user_id}`} className="font-bold">
-              {postOwner.username}
+              {postOwner.fullName}
             </Link>
             <span className="text-gray-500 flex gap-1 text-sm">
               <Link to={`/profile/${postOwner.user_id}`}>@{postOwner.username}</Link>
