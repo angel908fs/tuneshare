@@ -39,8 +39,26 @@ const CreatePost = ({ onPostCreated }) => {
   const [spotifyToken, setSpotifyToken] = useState("");
   const searchBarRef = useRef(null); // create ref for the search bar
   const [songCover, setSongCover] = useState("");
+  const [userData, setUserData] = useState(null);
 
+  useEffect(() => {
+    if(!userID) return;
+    const fetchUserData = async () => {
+      try{
+        const res = await axios.post("/api/profile",{
+          user_id: userID,
+          page: 1
+        });
 
+        if(res.data.success){
+          setUserData(res.data.data.user);
+        }
+      }catch(error){
+        console.error("Error fetching profile for CreatePost:", error);
+      }
+    };
+    fetchUserData();
+  }, [userID]);
 
 
   // retrieve user ID from JWT token in cookie
@@ -146,10 +164,6 @@ const CreatePost = ({ onPostCreated }) => {
       toast.error('Please enter a song link');
       return;
     }
-    // if (!text) {
-    //   toast.error('Please enter some content');
-    //   return;
-    // }
     createPost({ userID, songLink, content: text || " "});
   };
 
@@ -157,7 +171,7 @@ const CreatePost = ({ onPostCreated }) => {
     <div className='flex p-4 items-start gap-4 border-b border-gray-700'>
       <div className='avatar'>
         <div className='w-8 rounded-full'>
-          <img src={"/avatars/boy1.png"} alt="Profile" />
+          <img src={userData?.profile_picture || "/avatar-placeholder.png"} alt="Profile" />
         </div>
       </div>
       <form className='flex flex-col gap-2 w-full' onSubmit={handleSubmit}>

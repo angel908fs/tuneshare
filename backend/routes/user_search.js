@@ -23,7 +23,7 @@ router.post("/user-search", async(req, res) => {
             user_id :{$ne: viewer_id}
         })
             .limit(10)
-            .select("username user_id followers_count following_count");
+            .select("username user_id followers_count following_count profile_picture");
         // Get viewer's following list
         const viewer = await User.findOne({user_id: viewer_id}).select("following");
         const viewerFollowing = viewer?.following || [];
