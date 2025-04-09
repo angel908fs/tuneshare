@@ -47,13 +47,19 @@ describe("POST /profile", () => {
     it("should return 200 if no posts are available", async () => {
         User.findOne.mockImplementation((query) => {
             if (query.user_id === "123") {
+                const mockUser = {
+                    user_id: "123",
+                    username: "testuser",
+                    bio: "bio",
+                    profile_picture: "url",
+                    followers: [],
+                    followers_count: 10,
+                    following_count: 5
+                };
                 return {
                     select: jest.fn().mockResolvedValue({
-                        username: "testuser",
-                        bio: "bio",
-                        profile_picture: "url",
-                        followers_count: 10,
-                        following_count: 5
+                        ...mockUser,
+                        toObject: () => ({...mockUser})
                     })
                 };
             }
@@ -73,10 +79,13 @@ describe("POST /profile", () => {
             message: "user data has been retrieved successfully",
             data: {
                 user: {
+                    user_id: "123",
                     username: "testuser",
                     bio: "bio",
+                    followers: [],
                     profile_picture: "url",
                     followers_count: 10,
+                    isFollowing: false,
                     following_count: 5
                 },
                 posts: []
@@ -91,8 +100,20 @@ describe("POST /profile", () => {
 
         User.findOne.mockImplementation((query) => {
             if (query.user_id === "123") {
+                const mockUser = {
+                    user_id: "123",
+                    username: "testuser",
+                    bio: "bio",
+                    profile_picture: "url",
+                    followers: [],
+                    followers_count: 10,
+                    following_count: 5
+                };
                 return {
-                    select: jest.fn().mockResolvedValue(mockUserData)
+                    select: jest.fn().mockResolvedValue({
+                        ...mockUserData,
+                    toObject: () => ({ ...mockUserData })
+                    })
                 };
             }
             return null;
@@ -109,7 +130,11 @@ describe("POST /profile", () => {
         expect(response.body).toEqual({
             success: true,
             message: "user data has been retrieved successfully",
-            data: { user: mockUserData, posts: mockPosts }
+            data: { 
+                user: {
+                    ...mockUserData,
+                    isFollowing:false },
+                posts: mockPosts }
         });
     });
 
@@ -120,6 +145,45 @@ describe("POST /profile", () => {
         const response = await request(app).post("/profile").send({ user_id: "123", page: 1 });
         expect(response.status).toBe(500);
         expect(response.body).toEqual({ success: false, message: "internal server error", error: "Database error" });
+    });
+
+    it("should include isFollowing: true if view follows the user", async () =>{
+        const mockUser = {
+            user_id: "123",
+            followers: ["viewer_1"],
+            username: "testuser",
+            bio: "bio",
+            profile_picture: "url",
+            followers_count: 1, 
+            following_count: 1,
+        };
+        User.findOne.mockImplementation((query) => {
+            if (query.user_id === "123"){
+                return {
+                    select: jest.fn().mockResolvedValue({
+                        ...mockUser,
+                        toObject: () => ({...mockUser })
+                    })
+                };
+            }
+            return null;
+        });
+
+        Post.find.mockImplementation(() => ({
+            sort: jest.fn().mockReturnThis(),
+            skip: jest.fn().mockReturnThis(),
+            limit: jest.fn().mockResolvedValue([]),
+        }));
+
+        const res = await request(app)
+            .post("/profile")
+            .send({
+                user_id: "123",
+                viewer_id: "viewer_1",
+                page: 1,
+            });
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data.user.isFollowing).toBe(true);
     });
 });
 

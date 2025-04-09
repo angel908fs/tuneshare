@@ -48,7 +48,13 @@ router.post("/suggested-users", async (req, res) => {
 
         console.log("Suggested Users Response:", suggestedUsers);
 
-        return res.json({ success: true, users: suggestedUsers });
+        // Add isFollowing flag based on currentUser.following
+        const enrichedSuggestedUsers = suggestedUsers.map((user) => ({
+            ...user.toObject(),
+            isFollowing: currentUser.following.includes(user.user_id),
+        }));
+
+        return res.json({ success: true, users: enrichedSuggestedUsers });
 
     } catch (error) {
         console.error("🔥 Error fetching suggested users:", error);

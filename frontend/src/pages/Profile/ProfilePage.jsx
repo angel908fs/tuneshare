@@ -47,7 +47,8 @@ const ProfilePage = () => {
       setTimeout(() => setShowFollowAlert(false), 5000); // hide after 3 seconds
       setUserData((prevUserData)=> ({
         ...prevUserData,
-        isFollowing: !prevUserData.isFollowing,
+        isFollowing: true,
+        followers_count: prevUserData.followers_count + 1,
      }));
 
      } else if (res.data.error) {
@@ -70,19 +71,47 @@ const ProfilePage = () => {
       console.error("Error while following user:", error.message);
     }
   }
-   };
-
+  };
+  const handleUnfollow = async (targetUserId) =>{
+    try {
+      const res = await axios.post('/api/unfollow', {
+      userID: userIdFromCookie,
+      target_userID: targetUserId,
+      });
+      if (res.data.success) {
+        console.log(`Successfully Unfollowed user: ${targetUserId}`);
+        toast.success("successfully Unfollowed user");
+        setShowFollowAlert(true); // show alert
+        setTimeout(() => setShowFollowAlert(false), 5000); // hide after 3 seconds
+        setUserData((prevUserData)=> ({
+          ...prevUserData,
+          isFollowing: false,
+          followers_count: prevUserData.followers_count - 1,
+       }));
+      } else {
+        toast.error("could not unfollow user");
+        console.error("Failed to unfollow user:", res.data.message);
+     }
+  } catch(error){
+      console.error("Error while unfollowing user");
+      toast.error("Error occurred while unfollowing user");
+  }
+  };
   useEffect(() => {
     // get user ID from JWT token in cookie
     let currentUserId = "";
     const cookieValue = Cookies.get("tuneshare_cookie");
     if (cookieValue) {
       const decodedToken = jwtDecode(cookieValue);
-      currentUserId = decodedToken.user_id;
+      const currentUserId = decodedToken.user_id;
       setUserIdFromCookie(currentUserId);
-    } else {
+    } else{
       console.log("No token found in the cookie.");
     }
+  }, []);
+
+  useEffect(() => {
+    if (!userIdFromCookie) return;
 
     // get profile data
     const fetchProfileData = async () => {
@@ -90,6 +119,7 @@ const ProfilePage = () => {
         setIsLoading(true);
         const response = await axios.post("/api/profile", {
           user_id: userId,
+          viewer_id: userIdFromCookie,
           page: 1,
         });
 
@@ -97,12 +127,12 @@ const ProfilePage = () => {
           setUserData(response.data.data.user);
           setPosts(response.data.data.posts);
           setError(null);
-          setIsMyProfile(currentUserId === response.data.data.user?.user_id);
+          setIsMyProfile(userIdFromCookie === response.data.data.user?.user_id);
         } else {
           setError(response.data.message);
         }
       } catch (err) {
-        console.error(err);
+        console.error("Profile fetch error:",err.response?.data || err.message || err);
         setError("An error occurred while fetching profile data.");
       } finally {
         setIsLoading(false);
@@ -110,7 +140,7 @@ const ProfilePage = () => {
     };
 
     fetchProfileData();
-  }, [userId]);
+  }, [userId,userIdFromCookie]);
 
   const handleProfilePicChange = async (e) => {
     const file = e.target.files[0];
@@ -203,8 +233,12 @@ const ProfilePage = () => {
                     className="btn btn-outline rounded-full btn-sm"
                     onClick={async (e) => {
 											e.preventDefault();
+                      if(userData?.isFollowing){
+                        await handleUnfollow(userId);
+                      } else {
 											await handleFollow(userId);			
-										  }} 
+                    }
+                  }} 
                   >
                     {userData?.isFollowing ? "Unfollow" : "Follow"}
                   </button>
