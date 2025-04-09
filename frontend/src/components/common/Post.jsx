@@ -18,6 +18,7 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
   const [errorComments, setErrorComments] = useState("");
   const [trackMetadata, setTrackMetadata] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [postUser, setPostUser] = useState(null);
   const [audio, setAudio] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
@@ -77,7 +78,7 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
   };
 
   useEffect(() => {
-    console.log("Post Owner:", postOwner);
+    //console.log("Post Owner:", postOwner);
     // 1) If post has a song_link, fetch track metadata
     const fetchMetadata = async () => {
       if (accessToken && post.song_link) {
@@ -107,7 +108,22 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
     if (likedPosts?.data?.liked_posts?.includes(post.post_id)) {
       setIsLiked(true);
     }
-  }, [post.song_link, post.likes, post.post_id, likedPosts, accessToken]);
+
+    const fetchPostUser = async () => {
+      try {
+        const res = await axios.get(`/api/userInfo/${post.user_id}`);
+        console.log("Fetched post owner data");
+        if (res.data) {
+          setPostUser(res.data);
+        }
+      } catch (err) {
+        console.error("Error fetching post owner user data:", err);
+      }
+    };
+    if (post.user_id) {
+      fetchPostUser();
+    }
+  }, [post.song_link, post.likes, post.post_id, likedPosts, accessToken, post.user_id, post]);
 
   const handleDeletePost = async (postID) => {
     try {
@@ -280,7 +296,7 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
           <div className="flex gap-2 items-center">
           <Link to={`/profile/${postOwner.user_id}`} className="font-bold flex items-center gap-1">
             {postOwner.username}
-            {postOwner.verified && (
+            {postUser?.verified && (
               <FaCheckCircle title="Verified" className="text-blue-400 text-sm" />
             )}
 
