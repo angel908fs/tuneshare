@@ -3,7 +3,9 @@ let router = express.Router();
 const Middleware = require("../models/middleware.js");
 
 router.post("/get-logs", async(req, res)=>{
-    const MiddlewareLogs = Middleware.find()
+
+    const MiddlewareLogs = await Middleware.find()
+
     .sort({created_at:-1})
     .limit(100);
 

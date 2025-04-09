@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -29,21 +28,30 @@ const AdminPage = () => {
             {loading ? (
                 <p>Loading logs...</p>
             ) : (
-                <div className="space-y-2">
+                <div className="max-h-[calc(100vh-6rem)] overflow-auto space-y-2 border rounded p-2">
                     {logs.map((log, index) => (
                         <div
                             key={log.log_id || index}
-                            className="border p-2 rounded shadow-sm bg-white"
+                            className="border p-2 rounded shadow-sm"
                         >
-                            <pre className="text-sm overflow-x-auto">
-                                {JSON.stringify(log, null, 2)}
+                            <pre className="text-sm overflow-x-auto max-w-full whitespace-pre-wrap break-words font-mono">
+                                {Object.entries(log).map(([key, value]) => (
+                                    <div key={key}>
+                                        <span className="text-cyan-400">{key}</span>:{" "}
+                                        <span>
+                                            {typeof value === "object" && value !== null
+                                                ? JSON.stringify(value, null, 2)
+                                                : JSON.stringify(value)}
+                                        </span>
+                                    </div>
+                                ))}
                             </pre>
                         </div>
                     ))}
                 </div>
             )}
         </div>
-    );
+    );    
 };
 
 export default AdminPage;

@@ -7,7 +7,7 @@ import LoginPage from './pages/auth/Login/LoginPage';
 import SignUpPage from './pages/auth/signup/SignUpPage';
 import NotificationPage from './pages/notfications/NotificationPage';
 import ProfilePage from './pages/Profile/ProfilePage';
-import AdminPage from './pages/admin/adminPage';
+import AdminPage from './pages/admin/AdminPage';
 
 import LeftPanel from './components/common/Sidebar';
 import RightPanel from './components/common/Rightbar';
