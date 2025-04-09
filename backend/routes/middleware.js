@@ -6,8 +6,8 @@ router.post("/get-logs", async(req, res)=>{
 
     const MiddlewareLogs = await Middleware.find()
 
-    .sort({created_at:-1})
-    .limit(100);
+    .sort({timestamp:-1})
+    .limit(1000);
 
     return res.status(200).send({
         success: true,
