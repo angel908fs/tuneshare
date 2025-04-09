@@ -23,6 +23,7 @@ router.post("/profile", async(req, res) => {
     }
     try {
         const userID = req.body.user_id;
+        const viewerID = req.body.viewer_id || null;
         const pageNumber = req.body.page; 
 
         const postsPerPage = 10;
@@ -32,11 +33,12 @@ router.post("/profile", async(req, res) => {
         if (!userData) {
             return res.status(404).send({success:false, message: "user not found"});
         }
+        const isFollowing = viewerID ? userData.followers.some(f => f.toString() === viewerID) : false;
         // sort to get latests posts first
         // skip the first 10*page posts (if page is greater than 1)
         // limit the search to 10 post
         const posts = await Post.find({user_id: userID}).sort({created_at: -1}).skip(skip).limit(postsPerPage);
-        return res.status(200).send({success: true, message: "user data has been retrieved successfully", data: {user: userData, posts: posts}});
+        return res.status(200).send({success: true, message: "user data has been retrieved successfully", data: {user: {...userData.toObject(), isFollowing}, posts: posts}});
     } catch (error) {
         return res.status(500).send({ success: false, message: "internal server error", error: error.message});
     }

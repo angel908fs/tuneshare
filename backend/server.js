@@ -5,6 +5,7 @@ const cors = require('cors');
 
 const connectToDB = require('./config/db.js');
 
+const middleware = require('./middleware/logger.js');
 const loginRoutes = require('./routes/login.js');
 const defaultRoute = require('./routes/default_route.js');
 const invalidRoutes = require('./routes/invalid_routes.js');
@@ -22,6 +23,7 @@ const suggUsersRoutes = require('./routes/suggestedUsers.js');
 const commentsRoutes = require('./routes/comments.js');
 const songsRoutes = require('./routes/songs.js');
 const userInfoRoutes = require('./routes/userInfo.js');
+const middlewareRoutes = require('./routes/middleware.js');
 
 dotenv.config();
 const PORT = 8080;
@@ -35,6 +37,9 @@ app.use(cors({
   origin: ['http://localhost:3000', 'http://localhost:5173'],   // Allow both frontend ports
     credentials:true,
 }));
+
+//middleware
+app.use(middleware);
 
 // routes, /api' connects to the vite config, do not remove
 app.use('/api',accountCreation); // signup, 
@@ -53,6 +58,7 @@ app.use('/api', suggUsersRoutes);
 app.use('/api', commentsRoutes);
 app.use('/api', songsRoutes);
 app.use('/api', userInfoRoutes);
+app.use('/api', middlewareRoutes);
 
 app.use(defaultRoute);
 app.use(invalidRoutes); // THIS HAS TO STAY LAST

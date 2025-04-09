@@ -29,12 +29,14 @@ router.post("/load-feed", async (req, res) => {
         // find users by user ID (for profile page) or all users (for feed page)
         const userPosts = await User.find({ user_id: {
             $in: context === "profile" ? [userId] : [...user.following, userId]
-        }});
+        }
+    }).select("user_id fullName username profile_picture posts");
         
         // create a mapping of user_id to posts array
         const userPostsMap = {};
         userPosts.forEach(u => {
             userPostsMap[u.user_id] = { 
+                fullName: u.fullName,
                 username: u.username,
                 profile_picture: u.profile_picture,
                 posts: u.posts?.map(post => JSON.parse(post))
@@ -53,6 +55,7 @@ router.post("/load-feed", async (req, res) => {
             const userPostData = userData.posts?.find(userPost => userPost.post_id === post.post_id);
             return {
                 ...post.toObject(),
+                fullName: userData.fullName || userData.username,
                 username: userData.username || "Unknown",
                 profile_picture: userData.profile_picture || "/avatar-placeholder.png", // default avatar
                 content: userPostData ? userPostData.content : null,

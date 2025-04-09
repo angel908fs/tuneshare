@@ -38,7 +38,17 @@ describe("POST /load-feed", () => {
     it("should return 200 if no posts are available", async () => {
         const mockUser = { user_id: "1", following: ["2", "3"] };
         User.findOne.mockResolvedValueOnce(mockUser);
-        User.find.mockResolvedValueOnce([{ user_id: "2", posts: [] }]);
+        User.find.mockReturnValueOnce({
+            select: jest.fn().mockResolvedValueOnce([
+            { 
+                user_id: "2",
+                fullName: "User Two", 
+                username: "user2", 
+                profile_picture: null, 
+                posts: [] 
+            }
+        ])
+    });
         Post.find.mockImplementation(() => ({
             sort: jest.fn().mockReturnThis(),
             skip: jest.fn().mockReturnThis(),
@@ -58,8 +68,8 @@ describe("POST /load-feed", () => {
     it("should return 200 with posts if posts are found", async () => {
         const mockUser = { user_id: "1", following: ["2", "3"] };
         const mockUsers = [
-            { user_id: "1", username: "User1", posts: ['{"post_id": "post1", "content": "Content1"}'] },
-            { user_id: "2", username: "User2", posts: ['{"post_id": "post2", "content": "Content2"}'] },
+            { user_id: "1", username: "User1", fullName: "User One", posts: ['{"post_id": "post1", "content": "Content1"}'], profile_picture: "pic1.jpg" },
+            { user_id: "2", username: "User2", fullName: "User Two", posts: ['{"post_id": "post2", "content": "Content2"}'], profile_picture: "pic2.jpg" },
         ];
         const mockPosts = [
             {
@@ -87,7 +97,9 @@ describe("POST /load-feed", () => {
         ];
 
         User.findOne.mockResolvedValueOnce(mockUser);
-        User.find.mockResolvedValueOnce(mockUsers);
+        User.find.mockReturnValueOnce({
+            select: jest.fn().mockResolvedValueOnce(mockUsers),
+        });
         Post.find.mockImplementation(() => ({
             sort: jest.fn().mockReturnThis(),
             skip: jest.fn().mockReturnThis(),
@@ -105,13 +117,17 @@ describe("POST /load-feed", () => {
                     _id: "post1",
                     user_id: "1",
                     content: "Content1",
+                    fullName: "User One",
                     username: "User1",
+                    profile_picture: "pic1.jpg"
                 },
                 {
                     _id: "post2",
                     user_id: "2",
                     content: "Content2",
+                    fullName: "User Two",
                     username: "User2",
+                    profile_picture: "pic2.jpg"
                 },
             ],
         });

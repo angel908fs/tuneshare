@@ -295,8 +295,8 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
         <div className="flex flex-col flex-1">
           <div className="flex gap-2 items-center">
           <Link to={`/profile/${postOwner.user_id}`} className="font-bold flex items-center gap-1">
-            {postOwner.username}
-            {postUser?.verified && (
+            {postOwner.fullName}
+            {postOwner.verified && (
               <FaCheckCircle title="Verified" className="text-blue-400 text-sm" />
             )}
 

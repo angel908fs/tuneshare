@@ -21,6 +21,7 @@ const RightPanel = () => {
 	const fetchSuggestedUsers = async () => {
 		if (!userIdFromCookie || userIdFromCookie.trim() === "") {
 			console.warn("Skipping fetchSuggestedUsers: No valid userIdFromCookie");
+			console.log("Suggested users data", response.data.users);
 			return;
 		}
 	
@@ -71,11 +72,17 @@ const RightPanel = () => {
 	
 			if (response.data.success) {
 				toast.success("Successfully followed user");
-				setFollowedUsers((prev) => [...prev, targetUserId]); // Update followed users
-				await fetchSuggestedUsers(); // Refresh suggested users after follow
-			} else {
-				toast.success("User is already being followed");
-			}
+				setSuggestedUsers(prev =>
+				  prev.map(user =>
+					user.user_id === targetUserId ? { ...user, isFollowing: true } : user
+				  )
+				);
+				setSearchResults(prev =>
+					prev.map(user=>
+							user.user_id === targetUserId ? {...user, isFollowing: true } : user
+					)
+				);
+			  }
 		} catch (error) {
 			if (error.response?.status === 409) {
 				toast.success("User is already being followed");
@@ -85,6 +92,32 @@ const RightPanel = () => {
 			}
 		}
 	};
+	const handleUnfollow = async (targetUserId) => {
+		try {
+			const res = await axios.post('/api/unfollow', {
+				userID: userIdFromCookie,
+				target_userID: targetUserId,
+			});
+
+			if (res.data.success) {
+				toast.success("Successfully unfollowed user");
+				setSuggestedUsers(prev =>
+					prev.map(user =>
+						user.user_id === targetUserId ? {...user, isFollowing: false} : user
+					)
+				);
+				setSearchResults(prev =>
+					prev.map(user =>
+						user.user_id === targetUserId ? {...user, isFollowing: false}: user
+					)
+				);
+			}
+		}catch (error) {
+			toast.error("Error occurred while unfollowing user");
+			console.log("Unfollow error:", error);
+		}
+	};
+	
 
 	const handleSearch = async (e) => {
 		const query = e.target.value;
@@ -97,7 +130,10 @@ const RightPanel = () => {
 
 		setLoadingSearch(true);
 		try {
-			const response = await axios.post("/api/user-search", { username: query });
+			const response = await axios.post("/api/user-search", { 
+				username: query,
+				viewer_id: userIdFromCookie,
+			 });
 			if (response.data.success) {
 				setSearchResults(response.data.data);
 			} else {
@@ -135,23 +171,31 @@ const RightPanel = () => {
 								</p>
 							) : (
 								searchResults.map((user) => (
-									<Link to={`/profile/${user.user_id}`} className="flex items-center justify-between gap-4" key={user.user_id}>
-										<div className="flex gap-2 items-center">
+									<div className="flex items-center justify-between gap-4" key = {user.user_id}>
+										<Link to={`/profile/${user.user_id}`} className="flex gap-2 items-center">
 											<div className="avatar">
 												<div className="w-8 rounded-full">
-													<img src={user.profileImg || "/avatar-placeholder.png"} alt={user.username} />
+													<img src={user.profile_picture || "/avatar-placeholder.png"} alt={user.username} />
 												</div>
 											</div>
 											<div className="flex flex-col">
 												<span className="font-semibold tracking-tight truncate w-28">{user.username}</span>
 												<span className="text-sm text-slate-500">Followers: {user.followers_count}</span>
 											</div>
-										</div>
+										</Link>
 										<button className="btn bg-white text-black hover:bg-white hover:opacity-90 rounded-full btn-sm" 
-											onClick={(e) => { e.preventDefault(); handleFollow(user.user_id); }}>
-											Follow
+											onClick={async(e) => { 
+											e.preventDefault();
+											if (user.isFollowing) {
+												await handleUnfollow(user.user_id);
+											} else{
+												await handleFollow(user.user_id); 
+											}
+											}}
+										>
+											{user.isFollowing ? "Unfollow" : "Follow"}
 										</button>
-									</Link>
+									</div>
 								))
 							)}
 						</div>
@@ -165,8 +209,8 @@ const RightPanel = () => {
 								<p className="text-center text-gray-500 mt-2">No suggestions available</p>
 							) : (
 								suggestedUsers.map((user) => (
-									<Link to={`/profile/${user.user_id}`} className="flex items-center justify-between gap-4" key={user.user_id}>
-										<div className="flex gap-2 items-center">
+									<div className="flex items-center justify-between gap-4" key={user.user_id}>
+										<Link to={`/profile/${user.user_id}`} className="flex gap-2 items-center">
 											<div className="avatar">
 												<div className="w-8 rounded-full">
 													<img src={user.profile_picture || "/avatar-placeholder.png"} alt={user.username} />
@@ -176,12 +220,19 @@ const RightPanel = () => {
 												<span className="font-semibold tracking-tight truncate w-28">{user.username}</span>
 												<span className="text-sm text-slate-500">Followers: {user.followers_count}</span>
 											</div>
-										</div>
+										</Link>
 										<button className="btn bg-white text-black hover:bg-white hover:opacity-90 rounded-full btn-sm" 
-											onClick={(e) => { e.preventDefault(); handleFollow(user.user_id); }}>
-											Follow
+											onClick={async (e) => {
+												e.preventDefault(); 
+												if (user.isFollowing){
+													await handleUnfollow(user.user_id);
+												} else{
+													await handleFollow(user.user_id);
+												}
+												}}>
+											{user.isFollowing ? "Unfollow" : "Follow"}
 										</button>
-									</Link>
+									</div>
 								))
 							)}
 						</div>
