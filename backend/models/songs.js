@@ -18,8 +18,10 @@ const songSchema = new mongoose.Schema(
         deezer_url: { type: String},
     
         created_at: { type: Date, default: Date.now }
-    }
+    },
+    { timestamps: true}
 );
 
+songSchema.index({ updatedAt: 1}, {expireAfterSeconds: 60*60*24*3});
 const Song = mongoose.model('Song', songSchema);
 module.exports = Song;
