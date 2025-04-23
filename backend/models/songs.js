@@ -22,9 +22,8 @@ const songSchema = new mongoose.Schema(
     { timestamps: true}
 );
 
-// cached songs live only for days days, after that they get removed from the DB
+// cached songs live only for the specified amount of seconds, after that they get removed from the DB
 // helps ensure we always have the latest metadata with at most x days of delay
-const days = 1; 
-songSchema.index({ updatedAt: 1}, {expireAfterSeconds: 60*60*24*days});
+songSchema.index({ updatedAt: 1}, {expireAfterSeconds: 60*60});
 const Song = mongoose.model('Song', songSchema);
 module.exports = Song;
