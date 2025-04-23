@@ -1,6 +1,7 @@
 const User = require("../models/user.js");
 const Post = require("../models/post.js");
-
+const express = require("express");
+let router = express.Router();
 
 router.post("/get-users",  async (req, res) => { 
     try {
@@ -35,3 +36,5 @@ router.post("/get-posts",  async (req, res) => {
         return res.status(500).send({ success: false, message: "server error", error: error.message });
     }
 });
+
+module.exports = router;
