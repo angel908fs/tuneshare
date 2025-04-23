@@ -19,10 +19,6 @@ router.post("/get-users",  async (req, res) => {
     }
 });
 
-const User = require("../models/user.js");
-const Post = require("../models/post.js");
-
-
 router.post("/get-posts",  async (req, res) => { 
     try {
         const Users = await User.find()
