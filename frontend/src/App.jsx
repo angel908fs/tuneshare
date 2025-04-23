@@ -1,3 +1,4 @@
+
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import Cookies from 'js-cookie'; 
@@ -8,6 +9,8 @@ import SignUpPage from './pages/auth/signup/SignUpPage';
 import NotificationPage from './pages/notfications/NotificationPage';
 import ProfilePage from './pages/Profile/ProfilePage';
 import AdminPage from './pages/admin/AdminPage';
+import LogsDashboard from './pages/admin/LogsDashboard';
+
 
 import LeftPanel from './components/common/Sidebar';
 import RightPanel from './components/common/Rightbar';
@@ -19,7 +22,7 @@ const queryClient = new QueryClient();
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
-  const hideSidebars = ['/login', '/signup', '/admin'].includes(location.pathname);
+  const hideSidebars = ['/login', '/signup', '/admin', '/admin/logs'].includes(location.pathname);
 
   useEffect(() => {
     const cookieValue = Cookies.get("tuneshare_cookie");
@@ -39,6 +42,7 @@ function App() {
           <Route path='/notifications' element={<NotificationPage />} />
           <Route path='/profile/:userId' element={<ProfilePage />} />
           <Route path='/admin' element={<AdminPage/>}/> 
+          <Route path='/admin/logs' element={<LogsDashboard />} />
         </Routes>
         {!hideSidebars && <RightPanel />}
         <Toaster />
