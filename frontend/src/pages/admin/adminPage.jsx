@@ -6,7 +6,7 @@ const AdminPage = () => {
             <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
             <Link
                     to="/"
-                    className="block rounded transition duration-200 hover:text-white"
+                    className="block rounded transition duration-200 hover:border-cyan-500 hover:text-cyan-300"
                     >
                     ⌂ Home 
             </Link>

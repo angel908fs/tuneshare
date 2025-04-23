@@ -33,7 +33,7 @@ const LogsDashboard = () => {
         <div className="p-4 overflow-x-hidden max-w-full">
             <h1 className="text-2xl font-bold mb-4">Logs Dashboard</h1>
             <Link to="/admin"
-                className="block rounded transition duration-200 hover:text-white"
+                className="block rounded transition duration-200 hover:border-cyan-500 hover:text-cyan-300"
                 >
                  ⬅ Go back
             </Link>
