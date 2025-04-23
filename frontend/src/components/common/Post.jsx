@@ -264,7 +264,7 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
 
                 newAudio.onended = () => setIsPlaying(false);
             } else {
-                alert("No preview available for this track.");
+                console.error(`❌ No preview available for ${metadata.name}`);
             }
         } else {
             const newAudio = new Audio(previewUrl);
