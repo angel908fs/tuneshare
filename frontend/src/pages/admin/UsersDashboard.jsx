@@ -14,7 +14,7 @@ const UsersDashboard = () => {
                     setLogs(response.data.data.logs);
                 }
             } catch (err) {
-                console.error("Failed to fetch logs:", err);
+                console.error("Failed to fetch users:", err);
             } finally {
                 setLoading(false);
             }
@@ -29,18 +29,18 @@ const UsersDashboard = () => {
 
     return (
         <div className="p-4 overflow-x-hidden max-w-full">
-            <h1 className="text-2xl font-bold mb-4">Logs Dashboard</h1>
+            <h1 className="text-2xl font-bold mb-4">Users Dashboard</h1>
 
             <input
                 type="text"
-                placeholder="Search logs..."
+                placeholder="Search users..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="w-full mb-4 p-2 border rounded"
             />
 
             {loading ? (
-                <p>Loading logs...</p>
+                <p>Loading users...</p>
             ) : (
                 <>
                     <p className="text-m text-white-600 mb-4">
@@ -49,7 +49,7 @@ const UsersDashboard = () => {
 
                     <div className="max-h-[calc(100vh-10rem)] overflow-y-auto overflow-x-hidden space-y-10 rounded p-2">
                         {filteredLogs.length === 0 ? (
-                            <p className="text-gray-500">No matching logs.</p>
+                            <p className="text-gray-500">No matching users.</p>
                         ) : (
                             filteredLogs.map((log, index) => (
                                 <div
