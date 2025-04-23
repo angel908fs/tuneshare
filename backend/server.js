@@ -24,6 +24,7 @@ const commentsRoutes = require('./routes/comments.js');
 const songsRoutes = require('./routes/songs.js');
 const userInfoRoutes = require('./routes/userInfo.js');
 const middlewareRoutes = require('./routes/middleware.js');
+const adminRoutes = require('./routes/admin_routes.js')
 
 dotenv.config();
 const PORT = 8080;
@@ -59,6 +60,7 @@ app.use('/api', commentsRoutes);
 app.use('/api', songsRoutes);
 app.use('/api', userInfoRoutes);
 app.use('/api', middlewareRoutes);
+app.use('/api', adminRoutes);
 
 app.use(defaultRoute);
 app.use(invalidRoutes); // THIS HAS TO STAY LAST
