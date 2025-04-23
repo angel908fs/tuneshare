@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { Route, Routes, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import { sha512 } from 'js-sha512';
@@ -70,6 +70,8 @@ function App() {
               <Route path='/admin/logs' element={<LogsDashboard />} />
             </>
           )}
+          {/* redirect invalid routes to home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         {!hideSidebars && <RightPanel />}
         <Toaster />
