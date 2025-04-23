@@ -148,7 +148,7 @@ const RightPanel = () => {
 
 
 	return (
-		<div className="hidden lg:block my-4 mx-2">
+		<div className="hidden lg:block my-4 mx-2 min-w-[300px] max-w-[300px]">
 			<div className="bg-[#16181C] p-4 rounded-md sticky top-2">
 				{/* Search Bar */}
 				<input
