@@ -7,6 +7,7 @@ import { jwtDecode } from "jwt-decode";
 
 const Posts = ({ context, profileUserId }) => {
     const [isLoading, setIsLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [posts, setPosts] = useState([]);
     const [likedPosts, setLikedPosts] = useState([]);
     const [accessToken, setAccessToken] = useState("");
@@ -42,9 +43,15 @@ const Posts = ({ context, profileUserId }) => {
         fetchAccessToken();
     }, []);
 
-    const fetchPosts = async (currentPage = page) => {
+    const fetchPosts = async (currentPage = 1) => {
+        const isFirstPage = currentPage === 1;
         try {
-            setIsLoading(true);
+            if (isFirstPage) {
+                setIsLoading(true);
+            } else {
+                setLoadingMore(true);
+            }
+
             const token = Cookies.get("tuneshare_cookie");
             if (!token) return;
 
@@ -53,13 +60,13 @@ const Posts = ({ context, profileUserId }) => {
             const targetUserId = context === "profile" ? profileUserId : userId;
 
             const response = await axios.post("/api/load-feed", {
-                context: context,
+                context,
                 userid: targetUserId,
                 page: currentPage,
             });
 
             if (response.data.success) {
-                if (currentPage === 1) {
+                if (isFirstPage) {
                     setPosts(response.data.data);
                 } else {
                     setPosts((prev) => [...prev, ...response.data.data]);
@@ -77,17 +84,30 @@ const Posts = ({ context, profileUserId }) => {
         } catch (error) {
             console.error("Error fetching posts:", error);
         } finally {
-            setIsLoading(false);
+            if (isFirstPage) {
+                setIsLoading(false);
+            } else {
+                setLoadingMore(false);
+            }
         }
     };
 
+    // initial and paginated fetch
     useEffect(() => {
         fetchPosts(page);
     }, [page]);
 
+    // reset and refetch when profile changes
+    useEffect(() => {
+        setPage(1);
+        setHasMore(true);
+        fetchPosts(1);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, [profileUserId]);
+
     const lastPostRef = useCallback(
         (node) => {
-            if (isLoading) return;
+            if (isLoading || loadingMore) return;
             if (observer.current) observer.current.disconnect();
             observer.current = new IntersectionObserver((entries) => {
                 if (entries[0].isIntersecting && hasMore) {
@@ -96,20 +116,20 @@ const Posts = ({ context, profileUserId }) => {
             });
             if (node) observer.current.observe(node);
         },
-        [isLoading, hasMore]
+        [isLoading, loadingMore, hasMore]
     );
 
     return (
         <>
             {isLoading && page === 1 && (
-                <div className='flex flex-col justify-center'>
+                <div className="flex flex-col justify-center">
                     <PostSkeleton />
                     <PostSkeleton />
                     <PostSkeleton />
                 </div>
             )}
             {!isLoading && posts?.length === 0 && (
-                <p className='text-center my-4'>No posts in this tab. Switch 👻</p>
+                <p className="text-center my-4">No posts in this tab. Switch 👻</p>
             )}
             <div>
                 {posts.map((post, index) => {
@@ -136,6 +156,12 @@ const Posts = ({ context, profileUserId }) => {
                         );
                     }
                 })}
+
+                {loadingMore && (
+                    <div className="flex justify-center py-4">
+                        <span className="loading loading-spinner loading-md text-primary"></span>
+                    </div>
+                )}
             </div>
         </>
     );
