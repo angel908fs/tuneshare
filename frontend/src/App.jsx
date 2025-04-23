@@ -47,7 +47,7 @@ function App() {
       if (computedHash === expectedHash) {
         setAdminAccessAllowed(true);
       } else if (['/admin', '/admin/logs'].includes(location.pathname)) {
-        navigate('/login');
+        navigate('/');
       }
     };
 
