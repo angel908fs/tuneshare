@@ -57,4 +57,41 @@ router.post("/get-songs",  async (req, res) => {
     }
 });
 
+router.post("/delete-user", async (req, res) => {
+    try {
+        const { userID } = req.body;
+        if (!userID) return res.status(400).send({ success: false, message: "Missing userID" });
+
+        await User.findOneAndDelete({ user_id: userID });
+        return res.status(200).send({ success: true, message: "User deleted" });
+    } catch (error) {
+        return res.status(500).send({ success: false, message: "Failed to delete user", error: error.message });
+    }
+});
+
+router.post("/delete-post", async (req, res) => {
+    try {
+        const { postID } = req.body;
+        if (!postID) return res.status(400).send({ success: false, message: "Missing postID" });
+
+        await Post.findOneAndDelete({ post_id: postID });
+        return res.status(200).send({ success: true, message: "Post deleted" });
+    } catch (error) {
+        return res.status(500).send({ success: false, message: "Failed to delete post", error: error.message });
+    }
+});
+
+router.post("/delete-song", async (req, res) => {
+    try {
+        const { songID } = req.body;
+        if (!songID) return res.status(400).send({ success: false, message: "Missing songID" });
+
+        await Song.findOneAndDelete({ song_id: songID });
+        return res.status(200).send({ success: true, message: "Song deleted" });
+    } catch (error) {
+        return res.status(500).send({ success: false, message: "Failed to delete song", error: error.message });
+    }
+});
+
+
 module.exports = router;

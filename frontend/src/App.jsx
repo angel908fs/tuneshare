@@ -80,7 +80,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         {!hideSidebars && <RightPanel />}
-        <Toaster />
+        <Toaster position="top-right"/>
       </div>
     </QueryClientProvider>
   );
