@@ -35,6 +35,12 @@ const AdminPage = () => {
                     >
                     Songs Dashboard 
                 </Link>
+                <Link
+                    to="/admin/comments"
+                    className="block border p-4 rounded-lg transition duration-200 hover:border-cyan-500 hover:bg-[#083344] hover:text-cyan-300"
+                    >
+                    Comments Dashboard 
+                </Link>
             </div>
         </div>
     );

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
+import { Link } from "react-router-dom";
 
 const UsersDashboard = () => {
     const [users, setUsers] = useState([]);
@@ -7,30 +9,55 @@ const UsersDashboard = () => {
     const [query, setQuery] = useState("");
 
     useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const response = await axios.post("/api/get-users");
-                if (response.data.success) {
-                    setUsers(response.data.data.users);
-                }
-            } catch (err) {
-                console.error("Failed to fetch users:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchUsers();
     }, []);
 
-    const filteredUsers = users.filter((users) =>
-        JSON.stringify(users, null, 2).toLowerCase().includes(query.toLowerCase())
+    const fetchUsers = async () => {
+        try {
+            const response = await axios.post("/api/admin/get-users");
+            if (response.data.success) {
+                setUsers(response.data.data.users);
+            }
+        } catch (err) {
+            console.error("Failed to fetch users:", err);
+            toast.error("Failed to fetch users");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteUser = async (userID) => {
+        if (!window.confirm("Are you sure you want to delete this user?")) return;
+
+        try {
+            const response = await axios.post("/api/admin/delete-user", { userID });
+            if (response.data.success) {
+                setUsers((prev) => prev.filter((u) => u.user_id !== userID));
+                toast.success("User deleted successfully!");
+            } else {
+                toast.error("Failed to delete user: " + response.data.message);
+            }
+        } catch (err) {
+            console.error("Error deleting user:", err);
+            toast.error("An error occurred while deleting the user.");
+        }
+    };
+
+    const filteredUsers = users.filter((user) =>
+        JSON.stringify(user, null, 2).toLowerCase().includes(query.toLowerCase())
     );
 
     return (
         <div className="p-4 overflow-x-hidden max-w-full">
-            <h1 className="text-2xl font-bold mb-4">Users Dashboard</h1>
+            
+            <Toaster position="top-right" />
 
+            <h1 className="text-2xl font-bold mb-4">Users Dashboard</h1>
+            <Link to="/admin"
+                            className="block rounded transition duration-200 hover:border-cyan-500 hover:text-cyan-300"
+                            >
+                             ⬅ Go back
+            </Link>
             <input
                 type="text"
                 placeholder="Search users..."
@@ -53,8 +80,8 @@ const UsersDashboard = () => {
                         ) : (
                             filteredUsers.map((log, index) => (
                                 <div
-                                    key={log.log_id || index}
-                                    className="border p-2 rounded-lg shadow-sm break-words"
+                                    key={log.user_id || index}
+                                    className="relative border p-4 rounded-lg shadow-sm break-words"
                                 >
                                     <div className="text-sm max-w-full whitespace-pre-wrap break-words font-mono">
                                         {Object.entries(log).map(([key, value]) => (
@@ -70,6 +97,16 @@ const UsersDashboard = () => {
                                                 </span>
                                             </div>
                                         ))}
+                                    </div>
+
+                                    {/* DELETE BUTTON - BOTTOM RIGHT */}
+                                    <div className="absolute bottom-2 right-2">
+                                        <button
+                                            onClick={() => handleDeleteUser(log.user_id)}
+                                            className="text-xs bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
+                                        >
+                                            Delete
+                                        </button>
                                     </div>
                                 </div>
                             ))

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
+import { Link } from "react-router-dom";
 
 const PostsDashboard = () => {
     const [posts, setPosts] = useState([]);
@@ -7,30 +9,53 @@ const PostsDashboard = () => {
     const [query, setQuery] = useState("");
 
     useEffect(() => {
-        const fetchPosts = async () => {
-            try {
-                const response = await axios.post("/api/get-posts");
-                if (response.data.success) {
-                    setPosts(response.data.data.posts);
-                }
-            } catch (err) {
-                console.error("Failed to fetch posts:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchPosts();
     }, []);
 
-    const filteredPosts = posts.filter((posts) =>
-        JSON.stringify(posts, null, 2).toLowerCase().includes(query.toLowerCase())
+    const fetchPosts = async () => {
+        try {
+            const response = await axios.post("/api/admin/get-posts");
+            if (response.data.success) {
+                setPosts(response.data.data.posts);
+            }
+        } catch (err) {
+            console.error("Failed to fetch posts:", err);
+            toast.error("Failed to fetch posts");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeletePost = async (postID) => {
+        if (!window.confirm("Are you sure you want to delete this post?")) return;
+
+        try {
+            const response = await axios.post("/api/admin/delete-post", { postID });
+            if (response.data.success) {
+                setPosts((prev) => prev.filter((p) => p.post_id !== postID));
+                toast.success("Post deleted successfully!");
+            } else {
+                toast.error("Failed to delete post: " + response.data.message);
+            }
+        } catch (err) {
+            console.error("Error deleting post:", err);
+            toast.error("An error occurred while deleting the post.");
+        }
+    };
+
+    const filteredPosts = posts.filter((post) =>
+        JSON.stringify(post, null, 2).toLowerCase().includes(query.toLowerCase())
     );
 
     return (
         <div className="p-4 overflow-x-hidden max-w-full">
+            <Toaster position="top-right" />
             <h1 className="text-2xl font-bold mb-4">Posts Dashboard</h1>
-
+            <Link to="/admin"
+                className="block rounded transition duration-200 hover:border-cyan-500 hover:text-cyan-300"
+                >
+                 ⬅ Go back
+            </Link>
             <input
                 type="text"
                 placeholder="Search posts..."
@@ -53,8 +78,8 @@ const PostsDashboard = () => {
                         ) : (
                             filteredPosts.map((log, index) => (
                                 <div
-                                    key={log.log_id || index}
-                                    className="border p-2 rounded-lg shadow-sm break-words"
+                                    key={log.post_id || index}
+                                    className="relative border p-4 rounded-lg shadow-sm break-words"
                                 >
                                     <div className="text-sm max-w-full whitespace-pre-wrap break-words font-mono">
                                         {Object.entries(log).map(([key, value]) => (
@@ -71,7 +96,17 @@ const PostsDashboard = () => {
                                             </div>
                                         ))}
                                     </div>
+
+                                    <div className="absolute bottom-2 right-2">
+                                        <button
+                                            onClick={() => handleDeletePost(log.post_id)}
+                                            className="text-xs bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
                                 </div>
+
                             ))
                         )}
                     </div>

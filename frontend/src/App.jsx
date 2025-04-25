@@ -13,6 +13,7 @@ import LogsDashboard from './pages/admin/LogsDashboard';
 import UsersDashboard from './pages/admin/UsersDashboard';
 import PostsDashboard from './pages/admin/PostsDashboard';
 import SongsDashboard from './pages/admin/SongsDashboard';
+import CommentsDashboard from './pages/admin/CommentsDashboard';
 
 import LeftPanel from './components/common/Sidebar';
 import RightPanel from './components/common/Rightbar';
@@ -26,7 +27,7 @@ function App() {
   const navigate = useNavigate();
   const [adminAccessAllowed, setAdminAccessAllowed] = useState(false);
 
-  const hideSidebars = ['/login', '/signup', '/admin', '/admin/logs', '/admin/users', '/admin/posts', '/admin/songs'].includes(location.pathname);
+  const hideSidebars = ['/login', '/signup', '/admin', '/admin/logs', '/admin/users', '/admin/posts', '/admin/songs', '/admin/comments'].includes(location.pathname);
 
   useEffect(() => {
     const cookieValue = Cookies.get("tuneshare_cookie");
@@ -74,13 +75,14 @@ function App() {
               <Route path='/admin/users' element={<UsersDashboard />} />
               <Route path='/admin/posts' element={<PostsDashboard />} />
               <Route path='/admin/songs' element={<SongsDashboard />} />
+              <Route path='/admin/comments' element={<CommentsDashboard />} />
             </>
           )}
           {/* redirect invalid routes to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         {!hideSidebars && <RightPanel />}
-        <Toaster />
+        <Toaster position="top-right"/>
       </div>
     </QueryClientProvider>
   );
