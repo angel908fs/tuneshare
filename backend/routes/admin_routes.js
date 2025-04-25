@@ -22,14 +22,14 @@ router.post("/get-users",  async (req, res) => {
 
 router.post("/get-posts",  async (req, res) => { 
     try {
-        const Users = await User.find()
+        const Posts = await Post.find()
         .limit(1000);
         
         return res.status(200).send({
             success: true,
-            message: "users retrieved successfully",
+            message: "posts retrieved successfully",
             data: {
-                users: Users
+                posts: Posts
             }
         })
         } catch (error) {
