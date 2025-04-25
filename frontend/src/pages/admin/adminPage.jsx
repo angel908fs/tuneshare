@@ -23,6 +23,12 @@ const AdminPage = () => {
                     >
                     Users Dashboard 
                 </Link>
+                <Link
+                    to="/admin/posts"
+                    className="block border p-4 rounded-lg transition duration-200 hover:border-cyan-500 hover:bg-[#083344] hover:text-cyan-300"
+                    >
+                    Posts Dashboard 
+                </Link>
             </div>
         </div>
     );
