@@ -79,7 +79,7 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
 
   useEffect(() => {
     //console.log("Post Owner:", postOwner);
-    // 1) If post has a song_link, fetch track metadata
+    // 1) if post has a song_link, fetch track metadata
     const fetchMetadata = async () => {
       if (accessToken && post.song_link) {
         const metadata = await getSpotifyTrackMetadata(post.song_link, accessToken);
@@ -88,10 +88,13 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
     };
     fetchMetadata();
 
-    // 2) Set initial likes from post prop
+    // 2) set initial likes from post prop
     setLikes(post.likes || 0);
 
-    // 3) Decode userID from JWT cookie
+    // get comments for post
+    fetchComments();
+
+    // 3) decode userID from JWT cookie
     const cookieValue = Cookies.get("tuneshare_cookie");
     if (cookieValue) {
       try {
@@ -104,7 +107,7 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
       console.log("No token found in the cookie.");
     }
 
-    // 4) Check if this post is already liked by the user
+    // 4) check if this post is already liked by the user
     if (likedPosts?.data?.liked_posts?.includes(post.post_id)) {
       setIsLiked(true);
     }
@@ -130,7 +133,7 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
       const res = await axios.delete(`/api/delete-post?userID=${userIdFromCookie}&postID=${postID}`);
       if (res.data.success) {
         alert("Post deleted successfully!");
-        fetchPosts();  // 🚀 Refresh the post list dynamically
+        fetchPosts();  // 🚀 refresh the post list dynamically
       } else {
         alert(res.data.message);
       }
@@ -147,7 +150,7 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
         postID: post.post_id,
       });
       if (res.data.success) {
-        // The array is in res.data.data.comments
+        // the array is in res.data.data.comments
         setComments(res.data.data.comments);
         console.log(res.data.data.comments);
       } else {
@@ -178,7 +181,7 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
       });
       if (res.data.success) {
         setComment("");
-        // Refresh comments
+        // refresh comments
         await fetchComments();
       } else {
         alert(res.data.message);
@@ -198,7 +201,7 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
         },
       });
       if (res.data.success) {
-        // Re-fetch comments
+        // refetch comments
         await fetchComments();
       } else {
         alert(res.data.message);
@@ -239,7 +242,7 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
   const togglePlayPause = async () => {
     if (!post.song_link || !accessToken) return;
 
-    // Stop any existing audio before playing a new one
+    // stop any existing audio before playing a new one
     if (audio) {
         audio.pause();
         setIsPlaying(false);
@@ -253,7 +256,7 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
 
             if (preview) {
                 setPreviewUrl(preview);
-                setTrackMetadata(metadata); // 💾 Save metadata for later
+                setTrackMetadata(metadata); // save metadata for later
 
                 const newAudio = new Audio(preview);
                 newAudio.play();
@@ -264,7 +267,7 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
 
                 newAudio.onended = () => setIsPlaying(false);
             } else {
-                alert("No preview available for this track.");
+                console.error(`❌ No preview available for ${metadata.name}`);
             }
         } else {
             const newAudio = new Audio(previewUrl);
@@ -324,7 +327,6 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
             )}
             <span>{post.content || "<no content specified>"}</span>
 
-            {/* OPTIONAL: SPOTIFY/DEEZER PREVIEW */}
             {post.song_link && (
               <div className="spotify-metadata mt-3 p-12 border border-gray-700 rounded relative overflow-hidden">
                 {trackMetadata && (
@@ -439,8 +441,8 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
                         </div>
                         <div className="flex flex-col">
                           {/* 
-                            1) Link to the user's profile for the comment author
-                            2) Show created_at
+                            1) link to the user's profile for the comment author
+                            2) show created_at
                           */}
                           <div className="flex items-center gap-2">
                             <Link
@@ -453,10 +455,10 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
                               {new Date(commentObj.created_at).toLocaleString()}
                             </span>
                           </div>
-                          {/* The actual comment text */}
+                          {/* the actual comment text */}
                           <div className="text-sm mt-1">{commentObj.comment}</div>
 
-                          {/* Delete button if this is my comment */}
+                          {/* delete button if this is my comment */}
                           {commentObj.user_id === userIdFromCookie && (
                             <button
                               className="text-xs text-red-400 hover:text-red-600 underline mt-1"

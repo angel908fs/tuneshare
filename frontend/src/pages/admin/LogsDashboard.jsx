@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
+
 
 const LogsDashboard = () => {
     const [logs, setLogs] = useState([]);
@@ -30,7 +32,11 @@ const LogsDashboard = () => {
     return (
         <div className="p-4 overflow-x-hidden max-w-full">
             <h1 className="text-2xl font-bold mb-4">Logs Dashboard</h1>
-
+            <Link to="/admin"
+                className="block rounded transition duration-200 hover:border-cyan-500 hover:text-cyan-300"
+                >
+                 ⬅ Go back
+            </Link>
             <input
                 type="text"
                 placeholder="Search logs..."
