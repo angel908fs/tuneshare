@@ -3,7 +3,8 @@ const { v4: uuidv4 } = require('uuid');    // for generating UUIDs (User IDs)
 
 const postSchema = new mongoose.Schema(
     {
-        post_id: { type: String, default: uuidv4 }, 
+        post_id: { type: String, default: uuidv4 },
+        content: {type: String}, 
         song_link: { type: String, required: true }, // Link to the song
         likes: { type: Number, default: 0 }, // count of likes
         comments: [{ type: String, ref: 'Comment' }], // list of comment IDs
