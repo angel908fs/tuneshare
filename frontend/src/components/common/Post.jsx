@@ -152,7 +152,6 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
       if (res.data.success) {
         // the array is in res.data.data.comments
         setComments(res.data.data.comments);
-        console.log(res.data.data.comments);
       } else {
         setErrorComments(res.data.message || "Unknown error fetching comments");
       }

@@ -14,7 +14,7 @@ const UsersDashboard = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.post("/api/get-users");
+            const response = await axios.post("/api/admin/get-users");
             if (response.data.success) {
                 setUsers(response.data.data.users);
             }
@@ -30,7 +30,7 @@ const UsersDashboard = () => {
         if (!window.confirm("Are you sure you want to delete this user?")) return;
 
         try {
-            const response = await axios.post("/api/delete-user", { userID });
+            const response = await axios.post("/api/admin/delete-user", { userID });
             if (response.data.success) {
                 setUsers((prev) => prev.filter((u) => u.user_id !== userID));
                 toast.success("User deleted successfully!");

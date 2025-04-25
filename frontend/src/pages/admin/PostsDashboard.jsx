@@ -14,7 +14,7 @@ const PostsDashboard = () => {
 
     const fetchPosts = async () => {
         try {
-            const response = await axios.post("/api/get-posts");
+            const response = await axios.post("/api/admin/get-posts");
             if (response.data.success) {
                 setPosts(response.data.data.posts);
             }
@@ -30,7 +30,7 @@ const PostsDashboard = () => {
         if (!window.confirm("Are you sure you want to delete this post?")) return;
 
         try {
-            const response = await axios.post("/api/delete-post", { postID });
+            const response = await axios.post("/api/admin/delete-post", { postID });
             if (response.data.success) {
                 setPosts((prev) => prev.filter((p) => p.post_id !== postID));
                 toast.success("Post deleted successfully!");

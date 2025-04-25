@@ -1,37 +1,56 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
 
-const SongsDashboard = () => {
-    const [songs, setSongs] = useState([]);
+const CommentsDashboard = () => {
+    const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [query, setQuery] = useState("");
 
     useEffect(() => {
-        const fetchSongs = async () => {
-            try {
-                const response = await axios.post("/api/admin/get-songs");
-                console.log(response)
-                if (response.data.success) {
-                    setSongs(response.data.data.songs);
-                }
-            } catch (err) {
-                console.error("Failed to fetch songs:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchSongs();
+        fetchComments();
     }, []);
 
-    const filteredSongs = songs.filter((songs) =>
-        JSON.stringify(songs, null, 2).toLowerCase().includes(query.toLowerCase())
+    const fetchComments = async () => {
+        try {
+            const response = await axios.post("/api/admin/get-comments");
+            if (response.data.success) {
+                setComments(response.data.data.comments);
+            }
+        } catch (err) {
+            console.error("Failed to fetch comments:", err);
+            toast.error("Failed to fetch comments");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteComment = async (commentID) => {
+        if (!window.confirm("Are you sure you want to delete this comment?")) return;
+
+        try {
+            const response = await axios.post("/api/admin/delete-comment", { commentID });
+            if (response.data.success) {
+                setComments((prev) => prev.filter((p) => p.comment_id !== commentID));
+                toast.success("Comment deleted successfully!");
+            } else {
+                toast.error("Failed to delete comment: " + response.data.message);
+            }
+        } catch (err) {
+            console.error("Error deleting comment:", err);
+            toast.error("An error occurred while deleting the comment.");
+        }
+    };
+
+    const filteredComments = comments.filter((comment) =>
+        JSON.stringify(comment, null, 2).toLowerCase().includes(query.toLowerCase())
     );
 
     return (
         <div className="p-4 overflow-x-hidden max-w-full">
-            <h1 className="text-2xl font-bold mb-4">Songs Dashboard</h1>
+            <Toaster position="top-right" />
+            <h1 className="text-2xl font-bold mb-4">Comments Dashboard</h1>
             <Link to="/admin"
                 className="block rounded transition duration-200 hover:border-cyan-500 hover:text-cyan-300"
                 >
@@ -39,28 +58,28 @@ const SongsDashboard = () => {
             </Link>
             <input
                 type="text"
-                placeholder="Search songs..."
+                placeholder="Search comments..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="w-full mb-4 p-2 border rounded"
             />
 
             {loading ? (
-                <p>Loading songs...</p>
+                <p>Loading comments...</p>
             ) : (
                 <>
                     <p className="text-m text-white-600 mb-4">
-                        Showing {filteredSongs.length} result{filteredSongs.length !== 1 ? "s" : ""}
+                        Showing {filteredComments.length} result{filteredComments.length !== 1 ? "s" : ""}
                     </p>
 
                     <div className="max-h-[calc(100vh-10rem)] overflow-y-auto overflow-x-hidden space-y-10 rounded p-2">
-                        {filteredSongs.length === 0 ? (
-                            <p className="text-gray-500">No matching songs.</p>
+                        {filteredComments.length === 0 ? (
+                            <p className="text-gray-500">No matching comments.</p>
                         ) : (
-                            filteredSongs.map((log, index) => (
+                            filteredComments.map((log, index) => (
                                 <div
-                                    key={log.log_id || index}
-                                    className="border p-2 rounded-lg shadow-sm break-words"
+                                    key={log.comment_id || index}
+                                    className="relative border p-4 rounded-lg shadow-sm break-words"
                                 >
                                     <div className="text-sm max-w-full whitespace-pre-wrap break-words font-mono">
                                         {Object.entries(log).map(([key, value]) => (
@@ -77,7 +96,17 @@ const SongsDashboard = () => {
                                             </div>
                                         ))}
                                     </div>
+
+                                    <div className="absolute bottom-2 right-2">
+                                        <button
+                                            onClick={() => handleDeleteComment(log.comment_id)}
+                                            className="text-xs bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
                                 </div>
+
                             ))
                         )}
                     </div>
@@ -104,4 +133,4 @@ function escapeRegExp(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-export default SongsDashboard;
+export default CommentsDashboard;
