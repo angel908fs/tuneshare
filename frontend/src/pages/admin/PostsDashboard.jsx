@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
+import { Link } from "react-router-dom";
 
 const PostsDashboard = () => {
     const [posts, setPosts] = useState([]);
@@ -50,7 +51,11 @@ const PostsDashboard = () => {
         <div className="p-4 overflow-x-hidden max-w-full">
             <Toaster position="top-right" />
             <h1 className="text-2xl font-bold mb-4">Posts Dashboard</h1>
-
+            <Link to="/admin"
+                className="block rounded transition duration-200 hover:border-cyan-500 hover:text-cyan-300"
+                >
+                 ⬅ Go back
+            </Link>
             <input
                 type="text"
                 placeholder="Search posts..."

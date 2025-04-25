@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
+import { Link } from "react-router-dom";
 
 const UsersDashboard = () => {
     const [users, setUsers] = useState([]);
@@ -48,11 +49,15 @@ const UsersDashboard = () => {
 
     return (
         <div className="p-4 overflow-x-hidden max-w-full">
-            {/* If you already have <Toaster /> in App.jsx, remove this line */}
+            
             <Toaster position="top-right" />
 
             <h1 className="text-2xl font-bold mb-4">Users Dashboard</h1>
-
+            <Link to="/admin"
+                            className="block rounded transition duration-200 hover:border-cyan-500 hover:text-cyan-300"
+                            >
+                             ⬅ Go back
+            </Link>
             <input
                 type="text"
                 placeholder="Search users..."
