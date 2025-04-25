@@ -1,5 +1,7 @@
 const User = require("../models/user.js");
 const Post = require("../models/post.js");
+const Song = require("../models/songs.js");
+
 const express = require("express");
 let router = express.Router();
 
@@ -31,6 +33,23 @@ router.post("/get-posts",  async (req, res) => {
             message: "posts retrieved successfully",
             data: {
                 posts: Posts
+            }
+        })
+        } catch (error) {
+        return res.status(500).send({ success: false, message: "server error", error: error.message });
+    }
+});
+
+router.post("/get-songs",  async (req, res) => { 
+    try {
+        const Songs = await Song.find()
+        .limit(1000);
+        
+        return res.status(200).send({
+            success: true,
+            message: "songs retrieved successfully",
+            data: {
+                songs: Songs
             }
         })
         } catch (error) {
