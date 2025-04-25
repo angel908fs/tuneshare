@@ -10,6 +10,7 @@ import NotificationPage from './pages/notfications/NotificationPage';
 import ProfilePage from './pages/Profile/ProfilePage';
 import AdminPage from './pages/admin/AdminPage';
 import LogsDashboard from './pages/admin/LogsDashboard';
+import UsersDashboard from './pages/admin/UsersDashboard';
 
 import LeftPanel from './components/common/Sidebar';
 import RightPanel from './components/common/Rightbar';
@@ -23,7 +24,7 @@ function App() {
   const navigate = useNavigate();
   const [adminAccessAllowed, setAdminAccessAllowed] = useState(false);
 
-  const hideSidebars = ['/login', '/signup', '/admin', '/admin/logs'].includes(location.pathname);
+  const hideSidebars = ['/login', '/signup', '/admin', '/admin/logs', '/admin/users'].includes(location.pathname);
 
   useEffect(() => {
     const cookieValue = Cookies.get("tuneshare_cookie");
@@ -68,6 +69,7 @@ function App() {
             <>
               <Route path='/admin' element={<AdminPage />} />
               <Route path='/admin/logs' element={<LogsDashboard />} />
+              <Route path='/admin/users' element={<UsersDashboard />} />
             </>
           )}
           {/* redirect invalid routes to home */}

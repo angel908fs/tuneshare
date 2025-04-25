@@ -6,6 +6,7 @@ let router = express.Router();
 router.post("/get-users",  async (req, res) => { 
     try {
         const Users = await User.find()
+        .select("-profile_picture")
         .limit(1000);
         
         return res.status(200).send({

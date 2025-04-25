@@ -17,6 +17,12 @@ const AdminPage = () => {
                     >
                     Logs Dashboard 
                 </Link>
+                <Link
+                    to="/admin/users"
+                    className="block border p-4 rounded-lg transition duration-200 hover:border-cyan-500 hover:bg-[#083344] hover:text-cyan-300"
+                    >
+                    Users Dashboard 
+                </Link>
             </div>
         </div>
     );
