@@ -76,57 +76,59 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
       return null;
     }
   };
-
   useEffect(() => {
-    //console.log("Post Owner:", postOwner);
-    // 1) if post has a song_link, fetch track metadata
-    const fetchMetadata = async () => {
-      if (accessToken && post.song_link) {
-        const metadata = await getSpotifyTrackMetadata(post.song_link, accessToken);
-        setTrackMetadata(metadata);
-      }
-    };
-    fetchMetadata();
-
-    // 2) set initial likes from post prop
-    setLikes(post.likes || 0);
-
-    // get comments for post
-    fetchComments();
-
-    // 3) decode userID from JWT cookie
-    const cookieValue = Cookies.get("tuneshare_cookie");
-    if (cookieValue) {
-      try {
-        const decodedToken = jwtDecode(cookieValue);
-        setUserIdFromCookie(decodedToken.user_id);
-      } catch (err) {
-        console.error("Error decoding token:", err);
-      }
-    } else {
-      console.log("No token found in the cookie.");
-    }
-
-    // 4) check if this post is already liked by the user
-    if (likedPosts?.data?.liked_posts?.includes(post.post_id)) {
-      setIsLiked(true);
-    }
-
-    const fetchPostUser = async () => {
-      try {
-        const res = await axios.get(`/api/userInfo/${post.user_id}`);
-        console.log("Fetched post owner data");
-        if (res.data) {
-          setPostUser(res.data);
+    const fetchEverything = async () => {
+      if (!accessToken) return;
+  
+      // only fetch metadata if we haven't fetched it yet
+      if (!trackMetadata && post.song_link) {
+        try {
+          const metadata = await getSpotifyTrackMetadata(post.song_link, accessToken);
+          setTrackMetadata(metadata);
+        } catch (err) {
+          console.error("Error fetching track metadata:", err);
         }
-      } catch (err) {
-        console.error("Error fetching post owner user data:", err);
+      }
+  
+      // set likes once
+      setLikes(post.likes || 0);
+  
+      // always fetch comments
+      fetchComments();
+  
+      // decode userId once
+      if (!userIdFromCookie) {
+        const cookieValue = Cookies.get("tuneshare_cookie");
+        if (cookieValue) {
+          try {
+            const decodedToken = jwtDecode(cookieValue);
+            setUserIdFromCookie(decodedToken.user_id);
+          } catch (err) {
+            console.error("Error decoding token:", err);
+          }
+        } else {
+          console.warn("No token found in cookie.");
+        }
+      }
+  
+      // only fetch post owner info if not already fetched
+      if (!postUser && post.user_id) {
+        try {
+          const res = await axios.get(`/api/userInfo/${post.user_id}`);
+          console.log("✅ Fetched post owner user data");
+          if (res.data) {
+            setPostUser(res.data);
+          }
+        } catch (err) {
+          console.error("❌ Error fetching post owner user data:", err);
+        }
       }
     };
-    if (post.user_id) {
-      fetchPostUser();
-    }
-  }, [post.song_link, post.likes, post.post_id, likedPosts, accessToken, post.user_id, post]);
+  
+    fetchEverything();
+  }, [accessToken, post.song_link, post.user_id]);
+  
+  
 
   const handleDeletePost = async (postID) => {
     try {
