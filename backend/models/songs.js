@@ -21,8 +21,8 @@ const songSchema = new mongoose.Schema(
     }
 );
 
-// TTL index: expire 55 minutes after created_at
-songSchema.index({ created_at: 1 }, { expireAfterSeconds: (60*30) });
+// TTL index: expire some time after created_at
+songSchema.index({ created_at: 1 }, { expireAfterSeconds: (60*60*24) });
 
 const Song = mongoose.model('Song', songSchema);
 module.exports = Song;

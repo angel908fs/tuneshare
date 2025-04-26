@@ -344,12 +344,13 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
                   <>
                     {trackMetadata.album.images[0] && (
                       <div
-                        className="absolute inset-0 -z-10 bg-cover bg-center"
-                        style={{
-                          backgroundImage: `url(${trackMetadata.album.images[0].url})`,
-                          filter: "blur(20px) brightness(0.5)",
-                        }}
-                      ></div>
+                      className="absolute inset-0 -z-10 bg-cover bg-center transition-all duration-500"
+                      style={{
+                        backgroundImage: `url(${trackMetadata.album.images[0].url})`,
+                        filter: `blur(20px) brightness(${isPlaying ? "0.3" : "0.5"})`,
+                      }}
+                    ></div>
+                    
                     )}
 
                     <div className="flex gap-4 items-center relative">
@@ -363,16 +364,20 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
                             <img
                               src={trackMetadata.album.images[0].url}
                               alt="Song Cover"
-                              className="w-50 h-50 rounded-lg object-cover transition-transform duration-300 transform hover:scale-110"
+                              className={`w-50 h-50 rounded-lg object-cover transition-all duration-300 transform ${
+                                isPlaying ? "scale-110" : "scale-100"
+                              } hover:scale-110`}
                             />
+
                           </a>
                         )}
                       </div>
                       <div className="w-1/2 flex flex-col justify-center">
-                        <div
+                      <div
                           style={{
-                            color: "rgba(255, 255, 255, 0.6)",
+                            color: isPlaying ? "rgba(255, 255, 255, 0.6)" : "rgba(255, 255, 255, 0.6)",
                             textShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)",
+                            transition: "color 0.5s ease",
                           }}
                           className="flex flex-col items-center"
                         >
@@ -400,11 +405,12 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
                               className="mt-4 text-white rounded-full transition-transform duration-300 transform hover:scale-125 flex items-center justify-center text-4xl mx-auto"
                             >
                               {loadingPreview ? (
-  <div className="w-6 h-6 border-2 border-white/50 border-t-white rounded-full animate-spin"></div>
-) : (
-  isPlaying ? <FaPause /> : <FaPlay />
-)}
-
+                                <div className="text-4xl flex items-center justify-center">
+                                  <div className="w-9 h-9 border-4 border-white/50 border-t-white rounded-full animate-spin"></div>
+                                </div>
+                              ) : (
+                                isPlaying ? <FaPause /> : <FaPlay />
+                              )}
                             </button>
                           </div>
                         </div>
