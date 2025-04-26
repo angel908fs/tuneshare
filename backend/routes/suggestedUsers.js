@@ -5,7 +5,6 @@ const User = require("../models/user");
 router.post("/suggested-users", async (req, res) => {
     try {
         const userID = req.body.user_id;
-        console.log(`API Called with userID: ${userID}`);
 
         if (!userID || userID.trim() === "") {
             console.warn("Invalid or missing userID in request");
@@ -20,7 +19,6 @@ router.post("/suggested-users", async (req, res) => {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        console.log(`User found: ${currentUser.username}, Following: ${currentUser.following.length}`);
 
         // Debugging: Check if `following` field exists
         if (!Array.isArray(currentUser.following)) {
@@ -46,7 +44,6 @@ router.post("/suggested-users", async (req, res) => {
             .limit(5)
             .select("user_id username profile_picture followers_count");
 
-        console.log("Suggested Users Response:", suggestedUsers);
 
         // Add isFollowing flag based on currentUser.following
         const enrichedSuggestedUsers = suggestedUsers.map((user) => ({

@@ -10,6 +10,8 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { jwtDecode}  from "jwt-decode";
+import toast from "react-hot-toast";
+
 
 const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
   const [comment, setComment] = useState("");
@@ -134,7 +136,7 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
     try {
       const res = await axios.delete(`/api/delete-post?userID=${userIdFromCookie}&postID=${postID}`);
       if (res.data.success) {
-        alert("Post deleted successfully!");
+        toast.success("Post deleted successfully!");
         fetchPosts();  // 🚀 refresh the post list dynamically
       } else {
         alert(res.data.message);

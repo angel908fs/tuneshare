@@ -144,9 +144,12 @@ const CreatePost = ({ onPostCreated }) => {
     onSuccess: () => {
       toast.success('Post created successfully!');
       // reset form fields
-      setSongLink('');
       setText('');
-      onPostCreated(); // callback to notify for post updates
+      setSongLink('');
+      setSearchQuery('');    
+      setSongCover('');    
+      setSearchResults([]); 
+      onPostCreated(); 
     },
     onError: (error) => {
       toast.error('Error creating post: ' + (error.response?.data?.message || error.message));
@@ -165,6 +168,9 @@ const CreatePost = ({ onPostCreated }) => {
       return;
     }
     createPost({ userID, songLink, content: text || " "});
+    setText('');   
+setSongLink('');
+setSongCover('');
   };
 
   return (
