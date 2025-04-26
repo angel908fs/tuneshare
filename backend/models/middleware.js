@@ -10,11 +10,12 @@ const MiddlewareLogSchema = new mongoose.Schema({
   ip: { type: String },
   timestamp: { type: Date, default: Date.now },
   referrer: { type: String },
-  origin: { type: String }
+  origin: { type: String },
+  created_at: { type: Date, default: Date.now }
 });
 
-// Logs expire automatically after 30 days
-MiddlewareLogSchema.index({ timestamp: 1 }, { expireAfterSeconds: 60*60*24*30});
+// TTL index: expire 7 days minutes after created_at
+MiddlewareLogSchema.index({ created_at: 1 }, { expireAfterSeconds: (60*60*24*7)});
 
 const MiddlewareLog = mongoose.model('MiddlewareLog', MiddlewareLogSchema);
 module.exports = MiddlewareLog;

@@ -183,11 +183,6 @@ const ProfilePage = () => {
         <div className="flex flex-col">
           {!isLoading && userData && (
             <>
-              {showFollowAlert && (
-                <div className="alert alert-success">
-                  Successfully followed user!
-               </div>
-            )}
               <div className="flex gap-10 px-4 py-2 items-center">
                 <Link to="/">
                   <FaArrowLeft className="w-8 h-8" />
