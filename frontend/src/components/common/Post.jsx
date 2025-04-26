@@ -27,6 +27,7 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
   const [likes, setLikes] = useState(null);
   const [userIdFromCookie, setUserIdFromCookie] = useState("");
   const [loadingPreview, setLoadingPreview] = useState(false);
+  const [scaleFactor, setScaleFactor] = useState(1); // start at 1.0 = 100%
 
 
   const onlyUseSpotifyApi = false;
@@ -246,6 +247,7 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
  
   const togglePlayPause = async () => {
     if (!post.song_link || !accessToken) return;
+    if (loadingPreview) return;
   
     // stop any existing audio before playing a new one
     if (audio) {
@@ -362,12 +364,12 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
                             rel="noopener noreferrer"
                           >
                             <img
-                              src={trackMetadata.album.images[0].url}
-                              alt="Song Cover"
-                              className={`w-50 h-50 rounded-lg object-cover transition-all duration-300 transform ${
-                                isPlaying ? "scale-110" : "scale-100"
-                              } hover:scale-110`}
-                            />
+                            src={trackMetadata.album.images[0].url}
+                            alt="Song Cover"
+                            className={`w-50 h-50 rounded-lg object-cover transition-all duration-500 transform ${
+                              isPlaying ? "scale-110 shadow-[0_0_20px_5px_rgba(255,255,255,0.25)]" : "scale-100 shadow-none"
+                            } hover:scale-110`}
+                          />
 
                           </a>
                         )}
