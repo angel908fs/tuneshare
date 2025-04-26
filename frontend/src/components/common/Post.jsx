@@ -355,7 +355,7 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
                     
                     )}
 
-                    <div className="flex gap-4 items-center relative">
+                    <div className="flex gap-8 items-center relative">
                       <div className="w-1/2 flex justify-center items-center">
                         {trackMetadata.album.images[0] && (
                           <a
