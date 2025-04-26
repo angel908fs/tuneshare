@@ -26,6 +26,8 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likes, setLikes] = useState(null);
   const [userIdFromCookie, setUserIdFromCookie] = useState("");
+  const [loadingPreview, setLoadingPreview] = useState(false);
+
 
   const onlyUseSpotifyApi = false;
 
@@ -244,46 +246,52 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
  
   const togglePlayPause = async () => {
     if (!post.song_link || !accessToken) return;
-
+  
     // stop any existing audio before playing a new one
     if (audio) {
-        audio.pause();
-        setIsPlaying(false);
-        setAudio(null);
+      audio.pause();
+      setIsPlaying(false);
+      setAudio(null);
     }
-
+  
     if (!isPlaying) {
-        if (!previewUrl) {
-            const metadata = await getSpotifyTrackMetadata(post.song_link, accessToken);
-            const preview = metadata?.preview_url;
-
-            if (preview) {
-                setPreviewUrl(preview);
-                setTrackMetadata(metadata); // save metadata for later
-
-                const newAudio = new Audio(preview);
-                newAudio.play();
-                setAudio(newAudio);
-                setIsPlaying(true);
-
-                console.log(`🎧 Playing "${metadata.name}" from ${metadata.preview_source} preview`);
-
-                newAudio.onended = () => setIsPlaying(false);
-            } else {
-                console.error(`❌ No preview available for ${metadata.name}`);
-            }
-        } else {
-            const newAudio = new Audio(previewUrl);
+      if (!previewUrl) {
+        try {
+          setLoadingPreview(true);  // 🔥 start loading
+          const metadata = await getSpotifyTrackMetadata(post.song_link, accessToken);
+          const preview = metadata?.preview_url;
+  
+          if (preview) {
+            setPreviewUrl(preview);
+            setTrackMetadata(metadata);
+  
+            const newAudio = new Audio(preview);
             newAudio.play();
             setAudio(newAudio);
             setIsPlaying(true);
-
-            console.log(`🎧 Playing "${trackMetadata?.name}" from cached preview URL`);
-
+  
+            console.log(`🎧 Playing "${metadata.name}" from ${metadata.preview_source} preview`);
+  
             newAudio.onended = () => setIsPlaying(false);
+          } else {
+            console.error(`❌ No preview available for ${metadata.name}`);
+          }
+        } finally {
+          setLoadingPreview(false);  // 🔥 stop loading no matter what
         }
+      } else {
+        const newAudio = new Audio(previewUrl);
+        newAudio.play();
+        setAudio(newAudio);
+        setIsPlaying(true);
+  
+        console.log(`🎧 Playing "${trackMetadata?.name}" from cached preview URL`);
+  
+        newAudio.onended = () => setIsPlaying(false);
+      }
     }
-};
+  };
+  
 
   
   const postOwner = post || {};
@@ -391,7 +399,12 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
                               onClick={togglePlayPause}
                               className="mt-4 text-white rounded-full transition-transform duration-300 transform hover:scale-125 flex items-center justify-center text-4xl mx-auto"
                             >
-                              {isPlaying ? <FaPause /> : <FaPlay />}
+                              {loadingPreview ? (
+  <div className="w-6 h-6 border-2 border-white/50 border-t-white rounded-full animate-spin"></div>
+) : (
+  isPlaying ? <FaPause /> : <FaPlay />
+)}
+
                             </button>
                           </div>
                         </div>
