@@ -40,9 +40,13 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
 
   // has the user already commented on this post?
   useEffect(() => {
-    if (userIdFromCookie && comments.length > 0) {
+    if (!userIdFromCookie) return;
+  
+    if (comments.length > 0) {
       const userHasCommented = comments.some(comment => comment.user_id === userIdFromCookie);
       setHasCommented(userHasCommented);
+    } else {
+      setHasCommented(false); // reset if no comments
     }
   }, [comments, userIdFromCookie]);
   
