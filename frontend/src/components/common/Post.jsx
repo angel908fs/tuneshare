@@ -29,8 +29,15 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [scaleFactor, setScaleFactor] = useState(1); // start at 1.0 = 100%
 
-
   const onlyUseSpotifyApi = false;
+
+  // Has the logged-in user already liked this post?
+  useEffect(() => {
+    if (likedPosts && Array.isArray(likedPosts.data?.liked_posts)) {
+      setIsLiked(likedPosts.data.liked_posts.includes(post.post_id));
+    }
+  }, [likedPosts, post.post_id]);
+  
 
   const getSpotifyTrackMetadata = async (spotifyUrl, token) => {
     try {
@@ -115,7 +122,6 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
           console.warn("No token found in cookie.");
         }
       }
-  
       // only fetch post owner info if not already fetched
       if (!postUser && post.user_id) {
         try {
