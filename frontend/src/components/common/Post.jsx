@@ -1,4 +1,4 @@
-import { FaRegComment } from "react-icons/fa";
+import { FaRegComment, FaComment } from "react-icons/fa";
 import { BiRepost } from "react-icons/bi";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
 import { FaPlay, FaPause } from "react-icons/fa";
@@ -27,7 +27,7 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
   const [likes, setLikes] = useState(null);
   const [userIdFromCookie, setUserIdFromCookie] = useState("");
   const [loadingPreview, setLoadingPreview] = useState(false);
-  const [scaleFactor, setScaleFactor] = useState(1); // start at 1.0 = 100%
+  const [hasCommented, setHasCommented] = useState(false);
 
   const onlyUseSpotifyApi = false;
 
@@ -37,6 +37,15 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
       setIsLiked(likedPosts.data.liked_posts.includes(post.post_id));
     }
   }, [likedPosts, post.post_id]);
+
+  // has the user already commented on this post?
+  useEffect(() => {
+    if (userIdFromCookie && comments.length > 0) {
+      const userHasCommented = comments.some(comment => comment.user_id === userIdFromCookie);
+      setHasCommented(userHasCommented);
+    }
+  }, [comments, userIdFromCookie]);
+  
   
 
   const getSpotifyTrackMetadata = async (spotifyUrl, token) => {
@@ -163,8 +172,8 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
         postID: post.post_id,
       });
       if (res.data.success) {
-        // the array is in res.data.data.comments
-        setComments(res.data.data.comments);
+        const fetchedComments = res.data.data.comments;
+        setComments(fetchedComments);
       } else {
         setErrorComments(res.data.message || "Unknown error fetching comments");
       }
@@ -174,6 +183,8 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
       setLoadingComments(false);
     }
   };
+  
+  
 
   const handleOpenCommentsModal = async () => {
     const modalId = "comments_modal" + post.post_id;
@@ -435,14 +446,21 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
             <div className="flex gap-4 items-center w-2/3 justify-between">
               {/* COMMENT ICON */}
               <div
-                className="flex gap-1 items-center cursor-pointer group"
-                onClick={handleOpenCommentsModal}
-              >
-                <FaRegComment className="w-4 h-4 text-slate-500 group-hover:text-sky-400" />
-                <span className="text-sm text-slate-500 group-hover:text-sky-400">
-                  {comments.length}
-                </span>
-              </div>
+  className="flex gap-1 items-center cursor-pointer group"
+  onClick={handleOpenCommentsModal}
+>
+  {/* ICON SWITCH */}
+  {hasCommented ? (
+    <FaComment className="w-4 h-4 text-sky-400" />
+  ) : (
+    <FaRegComment className="w-4 h-4 text-slate-500 group-hover:text-sky-400" />
+  )}
+  
+  <span className={`text-sm ${hasCommented ? "text-sky-400" : "text-slate-500"} group-hover:text-sky-400`}>
+    {comments.length}
+  </span>
+</div>
+
 
               {/* COMMENT MODAL */}
               <dialog id={`comments_modal${post.post_id}`} className="modal border-none outline-none">
