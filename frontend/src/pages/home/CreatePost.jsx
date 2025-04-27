@@ -195,7 +195,7 @@ setSongCover('');
               className="absolute inset-0 bg-cover bg-center rounded-lg"
               style={{
                 backgroundImage: `url(${songCover})`,
-                filter: "blur(8px) brightness(0.8)",
+                filter: "blur(12px) brightness(0.8)",
               }}
             ></div>
           )}
