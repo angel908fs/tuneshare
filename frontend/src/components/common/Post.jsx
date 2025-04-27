@@ -341,7 +341,7 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
             <span>{post.content || "<no content specified>"}</span>
 
             {post.song_link && (
-              <div className="spotify-metadata mt-3 p-12 border border-gray-700 rounded relative overflow-hidden">
+              <div className="spotify-metadata mr-10 p-12 border border-gray-700 rounded-lg overflow-hidden relative">
                 {trackMetadata && (
                   <>
                     {trackMetadata.album.images[0] && (
