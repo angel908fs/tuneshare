@@ -144,9 +144,12 @@ const CreatePost = ({ onPostCreated }) => {
     onSuccess: () => {
       toast.success('Post created successfully!');
       // reset form fields
-      setSongLink('');
       setText('');
-      onPostCreated(); // callback to notify for post updates
+      setSongLink('');
+      setSearchQuery('');    
+      setSongCover('');    
+      setSearchResults([]); 
+      onPostCreated(); 
     },
     onError: (error) => {
       toast.error('Error creating post: ' + (error.response?.data?.message || error.message));
@@ -165,6 +168,9 @@ const CreatePost = ({ onPostCreated }) => {
       return;
     }
     createPost({ userID, songLink, content: text || " "});
+    setText('');   
+setSongLink('');
+setSongCover('');
   };
 
   return (
@@ -189,7 +195,7 @@ const CreatePost = ({ onPostCreated }) => {
               className="absolute inset-0 bg-cover bg-center rounded-lg"
               style={{
                 backgroundImage: `url(${songCover})`,
-                filter: "blur(8px) brightness(0.8)",
+                filter: "blur(12px) brightness(0.8)",
               }}
             ></div>
           )}

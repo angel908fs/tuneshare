@@ -11,10 +11,6 @@ router.get("/deezer-search", async (req, res) => {
     const { query } = req.query;
 
 
-    // Log the incoming query for debugging
-    console.log("Received Deezer search request for:", query);
-
-
     if (!query) {
         console.error("Missing track query in request.");
         return res.status(400).json({ error: "Missing track query" });
@@ -27,8 +23,6 @@ router.get("/deezer-search", async (req, res) => {
             headers: { 'Accept': 'application/json' }
         });
 
-
-        console.log("Deezer API response:", response.data); // Debug response from Deezer
 
 
         // If API returns data

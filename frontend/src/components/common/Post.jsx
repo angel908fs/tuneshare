@@ -1,4 +1,4 @@
-import { FaRegComment } from "react-icons/fa";
+import { FaRegComment, FaComment } from "react-icons/fa";
 import { BiRepost } from "react-icons/bi";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
 import { FaPlay, FaPause } from "react-icons/fa";
@@ -10,6 +10,8 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { jwtDecode}  from "jwt-decode";
+import toast from "react-hot-toast";
+
 
 const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
   const [comment, setComment] = useState("");
@@ -24,8 +26,31 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likes, setLikes] = useState(null);
   const [userIdFromCookie, setUserIdFromCookie] = useState("");
+  const [loadingPreview, setLoadingPreview] = useState(false);
+  const [hasCommented, setHasCommented] = useState(false);
 
   const onlyUseSpotifyApi = false;
+
+  // Has the logged-in user already liked this post?
+  useEffect(() => {
+    if (likedPosts && Array.isArray(likedPosts.data?.liked_posts)) {
+      setIsLiked(likedPosts.data.liked_posts.includes(post.post_id));
+    }
+  }, [likedPosts, post.post_id]);
+
+  // has the user already commented on this post?
+  useEffect(() => {
+    if (!userIdFromCookie) return;
+  
+    if (comments.length > 0) {
+      const userHasCommented = comments.some(comment => comment.user_id === userIdFromCookie);
+      setHasCommented(userHasCommented);
+    } else {
+      setHasCommented(false); // reset if no comments
+    }
+  }, [comments, userIdFromCookie]);
+  
+  
 
   const getSpotifyTrackMetadata = async (spotifyUrl, token) => {
     try {
@@ -110,7 +135,6 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
           console.warn("No token found in cookie.");
         }
       }
-  
       // only fetch post owner info if not already fetched
       if (!postUser && post.user_id) {
         try {
@@ -134,7 +158,7 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
     try {
       const res = await axios.delete(`/api/delete-post?userID=${userIdFromCookie}&postID=${postID}`);
       if (res.data.success) {
-        alert("Post deleted successfully!");
+        toast.success("Post deleted successfully!");
         fetchPosts();  // 🚀 refresh the post list dynamically
       } else {
         alert(res.data.message);
@@ -152,8 +176,8 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
         postID: post.post_id,
       });
       if (res.data.success) {
-        // the array is in res.data.data.comments
-        setComments(res.data.data.comments);
+        const fetchedComments = res.data.data.comments;
+        setComments(fetchedComments);
       } else {
         setErrorComments(res.data.message || "Unknown error fetching comments");
       }
@@ -163,6 +187,8 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
       setLoadingComments(false);
     }
   };
+  
+  
 
   const handleOpenCommentsModal = async () => {
     const modalId = "comments_modal" + post.post_id;
@@ -242,46 +268,53 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
  
   const togglePlayPause = async () => {
     if (!post.song_link || !accessToken) return;
-
+    if (loadingPreview) return;
+  
     // stop any existing audio before playing a new one
     if (audio) {
-        audio.pause();
-        setIsPlaying(false);
-        setAudio(null);
+      audio.pause();
+      setIsPlaying(false);
+      setAudio(null);
     }
-
+  
     if (!isPlaying) {
-        if (!previewUrl) {
-            const metadata = await getSpotifyTrackMetadata(post.song_link, accessToken);
-            const preview = metadata?.preview_url;
-
-            if (preview) {
-                setPreviewUrl(preview);
-                setTrackMetadata(metadata); // save metadata for later
-
-                const newAudio = new Audio(preview);
-                newAudio.play();
-                setAudio(newAudio);
-                setIsPlaying(true);
-
-                console.log(`🎧 Playing "${metadata.name}" from ${metadata.preview_source} preview`);
-
-                newAudio.onended = () => setIsPlaying(false);
-            } else {
-                console.error(`❌ No preview available for ${metadata.name}`);
-            }
-        } else {
-            const newAudio = new Audio(previewUrl);
+      if (!previewUrl) {
+        try {
+          setLoadingPreview(true);  // 🔥 start loading
+          const metadata = await getSpotifyTrackMetadata(post.song_link, accessToken);
+          const preview = metadata?.preview_url;
+  
+          if (preview) {
+            setPreviewUrl(preview);
+            setTrackMetadata(metadata);
+  
+            const newAudio = new Audio(preview);
             newAudio.play();
             setAudio(newAudio);
             setIsPlaying(true);
-
-            console.log(`🎧 Playing "${trackMetadata?.name}" from cached preview URL`);
-
+  
+            console.log(`🎧 Playing "${metadata.name}" from ${metadata.preview_source} preview`);
+  
             newAudio.onended = () => setIsPlaying(false);
+          } else {
+            console.error(`❌ No preview available for ${metadata.name}`);
+          }
+        } finally {
+          setLoadingPreview(false);  // 🔥 stop loading no matter what
         }
+      } else {
+        const newAudio = new Audio(previewUrl);
+        newAudio.play();
+        setAudio(newAudio);
+        setIsPlaying(true);
+  
+        console.log(`🎧 Playing "${trackMetadata?.name}" from cached preview URL`);
+  
+        newAudio.onended = () => setIsPlaying(false);
+      }
     }
-};
+  };
+  
 
   
   const postOwner = post || {};
@@ -329,20 +362,21 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
             <span>{post.content || "<no content specified>"}</span>
 
             {post.song_link && (
-              <div className="spotify-metadata mt-3 p-12 border border-gray-700 rounded relative overflow-hidden">
+              <div className="spotify-metadata mr-10 p-12 border border-gray-700 rounded-lg overflow-hidden relative">
                 {trackMetadata && (
                   <>
                     {trackMetadata.album.images[0] && (
                       <div
-                        className="absolute inset-0 -z-10 bg-cover bg-center"
-                        style={{
-                          backgroundImage: `url(${trackMetadata.album.images[0].url})`,
-                          filter: "blur(20px) brightness(0.5)",
-                        }}
-                      ></div>
+                      className="absolute inset-0 -z-10 bg-cover bg-center transition-all duration-500"
+                      style={{
+                        backgroundImage: `url(${trackMetadata.album.images[0].url})`,
+                        filter: `blur(20px) brightness(${isPlaying ? "0.3" : "0.5"})`,
+                      }}
+                    ></div>
+                    
                     )}
 
-                    <div className="flex gap-4 items-center relative">
+                    <div className="flex gap-8 items-center relative">
                       <div className="w-1/2 flex justify-center items-center">
                         {trackMetadata.album.images[0] && (
                           <a
@@ -351,18 +385,22 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
                             rel="noopener noreferrer"
                           >
                             <img
-                              src={trackMetadata.album.images[0].url}
-                              alt="Song Cover"
-                              className="w-50 h-50 rounded-lg object-cover transition-transform duration-300 transform hover:scale-110"
-                            />
+                            src={trackMetadata.album.images[0].url}
+                            alt="Song Cover"
+                            className={`w-50 h-50 rounded-lg object-cover transition-all duration-500 transform ${
+                              isPlaying ? "scale-110 shadow-[0_0_20px_5px_rgba(255,255,255,0.25)]" : "scale-100 shadow-none"
+                            } hover:scale-110`}
+                          />
+
                           </a>
                         )}
                       </div>
                       <div className="w-1/2 flex flex-col justify-center">
-                        <div
+                      <div
                           style={{
-                            color: "rgba(255, 255, 255, 0.6)",
+                            color: isPlaying ? "rgba(255, 255, 255, 0.6)" : "rgba(255, 255, 255, 0.6)",
                             textShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)",
+                            transition: "color 0.5s ease",
                           }}
                           className="flex flex-col items-center"
                         >
@@ -389,7 +427,13 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
                               onClick={togglePlayPause}
                               className="mt-4 text-white rounded-full transition-transform duration-300 transform hover:scale-125 flex items-center justify-center text-4xl mx-auto"
                             >
-                              {isPlaying ? <FaPause /> : <FaPlay />}
+                              {loadingPreview ? (
+                                <div className="text-4xl flex items-center justify-center">
+                                  <div className="w-9 h-9 border-4 border-white/50 border-t-white rounded-full animate-spin"></div>
+                                </div>
+                              ) : (
+                                isPlaying ? <FaPause /> : <FaPlay />
+                              )}
                             </button>
                           </div>
                         </div>
@@ -406,14 +450,21 @@ const Post = ({ post, likedPosts, accessToken, fetchPosts }) => {
             <div className="flex gap-4 items-center w-2/3 justify-between">
               {/* COMMENT ICON */}
               <div
-                className="flex gap-1 items-center cursor-pointer group"
-                onClick={handleOpenCommentsModal}
-              >
-                <FaRegComment className="w-4 h-4 text-slate-500 group-hover:text-sky-400" />
-                <span className="text-sm text-slate-500 group-hover:text-sky-400">
-                  {comments.length}
-                </span>
-              </div>
+  className="flex gap-1 items-center cursor-pointer group"
+  onClick={handleOpenCommentsModal}
+>
+  {/* ICON SWITCH */}
+  {hasCommented ? (
+    <FaComment className="w-4 h-4 text-sky-400" />
+  ) : (
+    <FaRegComment className="w-4 h-4 text-slate-500 group-hover:text-sky-400" />
+  )}
+  
+  <span className={`text-sm ${hasCommented ? "text-sky-400" : "text-slate-500"} group-hover:text-sky-400`}>
+    {comments.length}
+  </span>
+</div>
+
 
               {/* COMMENT MODAL */}
               <dialog id={`comments_modal${post.post_id}`} className="modal border-none outline-none">
